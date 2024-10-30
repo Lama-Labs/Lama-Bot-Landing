@@ -1,0 +1,23 @@
+# Ignore built files
+dist/
+build/
+node_modules/
+
+# Ignore logs
+*.log
+
+# Ignore TypeScript build info files
+*.tsbuildinfo
+
+# Ignore configuration files
+.vscode/
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Ignore other specific files or directories
+coverage/
