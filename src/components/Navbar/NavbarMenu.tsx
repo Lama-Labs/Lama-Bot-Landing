@@ -4,9 +4,10 @@ import { Box, Button, IconButton } from '@mui/material'
 import { Menu } from 'lucide-react'
 import LocaleSwitcher from '@/components/LanguageSwitcher/LocaleSwitcher'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 
 const NavbarMenu = () => {
-  const navItems = ['Home', 'About', 'Contact']
+  const t = useTranslations('navbar')
 
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -50,9 +51,9 @@ const NavbarMenu = () => {
           borderRadius: '30px',
         }}
       >
-        {navItems.map((item) => (
-          <Button key={item}>{item}</Button>
-        ))}
+        <Button>{t('home')}</Button>
+        <Button>{t('about')}</Button>
+        <Button>{t('contact')}</Button>
       </Box>
       <Box
         sx={{

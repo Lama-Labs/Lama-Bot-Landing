@@ -1,15 +1,63 @@
 {
+  "navbar": {
+    "home": "Domov",
+    "about": "O nas",
+    "contact": "Kontakt",
+    "localeSwitcher": {
+      "en": "English",
+      "sl": "Slovenščina"
+    }
+  },
   "home": {
     "hero": {
       "title": "Hero Naslov",
       "subtitle": "To je navadno besedilo pod glavnim naslovom. Lahko je kratek opis ali slogan.",
       "cta": "Začni"
-    }
-  },
-  "components": {
-    "LocaleSwitcher": {
-      "en": "English",
-      "sl": "Slovenščina"
+    },
+    "features": {
+      "title": "Značilnosti",
+      "items": [
+        {
+          "title": "Značilnost 1",
+          "description": "To je kratek opis značilnosti. Lahko je kratek pojasnilo ali seznam ključnih točk.",
+          "icon": "home"
+        },
+        {
+          "title": "Značilnost 2",
+          "description": "To je kratek opis značilnosti. Lahko je kratek pojasnilo ali seznam ključnih točk.",
+          "icon": "user"
+        },
+        {
+          "title": "Značilnost 3",
+          "description": "To je kratek opis značilnosti. Lahko je kratek pojasnilo ali seznam ključnih točk.",
+          "icon": "settings"
+        }
+      ]
+    },
+    "paragraphs": {
+      "title": "Odstavki",
+      "items": [
+        {
+          "title": "Odstavek 1",
+          "content": "To je daljši odstavek, ki lahko vsebuje bolj podrobne informacije. Uporablja se lahko za zagotavljanje konteksta ali ozadja.",
+          "image": "/matte-background.png"
+        },
+        {
+          "title": "Odstavek 2",
+          "content": "To je daljši odstavek, ki lahko vsebuje bolj podrobne informacije. Uporablja se lahko za zagotavljanje konteksta ali ozadja.",
+          "image": "/matte-background.png"
+        },
+        {
+          "title": "Odstavek 3",
+          "content": "To je daljši odstavek, ki lahko vsebuje bolj podrobne informacije. Uporablja se lahko za zagotavljanje konteksta ali ozadja.",
+          "image": "/matte-background.png"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Zahtevaj Demo",
+      "subtitle": "Vnesite svoj e-poštni naslov in stopili vas bomo v stik...",
+      "button": "Pošlji"
     }
   }
 }

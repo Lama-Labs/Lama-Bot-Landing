@@ -3,7 +3,7 @@ import { routing } from '@/i18n/routing'
 import LocaleSwitcherSelect from './LocaleSwitcherSelect'
 
 const LocaleSwitcher = () => {
-  const t = useTranslations('components.LocaleSwitcher')
+  const t = useTranslations('navbar.localeSwitcher')
   const locale = useLocale()
 
   return (

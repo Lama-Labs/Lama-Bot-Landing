@@ -27,7 +27,7 @@ const LocaleSwitcherSelect = ({
   const handleLocaleChange = (event: SelectChangeEvent<string>) => {
     const nextLocale = event.target.value as string
     startTransition(() => {
-      router.replace({ pathname, query: params }, { locale: nextLocale })
+      router.replace({ pathname }, { locale: nextLocale })
     })
   }
 

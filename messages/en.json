@@ -1,15 +1,60 @@
 {
+  "navbar": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact",
+    "localeSwitcher": {
+      "en": "English",
+      "sl": "Slovenščina"
+    }
+  },
   "home": {
     "hero": {
       "title": "Hero Title",
       "subtitle": "This is some regular text below the main title. It can be a brief description or tagline.",
       "cta": "Get Started"
-    }
-  },
-  "components": {
-    "LocaleSwitcher": {
-      "en": "English",
-      "sl": "Slovenščina"
+    },
+    "features": {
+      "title": "Features",
+      "items": [
+        {
+          "title": "Feature 1",
+          "description": "This is a short description of the feature. It can be a brief explanation or a list of key points.",
+          "icon": "home"
+        },
+        {
+          "title": "Feature 2",
+          "description": "This is a short description of the feature. It can be a brief explanation or a list of key points.",
+          "icon": "user"
+        },
+        {
+          "title": "Feature 3",
+          "description": "This is a short description of the feature. It can be a brief explanation or a list of key points.",
+          "icon": "settings"
+        }
+      ]
+    },
+    "paragraphs": {
+      "title": "Paragraphs",
+      "items": [
+        {
+          "title": "Paragraph 1",
+          "content": "This is a longer paragraph that can contain more detailed information. It can be used to provide context or background information."
+        },
+        {
+          "title": "Paragraph 2",
+          "content": "This is a longer paragraph that can contain more detailed information. It can be used to provide context or background information."
+        },
+        {
+          "title": "Paragraph 3",
+          "content": "This is a longer paragraph that can contain more detailed information. It can be used to provide context or background information."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Request a Demo",
+      "subtitle": "Enter your email address and we will contact you...",
+      "button": "Send"
     }
   }
 }
