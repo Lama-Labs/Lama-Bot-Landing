@@ -1,7 +1,10 @@
 import React from 'react'
 import { Box, Typography, Button, Container } from '@mui/material'
+import { useTranslations } from 'next-intl'
 
 const Hero = () => {
+  const t = useTranslations('home')
+
   return (
     <Box
       sx={{
@@ -22,14 +25,13 @@ const Hero = () => {
             mb: 2,
           }}
         >
-          Hero Title
+          {t('hero.title')}
         </Typography>
         <Typography variant='body1' sx={{ fontSize: '1.2rem', mb: 4 }}>
-          This is some regular text below the main title. It can be a brief
-          description or tagline.
+          {t('hero.subtitle')}
         </Typography>
         <Button variant='contained' color='primary' size='large'>
-          Get Started
+          {t('hero.cta')}
         </Button>
       </Container>
     </Box>

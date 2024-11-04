@@ -1,0 +1,15 @@
+{
+  "home": {
+    "hero": {
+      "title": "Hero Naslov",
+      "subtitle": "To je navadno besedilo pod glavnim naslovom. Lahko je kratek opis ali slogan.",
+      "cta": "Začni"
+    }
+  },
+  "components": {
+    "LocaleSwitcher": {
+      "en": "English",
+      "sl": "Slovenščina"
+    }
+  }
+}

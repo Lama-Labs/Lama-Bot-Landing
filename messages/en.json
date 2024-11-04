@@ -1,0 +1,15 @@
+{
+  "home": {
+    "hero": {
+      "title": "Hero Title",
+      "subtitle": "This is some regular text below the main title. It can be a brief description or tagline.",
+      "cta": "Get Started"
+    }
+  },
+  "components": {
+    "LocaleSwitcher": {
+      "en": "English",
+      "sl": "Slovenščina"
+    }
+  }
+}

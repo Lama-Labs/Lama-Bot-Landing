@@ -7,12 +7,6 @@ const Navbar = () => {
     <AppBar position='absolute'>
       <Container maxWidth='xl'>
         <Toolbar>
-          <Image
-            src='/lamashop logo.png'
-            alt='Lama Logo'
-            width={30}
-            height={30}
-          />
           <NavbarMenu />
         </Toolbar>
       </Container>
