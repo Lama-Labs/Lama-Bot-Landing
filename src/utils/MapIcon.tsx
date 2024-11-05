@@ -1,4 +1,4 @@
-import { Home, Settings, User, Search } from 'lucide-react'
+import { Home, Search, Settings, User } from 'lucide-react'
 import type { LucideProps } from 'lucide-react'
 
 type IconMap = {

@@ -1,9 +1,11 @@
 'use client'
 
-import { useParams } from 'next/navigation'
+// todo: fix
+// eslint-disable-next-line import/named
+import { FormControl, MenuItem, Select, SelectChangeEvent } from '@mui/material'
 import { useTransition } from 'react'
-import { useRouter, usePathname } from '@/i18n/routing'
-import { Select, MenuItem, FormControl, SelectChangeEvent } from '@mui/material'
+
+import { usePathname, useRouter } from '@/i18n/routing'
 
 type LocaleOption = {
   value: string
@@ -22,7 +24,6 @@ const LocaleSwitcherSelect = ({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const pathname = usePathname()
-  const params = useParams()
 
   const handleLocaleChange = (event: SelectChangeEvent<string>) => {
     const nextLocale = event.target.value as string

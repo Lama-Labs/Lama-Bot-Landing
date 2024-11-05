@@ -1,14 +1,15 @@
-import type { Metadata } from 'next'
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter'
-import { ThemeProvider } from '@mui/material/styles'
-import theme from '@/theme/theme'
-import Navbar from '@/components/Navbar/Navbar'
 import { CssBaseline } from '@mui/material'
-import Footer from '@/components/Footer/Footer'
-import { routing } from '@/i18n/routing'
+import { ThemeProvider } from '@mui/material/styles'
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter'
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { getMessages } from 'next-intl/server'
 import { NextIntlClientProvider } from 'next-intl'
+import { getMessages } from 'next-intl/server'
+
+import Footer from '@/components/Footer/Footer'
+import Navbar from '@/components/Navbar/Navbar'
+import { routing } from '@/i18n/routing'
+import theme from '@/theme/theme'
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -24,7 +25,7 @@ export default async function RootLayout({
 }>) {
   const { locale } = await params
   // Ensure that the incoming `locale` is valid
-  if (!routing.locales.includes(locale as any)) {
+  if (!routing.locales.includes(locale as never)) {
     notFound()
   }
 

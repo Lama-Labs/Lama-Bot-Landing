@@ -1,14 +1,17 @@
 'use client'
-import { useState } from 'react'
 import { Box, Button, IconButton } from '@mui/material'
 import { Menu } from 'lucide-react'
-import LocaleSwitcher from '@/components/LanguageSwitcher/LocaleSwitcher'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
+import { useState } from 'react'
+
+import LocaleSwitcher from '@/components/LanguageSwitcher/LocaleSwitcher'
 
 const NavbarMenu = () => {
   const t = useTranslations('navbar')
 
+  // todo: implement mobile drawer
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const handleDrawerToggle = () => {

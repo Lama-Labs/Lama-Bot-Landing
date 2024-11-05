@@ -1,5 +1,4 @@
-import React from 'react'
-import { Box, Typography, Button, Container } from '@mui/material'
+import { Box, Button, Container, Typography } from '@mui/material'
 import { useTranslations } from 'next-intl'
 
 const Hero = () => {

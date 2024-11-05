@@ -1,8 +1,9 @@
 import { Box } from '@mui/material'
-import Hero from '@/components/Hero/Hero'
-import FeatureGrid from '@/components/FeatureGrid/FeatureGrid'
-import Paragraphs from '@/components/Paragraphs/Paragraphs'
+
 import ContactForm from '@/components/ContactForm/ContactForm'
+import FeatureGrid from '@/components/FeatureGrid/FeatureGrid'
+import Hero from '@/components/Hero/Hero'
+import Paragraphs from '@/components/Paragraphs/Paragraphs'
 
 const Home = () => {
   return (

@@ -1,7 +1,8 @@
-import Grid from '@mui/material/Grid2'
 import { Box, Typography } from '@mui/material'
-import FeatureCard from '@/components/FeatureGrid/FeatureCard'
+import Grid from '@mui/material/Grid2'
 import { useTranslations } from 'next-intl'
+
+import FeatureCard from '@/components/FeatureGrid/FeatureCard'
 
 const FeatureGrid = () => {
   const t = useTranslations('home.features')
@@ -13,7 +14,8 @@ const FeatureGrid = () => {
         {t('title')}
       </Typography>
       <Grid container spacing={3}>
-        {/*todo: fix any*/}
+        {/*todo: fix*/}
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
         {items.map((feature: any, index: number) => (
           <Grid key={index} size={{ xs: 12, md: 4 }}>
             <FeatureCard

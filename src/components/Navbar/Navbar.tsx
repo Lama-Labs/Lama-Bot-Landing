@@ -1,5 +1,5 @@
 import { AppBar, Container, Toolbar } from '@mui/material'
-import Image from 'next/image'
+
 import NavbarMenu from '@/components/Navbar/NavbarMenu'
 
 const Navbar = () => {

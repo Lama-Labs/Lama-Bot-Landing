@@ -1,5 +1,6 @@
-import { useTranslations } from 'next-intl'
 import { Container } from '@mui/material'
+import { useTranslations } from 'next-intl'
+
 import Paragraph from '@/components/Paragraphs/Paragraph'
 
 const Paragraphs = () => {
@@ -8,7 +9,8 @@ const Paragraphs = () => {
 
   return (
     <Container maxWidth='xl'>
-      {/* todo: fix any*/}
+      {/*todo: fix*/}
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
       {items.map((paragraph: any, index: number) => (
         <Paragraph
           key={index}

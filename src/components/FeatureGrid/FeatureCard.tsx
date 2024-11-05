@@ -1,5 +1,5 @@
-import React from 'react'
 import { Box, Card, Typography } from '@mui/material'
+
 import MapIcon from '@/utils/MapIcon'
 
 interface FeatureCardProps {
