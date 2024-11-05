@@ -17,24 +17,27 @@ const Paragraph: React.FC<ParagraphProps> = ({ title, description, image }) => {
     >
       <Box
         sx={{
-          flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
+          justifyContent: 'start',
           gap: 2,
+          width: { xs: '100%', md: '50%' },
         }}
       >
-        <Typography variant='h4'>{title}</Typography>
+        <Typography variant='body1' color='primary' sx={{ pb: 2 }}>
+          {title}
+        </Typography>
+        <Typography variant='h2'>{title}</Typography>
         <Typography variant='body1'>{description}</Typography>
       </Box>
       <Box
         sx={{
           flex: 1,
           display: 'flex',
-          justifyContent: 'end',
+          justifyContent: 'center',
         }}
       >
-        <Card variant='outlined'>
+        <Card variant='outlined' sx={{ width: '100%' }}>
           <Image src={image} alt='Car' width={400} height={300} />
         </Card>
       </Box>

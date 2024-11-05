@@ -26,7 +26,7 @@ const Hero = () => {
         >
           {t('hero.title')}
         </Typography>
-        <Typography variant='body1' sx={{ fontSize: '1.2rem', mb: 4 }}>
+        <Typography variant='body1' sx={{ mb: 4 }}>
           {t('hero.subtitle')}
         </Typography>
         <Button variant='contained' color='primary' size='large'>

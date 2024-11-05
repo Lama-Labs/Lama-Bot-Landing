@@ -5,7 +5,7 @@ const Footer = () => {
     <footer>
       <Container maxWidth='xl'>
         <Divider variant='middle' />
-        <Typography variant='body2' align='center' sx={{ py: 3 }}>
+        <Typography variant='body1' align='center' sx={{ py: 3 }}>
           © {new Date().getFullYear()} Lama Bot
         </Typography>
       </Container>

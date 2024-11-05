@@ -40,7 +40,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       <Typography variant='h6' component='h2' gutterBottom>
         {title}
       </Typography>
-      <Typography variant='body2'>{description}</Typography>
+      <Typography variant='body1'>{description}</Typography>
     </Card>
   )
 }

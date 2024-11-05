@@ -21,6 +21,9 @@ const theme = createTheme({
     background: {
       default: '#0E0D0D',
     },
+    text: {
+      primary: '#ffffff',
+    },
   },
   components: {
     MuiAppBar: {
@@ -54,32 +57,40 @@ const theme = createTheme({
     h1: {
       fontWeight: 600,
       fontSize: '58px',
+      color: '#ffffff',
     },
     h2: {
       fontWeight: 600,
       fontSize: '48px',
+      color: '#ffffff',
     },
     h3: {
       fontWeight: 600,
       fontSize: '40px',
+      color: '#ffffff',
     },
     h4: {
       fontWeight: 600,
       fontSize: '32px',
+      color: '#ffffff',
     },
     h5: {
       fontWeight: 600,
       fontSize: '24px',
+      color: '#ffffff',
     },
     h6: {
       fontWeight: 600,
       fontSize: '1rem',
+      color: '#ffffff',
     },
     button: {
       fontWeight: 400,
     },
     body1: {
       fontWeight: 400,
+      fontSize: '16px',
+      color: '#8692a6',
     },
     body2: {
       fontWeight: 400,
