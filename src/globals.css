@@ -1,0 +1,19 @@
+@keyframes appearFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(50px); /* Start 50px below the final position */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0); /* End at the final position */
+  }
+}
+
+.animate {
+  opacity: 0; /* Ensure the element is hidden initially */
+}
+
+.animate.in-view {
+  animation: appearFromBottom 1s forwards;
+  opacity: 1; /* Ensure the element is visible after animation */
+}

@@ -37,7 +37,7 @@ const Paragraph: React.FC<ParagraphProps> = ({ title, description, image }) => {
           justifyContent: 'center',
         }}
       >
-        <Card variant='outlined' sx={{ width: '100%' }}>
+        <Card variant='outlined' sx={{ p: 4, width: '100%' }}>
           <Image src={image} alt='Car' width={400} height={300} />
         </Card>
       </Box>

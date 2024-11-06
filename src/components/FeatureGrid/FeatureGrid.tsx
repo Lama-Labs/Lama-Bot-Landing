@@ -18,7 +18,7 @@ const FeatureGrid = () => {
           {/*todo: fix*/}
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
           {items.map((feature: any, index: number) => (
-            <Grid key={index} size={{ xs: 12, md: 4 }}>
+            <Grid key={index} size={{ xs: 12, md: 4 }} className='animate'>
               <FeatureCard
                 title={feature.title}
                 description={feature.description}

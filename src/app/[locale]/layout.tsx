@@ -6,10 +6,13 @@ import { notFound } from 'next/navigation'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 
+import AnimateOnScroll from '@/components/Animations/AnimateOnScroll'
 import Footer from '@/components/Footer/Footer'
 import Navbar from '@/components/Navbar/Navbar'
 import { routing } from '@/i18n/routing'
 import theme from '@/theme/theme'
+
+import '@/globals.css'
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -40,6 +43,7 @@ export default async function RootLayout({
             <CssBaseline />
             <NextIntlClientProvider messages={messages}>
               <Navbar />
+              <AnimateOnScroll />
               {children}
               <Footer />
             </NextIntlClientProvider>
