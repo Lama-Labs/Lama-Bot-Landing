@@ -1,7 +1,8 @@
+/* Keyframes for animations in different directions */
 @keyframes appearFromBottom {
   from {
     opacity: 0;
-    transform: translateY(50px); /* Start 50px below the final position */
+    transform: translateY(5vh); /* Start slightly below the final position */
   }
   to {
     opacity: 1;
@@ -9,11 +10,81 @@
   }
 }
 
-.animate {
-  opacity: 0; /* Ensure the element is hidden initially */
+@keyframes appearFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-5vh); /* Start slightly above the final position */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0); /* End at the final position */
+  }
 }
 
+@keyframes appearFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-5vw); /* Start slightly left of the final position */
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0); /* End at the final position */
+  }
+}
+
+@keyframes appearFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(5vw); /* Start slightly right of the final position */
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0); /* End at the final position */
+  }
+}
+
+/* Base class to ensure element is initially hidden */
+.animate {
+  opacity: 0; /* Hidden initially */
+  transition: opacity 0.3s ease !important;
+}
+
+/* Trigger animation when the element is in view */
 .animate.in-view {
+  opacity: 1; /* Ensure visibility after animation */
+}
+
+/* Ensure animations only trigger when both `.animate` and `.in-view` are present */
+
+/* Direction-based animations with default 1s duration */
+.animate.in-view.animate-bottom {
   animation: appearFromBottom 1s forwards;
-  opacity: 1; /* Ensure the element is visible after animation */
+}
+
+.animate.in-view.animate-top {
+  animation: appearFromTop 1s forwards;
+}
+
+.animate.in-view.animate-left {
+  animation: appearFromLeft 1s forwards;
+}
+
+.animate.in-view.animate-right {
+  animation: appearFromRight 1s forwards;
+}
+
+/* Preset animation duration utility classes, applied only when `.animate.in-view` is present */
+.animate.in-view.duration-500ms {
+  animation-duration: 0.5s !important;
+  transition-duration: 0.5s !important;
+}
+
+.animate.in-view.duration-1s {
+  animation-duration: 1s !important;
+  transition-duration: 1s !important;
+}
+
+.animate.in-view.duration-2s {
+  animation-duration: 2s !important;
+  transition-duration: 2s !important;
 }

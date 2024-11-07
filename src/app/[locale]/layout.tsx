@@ -11,7 +11,6 @@ import Footer from '@/components/Footer/Footer'
 import Navbar from '@/components/Navbar/Navbar'
 import { routing } from '@/i18n/routing'
 import theme from '@/theme/theme'
-
 import '@/globals.css'
 
 export const metadata: Metadata = {

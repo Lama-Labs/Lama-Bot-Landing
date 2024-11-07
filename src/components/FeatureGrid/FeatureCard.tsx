@@ -16,6 +16,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   return (
     <Card
       variant='outlined'
+      className='animate animate-bottom duration-1s'
       sx={{
         textAlign: 'center',
         px: 6,

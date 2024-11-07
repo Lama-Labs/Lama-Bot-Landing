@@ -17,7 +17,7 @@ const AnimateOnScroll: React.FC = () => {
         })
       },
       {
-        threshold: 0.1, // Trigger when 10% of the element is in view
+        threshold: 0.15, // Trigger when 10% of the element is in view
       }
     )
 

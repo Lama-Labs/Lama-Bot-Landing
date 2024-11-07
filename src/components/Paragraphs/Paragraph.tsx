@@ -9,6 +9,7 @@ interface ParagraphProps {
 const Paragraph: React.FC<ParagraphProps> = ({ title, description, image }) => {
   return (
     <Box
+      className='animate duration-2s'
       sx={{
         display: 'flex',
         flexDirection: { xs: 'column', md: 'row' },
