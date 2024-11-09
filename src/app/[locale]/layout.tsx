@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 
+import AnalyticsConsentProvider from '@/components/Analytics/AnalyticsConsentProvider'
 import AnimateOnScroll from '@/components/Animations/AnimateOnScroll'
 import Footer from '@/components/Footer/Footer'
 import Navbar from '@/components/Navbar/Navbar'
@@ -48,6 +49,7 @@ export default async function RootLayout({
             </NextIntlClientProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>
+        <AnalyticsConsentProvider />
       </body>
     </html>
   )
