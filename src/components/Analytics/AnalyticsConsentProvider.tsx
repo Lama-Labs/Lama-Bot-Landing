@@ -4,12 +4,10 @@ import { GoogleAnalytics } from '@next/third-parties/google';
 import Cookies from 'js-cookie';
 import { useEffect, useState } from 'react';
 
-import usePageView from '@/Hooks/usePageView'
-
 const AnalyticsConsentProvider: React.FC = () => {
   const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
   const [consentGiven, setConsentGiven] = useState(false);
-  const trackingId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || '';
+  const trackingId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || 'aa';
 
 
   useEffect(() => {
@@ -30,8 +28,6 @@ const AnalyticsConsentProvider: React.FC = () => {
     setAnalyticsEnabled(false);
     setConsentGiven(true);
   };
-
-  usePageView(trackingId, analyticsEnabled);
 
   return (
     <>
