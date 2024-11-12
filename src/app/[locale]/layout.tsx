@@ -8,6 +8,7 @@ import { getMessages } from 'next-intl/server'
 
 import AnalyticsConsentProvider from '@/components/Analytics/AnalyticsConsentProvider'
 import AnimateOnScroll from '@/components/Animations/AnimateOnScroll'
+import FloatingActionButton from '@/components/ChatBot/FloatingActionButton'
 import Footer from '@/components/Footer/Footer'
 import Navbar from '@/components/Navbar/Navbar'
 import { routing } from '@/i18n/routing'
@@ -45,6 +46,7 @@ export default async function RootLayout({
               <Navbar />
               <AnimateOnScroll />
               {children}
+              <FloatingActionButton />
               <Footer />
             </NextIntlClientProvider>
           </ThemeProvider>
