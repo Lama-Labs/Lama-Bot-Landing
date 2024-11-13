@@ -20,6 +20,13 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
         textAlign: 'center',
         px: 6,
         py: 4,
+        transition: 'filter 0.25s ease-in-out',
+        '& .icon': {
+          transition: 'filter 0.25s ease-in-out',
+        },
+        '& .MuiTypography-root': {
+          transition: 'filter 0.25s ease-in-out',
+        },
         '&:hover': {
           filter: 'drop-shadow(0 0 5px #A7A0F8)',
           transition: 'filter 0.25s ease-in-out',
@@ -30,6 +37,15 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
           '& .MuiTypography-root': {
             filter: 'drop-shadow(0 0 5px #A7A0F8)',
             transition: 'filter 0.25s ease-in-out',
+          },
+        },
+        '&:not(:hover)': {
+          transition: 'filter 0.5s ease-in-out',
+          '& .icon': {
+            transition: 'filter 0.5s ease-in-out',
+          },
+          '& .MuiTypography-root': {
+            transition: 'filter 0.5s ease-in-out',
           },
         },
       }}
