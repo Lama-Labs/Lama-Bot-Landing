@@ -11,13 +11,13 @@ const AnimateOnScroll: React.FC = () => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('in-view')
-          } else {
+          } else if (entry.boundingClientRect.top > window.innerHeight) {
             entry.target.classList.remove('in-view')
           }
         })
       },
       {
-        threshold: 0.15, // Trigger when 10% of the element is in view
+        threshold: 0.15, // Trigger when 15% of the element is in view, todo: improve
       }
     )
 

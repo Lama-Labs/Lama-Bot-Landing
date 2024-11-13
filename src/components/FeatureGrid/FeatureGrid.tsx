@@ -8,6 +8,11 @@ const FeatureGrid = () => {
   const t = useTranslations('home.features')
   const items = t.raw('items')
 
+  const getDelayClass = (index: number) => {
+    if (index === 0) return ''
+    return `delay-${index * 250}ms`
+  }
+
   return (
     <Container maxWidth='xl'>
       <Box display='flex' maxWidth='xl' flexDirection='column' gap={6} pb={6}>
@@ -18,7 +23,11 @@ const FeatureGrid = () => {
           {/*todo: fix*/}
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
           {items.map((feature: any, index: number) => (
-            <Grid key={index} size={{ xs: 12, md: 4 }}>
+            <Grid
+              key={index}
+              size={{ xs: 12, md: 4 }}
+              className={`animate animate-bottom ${getDelayClass(index)}`}
+            >
               <FeatureCard
                 title={feature.title}
                 description={feature.description}

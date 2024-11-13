@@ -15,6 +15,7 @@ const ContactForm = () => {
   return (
     <Container maxWidth='xl'>
       <Box
+        className='animate animate-bottom'
         sx={{
           display: 'flex',
           flexDirection: 'column',

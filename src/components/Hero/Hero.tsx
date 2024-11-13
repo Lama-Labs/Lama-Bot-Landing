@@ -13,6 +13,8 @@ const Hero = () => {
         alignItems: 'center',
         justifyContent: 'center',
         textAlign: 'center',
+        background:
+          'radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%)',
       }}
     >
       <Container maxWidth='sm'>

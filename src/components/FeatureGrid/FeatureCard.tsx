@@ -16,17 +16,26 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   return (
     <Card
       variant='outlined'
-      className='animate animate-bottom duration-1s'
       sx={{
         textAlign: 'center',
         px: 6,
         py: 4,
         '&:hover': {
-          boxShadow: '0px 2px 5px #A7A0F8',
+          filter: 'drop-shadow(0 0 5px #A7A0F8)',
+          transition: 'filter 0.25s ease-in-out',
+          '& .icon': {
+            filter: 'drop-shadow(0 0 5px #A7A0F8)',
+            transition: 'filter 0.25s ease-in-out',
+          },
+          '& .MuiTypography-root': {
+            filter: 'drop-shadow(0 0 5px #A7A0F8)',
+            transition: 'filter 0.25s ease-in-out',
+          },
         },
       }}
     >
       <Box
+        className='icon'
         sx={{
           display: 'flex',
           justifyContent: 'center',

@@ -9,7 +9,6 @@ interface ParagraphProps {
 const Paragraph: React.FC<ParagraphProps> = ({ title, description, image }) => {
   return (
     <Box
-      className='animate duration-2s'
       sx={{
         display: 'flex',
         flexDirection: { xs: 'column', md: 'row' },
@@ -17,6 +16,7 @@ const Paragraph: React.FC<ParagraphProps> = ({ title, description, image }) => {
       }}
     >
       <Box
+        className='animate animate-left'
         sx={{
           display: 'flex',
           flexDirection: 'column',
@@ -32,6 +32,7 @@ const Paragraph: React.FC<ParagraphProps> = ({ title, description, image }) => {
         <Typography variant='body1'>{description}</Typography>
       </Box>
       <Box
+        className='animate animate-right delay-250'
         sx={{
           flex: 1,
           display: 'flex',

@@ -1,3 +1,7 @@
+body {
+  overflow-x: hidden;
+}
+
 /* Keyframes for animations in different directions */
 @keyframes appearFromBottom {
   from {
@@ -46,7 +50,6 @@
 /* Base class to ensure element is initially hidden */
 .animate {
   opacity: 0; /* Hidden initially */
-  transition: opacity 0.3s ease !important;
 }
 
 /* Trigger animation when the element is in view */
@@ -74,17 +77,27 @@
 }
 
 /* Preset animation duration utility classes, applied only when `.animate.in-view` is present */
-.animate.in-view.duration-500ms {
-  animation-duration: 0.5s !important;
-  transition-duration: 0.5s !important;
+.animate.in-view.delay-250ms {
+  animation-delay: 0.25s !important;
+  transition-delay: 0.5s !important;
 }
 
-.animate.in-view.duration-1s {
-  animation-duration: 1s !important;
-  transition-duration: 1s !important;
+.animate.in-view.delay-500ms {
+  animation-delay: 0.5s !important;
+  transition-delay: 0.5s !important;
 }
 
-.animate.in-view.duration-2s {
-  animation-duration: 2s !important;
-  transition-duration: 2s !important;
+.animate.in-view.delay-750ms {
+  animation-delay: 0.75s !important;
+  transition-delay: 0.75s !important;
+}
+
+.animate.in-view.delay-1s {
+  animation-delay: 1s !important;
+  transition-delay: 1s !important;
+}
+
+.animate.in-view.delay-2s {
+  animation-delay: 2s !important;
+  transition-delay: 2s !important;
 }
