@@ -50,13 +50,66 @@ const NavbarMenu = () => {
           py: 1,
           display: { xs: 'none', sm: 'flex' },
           gap: 1,
+          background: 'black',
           border: '2px solid rgba(255, 255, 255, 0.1)',
           borderRadius: '30px',
+          '&:hover': {
+            boxShadow: '0 0 1px #A7A0F8',
+            transition: 'box-shadow 0.25s ease-in-out',
+          },
+          '&:not(:hover)': {
+            transition: 'box-shadow 0.5s ease-in-out',
+          },
         }}
       >
-        <Button>{t('home')}</Button>
-        <Button>{t('about')}</Button>
-        <Button>{t('contact')}</Button>
+        <Button
+          variant='text'
+          sx={{
+            '&:hover': {
+              backgroundColor: 'transparent',
+              color: '#A7A0F8',
+              textShadow: '0 0 5px #A7A0F8',
+              transition: 'text-shadow 0.25s ease-in-out',
+            },
+            '&:not(:hover)': {
+              transition: 'text-shadow 0.5s ease-in-out',
+            },
+          }}
+        >
+          {t('home')}
+        </Button>
+        <Button
+          variant='text'
+          sx={{
+            '&:hover': {
+              backgroundColor: 'transparent',
+              color: '#A7A0F8',
+              textShadow: '0 0 5px #A7A0F8',
+              transition: 'text-shadow 0.25s ease-in-out',
+            },
+            '&:not(:hover)': {
+              transition: 'text-shadow 0.h5s ease-in-out',
+            },
+          }}
+        >
+          {t('about')}
+        </Button>
+        <Button
+          variant='text'
+          sx={{
+            '&:hover': {
+              backgroundColor: 'transparent',
+              color: '#A7A0F8',
+              textShadow: '0 0 5px #A7A0F8',
+              transition: 'text-shadow 0.25s ease-in-out',
+            },
+            '&:not(:hover)': {
+              transition: 'text-shadow 0.h5s ease-in-out',
+            },
+          }}
+        >
+          {t('contact')}
+        </Button>
       </Box>
       <Box
         sx={{
