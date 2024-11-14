@@ -9,6 +9,21 @@ export const plusJakartaSans = Plus_Jakarta_Sans({
   fallback: ['Helvetica', 'Arial', 'sans-serif'],
 })
 
+declare module '@mui/material/styles/createPalette' {
+  interface Palette {
+    chat: {
+      background: string
+      bubble: string
+    }
+  }
+  interface PaletteOptions {
+    chat: {
+      background: string
+      bubble: string
+    }
+  }
+}
+
 const theme = createTheme({
   palette: {
     mode: 'dark',
@@ -23,6 +38,10 @@ const theme = createTheme({
     },
     text: {
       primary: '#ffffff',
+    },
+    chat: {
+      background: '#1C1C1E',
+      bubble: '#2C2C2E',
     },
   },
   components: {
