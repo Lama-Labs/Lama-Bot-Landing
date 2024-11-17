@@ -2,6 +2,8 @@ body {
   overflow-x: hidden;
 }
 
+.grecaptcha-badge { visibility: hidden; }
+
 /* Keyframes for animations in different directions */
 @keyframes appearFromBottom {
   from {
