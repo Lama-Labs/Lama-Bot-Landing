@@ -53,10 +53,15 @@ const AnalyticsConsentProvider: React.FC = () => {
             }}
           >
             <AlertTitle>{t('title')}</AlertTitle>
-            {t('message')}
-            <br />
-            <Button onClick={handleAccept}>{t('accept')}</Button>
-            <Button onClick={handleDecline}>{t('reject')}</Button>
+            <Box display='flex' flexDirection='column' gap={2}>
+              {t('message')}
+              <Box display='flex' gap={1}>
+                <Button variant='contained' onClick={handleAccept}>
+                  {t('accept')}
+                </Button>
+                <Button onClick={handleDecline}>{t('reject')}</Button>
+              </Box>
+            </Box>
           </Alert>
         </Box>
       )}
