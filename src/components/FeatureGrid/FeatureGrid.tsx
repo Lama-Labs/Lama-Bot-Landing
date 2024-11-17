@@ -26,6 +26,7 @@ const FeatureGrid = () => {
             <Grid
               key={index}
               size={{ xs: 12, md: 4 }}
+              alignItems='stretch'
               className={`animate animate-bottom ${getDelayClass(index)}`}
             >
               <FeatureCard

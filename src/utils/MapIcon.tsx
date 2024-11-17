@@ -1,4 +1,11 @@
-import { Home, Search, Settings, User } from 'lucide-react'
+import {
+  BookMarked,
+  BotMessageSquare,
+  Sparkles,
+  Trophy,
+  Unplug,
+  UserRoundSearch,
+} from 'lucide-react'
 import type { LucideProps } from 'lucide-react'
 
 type IconMap = {
@@ -7,11 +14,12 @@ type IconMap = {
 
 // Define the mapping between strings and icons
 const iconMap: IconMap = {
-  home: Home,
-  settings: Settings,
-  user: User,
-  search: Search,
-  // Add more icons as needed
+  bookMarked: BookMarked,
+  botMessageSquare: BotMessageSquare,
+  sparkles: Sparkles,
+  trophy: Trophy,
+  unplug: Unplug,
+  userRoundSearch: UserRoundSearch,
 }
 
 type IconProps = {

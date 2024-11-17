@@ -10,50 +10,60 @@
   },
   "home": {
     "hero": {
-      "title": "Hero Title",
-      "subtitle": "This is some regular text below the main title. It can be a brief description or tagline.",
-      "cta": "Get Started"
+      "title": "Revolutionize Your Website with Lama Bot",
+      "subtitle": "Seamless custom AI chatbot integration in minutes — no coding skills required",
+      "cta": "Get Started Now"
     },
     "features": {
       "title": "Features",
+      "subtitle": "Why Choose Lama Bot?",
       "items": [
         {
-          "title": "Feature 1",
-          "description": "This is a short description of the feature. It can be a brief explanation or a list of key points.",
-          "icon": "home"
+          "title": "On-Point Responses",
+          "description": "Lama Bot leverages your business domain and website's content to provide accurate and relevant answers.",
+          "icon": "botMessageSquare"
         },
         {
-          "title": "Feature 2",
-          "description": "This is a short description of the feature. It can be a brief explanation or a list of key points.",
-          "icon": "user"
+          "title": "Flexible Integration Options",
+          "description": "Use our WordPress plugin or embed via a simple script — compatible with any website.",
+          "icon": "unplug"
         },
         {
-          "title": "Feature 3",
-          "description": "This is a short description of the feature. It can be a brief explanation or a list of key points.",
-          "icon": "settings"
+          "title": "Real-Time Page Context",
+          "description": "The assistant utilizes the content of the page your visitor is viewing to deliver precise assistance.",
+          "icon": "bookMarked"
         }
       ]
     },
     "paragraphs": {
-      "title": "Paragraphs",
+      "title": "Introducing Lama Bot custom AI chatbot",
       "items": [
         {
-          "title": "Paragraph 1",
-          "content": "This is a longer paragraph that can contain more detailed information. It can be used to provide context or background information."
+          "pretitle": "24/7 AI Support",
+          "title": "Enhance User Experience",
+          "content": "Provide instant support, answer queries, and engage your visitors like never before with our intelligent AI assistant.",
+          "image": "/matte-background.png",
+          "icon": "sparkles"
         },
         {
-          "title": "Paragraph 2",
-          "content": "This is a longer paragraph that can contain more detailed information. It can be used to provide context or background information."
+          "pretitle": "Relevant Context",
+          "title": "Personalized Responses",
+          "content": "The assistant utilizes the content of the page your visitor is viewing and combines it with its knowledge base to deliver precise assistance.",
+          "image": "/matte-background.png",
+          "icon": "userRoundSearch"
         },
         {
-          "title": "Paragraph 3",
-          "content": "This is a longer paragraph that can contain more detailed information. It can be used to provide context or background information."
+          "pretitle": "Scalable and Reliable",
+          "title": "State-of-the-Art Technology",
+          "content": "Using the lates AI technology and robust infrastructure to ensure speed and uptime, providing a seamless experience for your visitors.",
+          "image": "/matte-background.png",
+          "icon": "trophy"
         }
       ]
     },
     "cta": {
-      "title": "Request a Demo",
-      "subtitle": "Enter your email address and we will contact you..."
+      "title": "Ready to Elevate Your Website Experience?",
+      "subtitle": "Enter your email address and our support will contact you as soon as possible."
     }
   }
 }

@@ -21,9 +21,11 @@ const Paragraphs = () => {
         {items.map((paragraph: any, index: number) => (
           <Paragraph
             key={index}
+            pretitle={paragraph.pretitle}
             title={paragraph.title}
             description={paragraph.content}
             image={paragraph.image}
+            icon={paragraph.icon}
           />
         ))}
       </Box>

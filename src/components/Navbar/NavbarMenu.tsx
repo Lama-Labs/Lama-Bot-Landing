@@ -67,12 +67,14 @@ const NavbarMenu = () => {
           sx={{
             '&:hover': {
               backgroundColor: 'transparent',
-              color: '#A7A0F8',
-              textShadow: '0 0 5px #A7A0F8',
-              transition: 'text-shadow 0.25s ease-in-out',
+              color: 'white',
+              textShadow: '0 0 5px white',
+              transition:
+                'text-shadow 0.25s ease-in-out, color 0.25s ease-in-out',
             },
             '&:not(:hover)': {
-              transition: 'text-shadow 0.5s ease-in-out',
+              transition:
+                'text-shadow 0.5s ease-in-out, color 0.5s ease-in-out',
             },
           }}
         >
@@ -83,12 +85,14 @@ const NavbarMenu = () => {
           sx={{
             '&:hover': {
               backgroundColor: 'transparent',
-              color: '#A7A0F8',
-              textShadow: '0 0 5px #A7A0F8',
-              transition: 'text-shadow 0.25s ease-in-out',
+              color: 'white',
+              textShadow: '0 0 5px white',
+              transition:
+                'text-shadow 0.25s ease-in-out, color 0.25s ease-in-out',
             },
             '&:not(:hover)': {
-              transition: 'text-shadow 0.h5s ease-in-out',
+              transition:
+                'text-shadow 0.5s ease-in-out, color 0.5s ease-in-out',
             },
           }}
         >
@@ -99,12 +103,14 @@ const NavbarMenu = () => {
           sx={{
             '&:hover': {
               backgroundColor: 'transparent',
-              color: '#A7A0F8',
-              textShadow: '0 0 5px #A7A0F8',
-              transition: 'text-shadow 0.25s ease-in-out',
+              color: 'white',
+              textShadow: '0 0 5px white',
+              transition:
+                'text-shadow 0.25s ease-in-out, color 0.25s ease-in-out',
             },
             '&:not(:hover)': {
-              transition: 'text-shadow 0.h5s ease-in-out',
+              transition:
+                'text-shadow 0.5s ease-in-out, color 0.5s ease-in-out',
             },
           }}
         >

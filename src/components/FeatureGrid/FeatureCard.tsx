@@ -18,6 +18,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       variant='outlined'
       sx={{
         textAlign: 'center',
+        height: '100%',
         px: 6,
         py: 4,
         transition: 'filter 0.25s ease-in-out',

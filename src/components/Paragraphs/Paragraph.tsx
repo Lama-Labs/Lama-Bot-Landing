@@ -1,12 +1,22 @@
 import { Box, Card, Typography } from '@mui/material'
 import Image from 'next/image'
 
+import MapIcon from '@/utils/MapIcon'
+
 interface ParagraphProps {
+  pretitle: string
   title: string
   description: string
   image: string
+  icon: string
 }
-const Paragraph: React.FC<ParagraphProps> = ({ title, description, image }) => {
+const Paragraph: React.FC<ParagraphProps> = ({
+  pretitle,
+  title,
+  description,
+  image,
+  icon,
+}) => {
   return (
     <Box
       sx={{
@@ -25,10 +35,15 @@ const Paragraph: React.FC<ParagraphProps> = ({ title, description, image }) => {
           width: { xs: '100%', md: '50%' },
         }}
       >
-        <Typography variant='body1' color='primary' sx={{ pb: 2 }}>
+        <Box display='flex' gap={1} alignItems='center'>
+          <MapIcon iconName={icon} color='#A7A0F8' size={16} />
+          <Typography variant='body1' color='primary'>
+            {pretitle}
+          </Typography>
+        </Box>
+        <Typography variant='h2' sx={{ pt: 2 }}>
           {title}
         </Typography>
-        <Typography variant='h2'>{title}</Typography>
         <Typography variant='body1'>{description}</Typography>
       </Box>
       <Box

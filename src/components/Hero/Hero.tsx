@@ -55,7 +55,7 @@ const Hero = () => {
           zIndex: -1,
         }}
       >
-        <Container maxWidth='sm'>
+        <Container maxWidth='md'>
           <Typography
             variant='h1'
             sx={{
@@ -108,7 +108,7 @@ const Hero = () => {
           },
         }}
       >
-        <Container maxWidth='sm'>
+        <Container maxWidth='md'>
           <Typography
             variant='h1'
             sx={{
