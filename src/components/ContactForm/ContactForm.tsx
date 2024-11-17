@@ -10,11 +10,14 @@ import {
   Typography,
 } from '@mui/material'
 import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar'
+import { sendGAEvent } from '@next/third-parties/google'
 import { Send } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { RefObject, useRef, useState } from 'react'
+import ReCAPTCHA from 'react-google-recaptcha'
 
 import { sendToPushBullet } from '@/app/api/PushBulletSend'
+import { validateRecaptchaToken } from '@/app/api/validateRecaptcha'
 
 const ContactForm = () => {
   const t = useTranslations('home.cta')
@@ -24,6 +27,7 @@ const ContactForm = () => {
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false)
   const [sending, setSending] = useState<boolean>(false)
 
+  const recaptchaRef = useRef<ReCAPTCHA>()
 
   const validateEmail = (value: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -40,29 +44,56 @@ const ContactForm = () => {
   // Show an alert with the email when the button is clicked
   const handleClick = async () => {
     try {
-      setSending(true);
-      const resp = await sendToPushBullet("email", email);
-      setEmail("");
-      console.log("Response:", resp);
+      setSending(true)
+
+      if (!recaptchaRef.current) {
+        setSnackbarOpen(true)
+        return
+      }
+
+      const token = await recaptchaRef.current.executeAsync()
+
+      // if no token, don't submit
+      if (!token) {
+        new Error('reCAPTCHA token error')
+      }
+      // validate token
+      const isCaptchaValid = await validateRecaptchaToken(token!)
+
+      if (!isCaptchaValid) {
+        new Error('reCAPTCHA validation error')
+      }
+
+      sendGAEvent({
+        action: 'click',
+        category: 'Button',
+        label: 'Send email clicked',
+        value: email,
+      })
+      await sendToPushBullet('email', email)
+
+      // clear captcha
+      recaptchaRef.current.reset()
+      setEmail('')
+      setIsValidEmail(false)
     } catch (error) {
-      console.error("An error occurred while sending to PushBullet:", error);
-      setSnackbarOpen(true);
-    }
-    finally {
-      setSending(false);
+      console.error('An error occurred while sending to PushBullet:', error)
+      setSnackbarOpen(true)
+    } finally {
+      setSending(false)
     }
   }
 
   const handleClose = (
     event: React.SyntheticEvent | Event,
-    reason?: SnackbarCloseReason,
+    reason?: SnackbarCloseReason
   ) => {
     if (reason === 'clickaway') {
-      return;
+      return
     }
 
-    setSnackbarOpen(false);
-  };
+    setSnackbarOpen(false)
+  }
 
   return (
     <Container maxWidth='xl'>
@@ -71,11 +102,7 @@ const ContactForm = () => {
         autoHideDuration={4000}
         onClose={handleClose}
       >
-        <Alert
-          onClose={handleClose}
-          severity="error"
-          sx={{ width: '100%' }}
-        >
+        <Alert onClose={handleClose} severity='error' sx={{ width: '100%' }}>
           An error occurred while sending the email.
         </Alert>
       </Snackbar>
@@ -128,7 +155,11 @@ const ContactForm = () => {
                 value={email}
                 onChange={handleChange}
                 error={!isValidEmail && email.length > 0}
-                helperText={!isValidEmail && email.length > 0 ? "Please enter a valid email" : ""}
+                helperText={
+                  !isValidEmail && email.length > 0
+                    ? 'Please enter a valid email'
+                    : ''
+                }
               />
               <LoadingButton
                 type='submit'
@@ -139,7 +170,12 @@ const ContactForm = () => {
                 onClick={handleClick}
               >
                 <Send />
-              </LoadingButton >
+              </LoadingButton>
+              <ReCAPTCHA
+                ref={recaptchaRef as RefObject<ReCAPTCHA>}
+                size='invisible'
+                sitekey={process.env.NEXT_PUBLIC_CAPTCHA_SITEKEY || 'aaa'}
+              />
             </Box>
           </Box>
         </Card>
