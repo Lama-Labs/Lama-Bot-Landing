@@ -140,7 +140,7 @@ const ContactForm = () => {
               component='form'
               sx={{
                 display: 'flex',
-                alignItems: 'center',
+                alignItems: 'start',
                 width: '100%',
                 gap: 2,
                 pt: 2,
@@ -158,8 +158,14 @@ const ContactForm = () => {
                 helperText={
                   !isValidEmail && email.length > 0
                     ? 'Please enter a valid email'
-                    : ''
+                    : ' '
                 }
+                sx={{
+                  '& .MuiFormHelperText-root': {
+                    visibility: email.length > 0 && !isValidEmail ? 'visible' : 'hidden', // Toggle visibility
+                    height: '1.5em', // Fixed height for the helper text
+                  },
+                }}
               />
               <LoadingButton
                 type='submit'

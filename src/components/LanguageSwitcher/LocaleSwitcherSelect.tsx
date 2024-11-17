@@ -33,7 +33,7 @@ const LocaleSwitcherSelect = ({
   }
 
   return (
-    <FormControl sx={{ width: '200px' }}>
+    <FormControl sx={{ width: '200px' }} size="small">
       <Select
         value={currentLocale}
         onChange={handleLocaleChange}

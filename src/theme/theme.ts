@@ -24,6 +24,12 @@ declare module '@mui/material/styles/createPalette' {
   }
 }
 
+declare module '@mui/material/Alert' {
+  interface AlertPropsColorOverrides {
+    primary: true;
+  }
+}
+
 const theme = createTheme({
   palette: {
     mode: 'dark',

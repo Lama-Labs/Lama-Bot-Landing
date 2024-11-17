@@ -48,10 +48,10 @@ export default async function RootLayout({
               {children}
               <FloatingActionButton />
               <Footer />
+              <AnalyticsConsentProvider />
             </NextIntlClientProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>
-        <AnalyticsConsentProvider />
       </body>
     </html>
   )

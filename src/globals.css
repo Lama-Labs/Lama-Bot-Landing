@@ -2,7 +2,9 @@ body {
   overflow-x: hidden;
 }
 
-.grecaptcha-badge { visibility: hidden; }
+.grecaptcha-badge {
+  display: none !important; /* Hide the reCAPTCHA badge */
+}
 
 /* Keyframes for animations in different directions */
 @keyframes appearFromBottom {

@@ -58,5 +58,11 @@
       "title": "Zahtevaj Demo",
       "subtitle": "Vnesite svoj e-poštni naslov in stopili vas bomo v stik..."
     }
+  },
+  "cookies": {
+    "title": "Cenimo vašo zasebnost",
+    "message": "Piškotke uporabljamo za izboljšanje vaše uporabniške izkušnje in analizo delovanja naše spletne strani. Izberite, ali želite sprejeti ali zavrniti neobvezne piškotke.",
+    "accept": "Sprejmi",
+    "reject": "Zavrni"
   }
 }

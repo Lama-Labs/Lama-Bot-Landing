@@ -65,5 +65,11 @@
       "title": "Ready to Elevate Your Website Experience?",
       "subtitle": "Enter your email address and our support will contact you as soon as possible."
     }
+  },
+  "cookies": {
+    "title": "We Value Your Privacy",
+    "message": "We use cookies to enhance your experience and analyze our website’s performance. Please choose whether to accept or reject non-essential cookies.",
+    "accept": "Accept",
+    "reject": "Reject"
   }
 }

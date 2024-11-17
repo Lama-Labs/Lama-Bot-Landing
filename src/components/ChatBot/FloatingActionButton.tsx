@@ -18,8 +18,8 @@ const FloatingActionButton: React.FC = () => {
         onClick={() => setIsChatOpen(!isChatOpen)}
         sx={{
           position: 'fixed',
-          bottom: '20px',
-          right: '20px',
+          bottom: {xs:10, md:20},
+          right: {xs:10, md:20},
         }}
       >
         <MessageCircle />
