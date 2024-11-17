@@ -135,7 +135,7 @@ const ContactForm = () => {
             gap={5}
             sx={{ pt: 8, pb: 20 }}
           >
-            <Typography variant='h1'>{t('title')}</Typography>
+            <Typography variant='h2'>{t('title')}</Typography>
             <Typography variant='body1'>{t('subtitle')}</Typography>
             <Box
               component='form'
