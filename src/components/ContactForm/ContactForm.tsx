@@ -23,7 +23,7 @@ const ContactForm = () => {
   const t = useTranslations('home.cta')
 
   const [email, setEmail] = useState<string>('')
-  const [isValidEmail, setIsValidEmail] = useState<boolean>(false)
+  const [isValidEmail, setIsValidEmail] = useState<boolean>(true)
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false)
   const [sending, setSending] = useState<boolean>(false)
 
@@ -38,7 +38,6 @@ const ContactForm = () => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value
     setEmail(value)
-    setIsValidEmail(validateEmail(value)) // Update validity based on email format
   }
 
   // Show an alert with the email when the button is clicked
@@ -48,6 +47,12 @@ const ContactForm = () => {
 
       if (!recaptchaRef.current) {
         setSnackbarOpen(true)
+        throw new Error('reCAPTCHA ref error')
+      }
+
+      const validEmail = validateEmail(email)
+      setIsValidEmail(validEmail) // Update validity based on email format
+      if(!validEmail) {
         return
       }
 
@@ -55,13 +60,13 @@ const ContactForm = () => {
 
       // if no token, don't submit
       if (!token) {
-        new Error('reCAPTCHA token error')
+        throw new Error('reCAPTCHA token error')
       }
       // validate token
       const isCaptchaValid = await validateRecaptchaToken(token!)
 
       if (!isCaptchaValid) {
-        new Error('reCAPTCHA validation error')
+        throw new Error('reCAPTCHA validation error')
       }
 
       sendGAEvent({
@@ -75,7 +80,7 @@ const ContactForm = () => {
       // clear captcha
       recaptchaRef.current.reset()
       setEmail('')
-      setIsValidEmail(false)
+      setIsValidEmail(true)
     } catch (error) {
       console.error('An error occurred while sending to PushBullet:', error)
       setSnackbarOpen(true)
@@ -157,7 +162,7 @@ const ContactForm = () => {
                 error={!isValidEmail && email.length > 0}
                 helperText={
                   !isValidEmail && email.length > 0
-                    ? 'Please enter a valid email'
+                    ? t('errors.email')
                     : ' '
                 }
                 sx={{
@@ -168,11 +173,10 @@ const ContactForm = () => {
                 }}
               />
               <LoadingButton
-                type='submit'
+                type='button'
                 variant='contained'
                 color='primary'
                 loading={sending}
-                disabled={!isValidEmail}
                 onClick={handleClick}
               >
                 <Send />

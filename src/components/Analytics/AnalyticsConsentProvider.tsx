@@ -16,7 +16,6 @@ const AnalyticsConsentProvider: React.FC = () => {
 
   useEffect(() => {
     const consent = Cookies.get('analytics-consent')
-    console.log(consent, 'consent')
     setAnalyticsEnabled(consent === 'true')
     setConsentGiven(!!consent)
   }, [])

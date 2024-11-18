@@ -56,7 +56,10 @@
     },
     "cta": {
       "title": "Zahtevaj Demo",
-      "subtitle": "Vnesite svoj e-poštni naslov in stopili vas bomo v stik..."
+      "subtitle": "Vnesite svoj e-poštni naslov in stopili vas bomo v stik...",
+      "errors": {
+        "email": "Prosimo, vnesite veljaven e-poštni naslov."
+      }
     }
   },
   "cookies": {
