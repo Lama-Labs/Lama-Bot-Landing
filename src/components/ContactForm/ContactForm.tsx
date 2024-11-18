@@ -176,7 +176,7 @@ const ContactForm = () => {
                     '& .MuiFormHelperText-root': {
                       visibility:
                         !isValidEmail ? 'visible' : 'hidden', // Toggle visibility
-                      height: '1.5em', // Fixed height for the helper text
+                      minHeight: '1.5em', // Fixed height for the helper text
                     },
                   }}
                 />
