@@ -63,7 +63,7 @@
     },
     "cta": {
       "title": "Ste pripravljeni izboljšati izkušnjo svojega spletnega mesta?",
-      "subtitle": "Vpišite svoj e-poštni naslov in naša podpora vas bo kontaktirala v najkrajšem možnem času."
+      "subtitle": "Vpišite svoj e-poštni naslov in naša podpora vas bo kontaktirala v najkrajšem možnem času.",
       "errors": {
         "email": "Prosimo, vnesite veljaven e-poštni naslov."
       }

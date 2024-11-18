@@ -166,16 +166,16 @@ const ContactForm = () => {
                   size='small'
                   value={email}
                   onChange={handleChange}
-                  error={!isValidEmail && email.length > 0}
+                  error={!isValidEmail}
                   helperText={
-                    !isValidEmail && email.length > 0
+                    !isValidEmail
                       ? t('errors.email')
                       : ' '
                   }
                   sx={{
                     '& .MuiFormHelperText-root': {
-                      display:
-                        email.length > 0 && !isValidEmail ? 'block' : 'none', // Toggle visibility
+                      visibility:
+                        !isValidEmail ? 'visible' : 'hidden', // Toggle visibility
                       height: '1.5em', // Fixed height for the helper text
                     },
                   }}
