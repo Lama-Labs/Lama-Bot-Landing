@@ -26,7 +26,7 @@ declare module '@mui/material/styles/createPalette' {
 
 declare module '@mui/material/Alert' {
   interface AlertPropsColorOverrides {
-    primary: true;
+    primary: true
   }
 }
 
@@ -35,6 +35,7 @@ const theme = createTheme({
     mode: 'dark',
     primary: {
       main: '#A7A0F8',
+      contrastText: '#fff',
     },
     secondary: {
       main: '#F7931A',
@@ -125,6 +126,9 @@ const theme = createTheme({
     },
     subtitle2: {
       fontWeight: 400,
+    },
+    caption: {
+      color: '#8692a6',
     },
   },
 })

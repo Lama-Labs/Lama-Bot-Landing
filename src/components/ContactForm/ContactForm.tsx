@@ -6,6 +6,7 @@ import {
   Box,
   Card,
   Container,
+  Link,
   TextField,
   Typography,
 } from '@mui/material'
@@ -139,7 +140,7 @@ const ContactForm = () => {
             gap={5}
             sx={{ pt: 8, pb: 20 }}
           >
-            <Typography variant='h1'>{t('title')}</Typography>
+            <Typography variant='h2'>{t('title')}</Typography>
             <Typography variant='body1'>{t('subtitle')}</Typography>
             <Box
               component='form'
@@ -151,27 +152,59 @@ const ContactForm = () => {
                 pt: 2,
               }}
             >
-              <TextField
-                label='Email'
-                type='email'
-                variant='outlined'
-                fullWidth
-                size='small'
-                value={email}
-                onChange={handleChange}
-                error={!isValidEmail && email.length > 0}
-                helperText={
-                  !isValidEmail && email.length > 0
-                    ? t('errors.email')
-                    : ' '
-                }
-                sx={{
-                  '& .MuiFormHelperText-root': {
-                    visibility: email.length > 0 && !isValidEmail ? 'visible' : 'hidden', // Toggle visibility
-                    height: '1.5em', // Fixed height for the helper text
-                  },
-                }}
-              />
+              <Box
+                display='flex'
+                flexDirection='column'
+                gap={0.5}
+                sx={{ width: '100%' }}
+              >
+                <TextField
+                  label='Email'
+                  type='email'
+                  variant='outlined'
+                  fullWidth
+                  size='small'
+                  value={email}
+                  onChange={handleChange}
+                  error={!isValidEmail && email.length > 0}
+                  helperText={
+                    !isValidEmail && email.length > 0
+                      ? t('errors.email')
+                      : ' '
+                  }
+                  sx={{
+                    '& .MuiFormHelperText-root': {
+                      display:
+                        email.length > 0 && !isValidEmail ? 'block' : 'none', // Toggle visibility
+                      height: '1.5em', // Fixed height for the helper text
+                    },
+                  }}
+                />
+                <Typography
+                  sx={{ px: 1, py: 0.5 }}
+                  variant='caption'
+                  textAlign='start'
+                  fontSize={10}
+                >
+                  This site is protected by reCAPTCHA and the Google{' '}
+                  <Link
+                    href='https://policies.google.com/privacy'
+                    target='_blank'
+                    underline='none'
+                  >
+                    Privacy Policy
+                  </Link>{' '}
+                  and{' '}
+                  <Link
+                    href='https://policies.google.com/terms'
+                    target='_blank'
+                    underline='none'
+                  >
+                    Terms of Service
+                  </Link>{' '}
+                  apply.
+                </Typography>
+              </Box>
               <LoadingButton
                 type='button'
                 variant='contained'

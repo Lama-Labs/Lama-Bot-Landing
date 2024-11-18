@@ -1,9 +1,8 @@
 'use client'
 
-// todo: fix
-// eslint-disable-next-line import/named
-import { FormControl, MenuItem, Select, SelectChangeEvent } from '@mui/material'
-import { useTransition } from 'react'
+import { Box, IconButton, Menu, MenuItem } from '@mui/material'
+import { ChevronDown, Languages } from 'lucide-react'
+import { useState, useTransition } from 'react'
 
 import { usePathname, useRouter } from '@/i18n/routing'
 
@@ -22,31 +21,95 @@ const LocaleSwitcherSelect = ({
   locales,
 }: LocaleSwitcherSelectProps) => {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
   const pathname = usePathname()
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [isPending, startTransition] = useTransition()
+  const isMenuOpen = Boolean(anchorEl)
 
-  const handleLocaleChange = (event: SelectChangeEvent<string>) => {
-    const nextLocale = event.target.value as string
-    startTransition(() => {
-      router.replace({ pathname }, { locale: nextLocale })
-    })
+  const handleButtonClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget)
   }
 
+  const handleMenuClose = () => {
+    setAnchorEl(null)
+  }
+
+  const handleLocaleChange = (value: string) => {
+    startTransition(() => {
+      router.replace({ pathname }, { locale: value })
+    })
+    setAnchorEl(null)
+  }
+
+  const sortedLocales = [
+    ...locales.filter((locale) => locale.value === currentLocale),
+    ...locales.filter((locale) => locale.value !== currentLocale),
+  ]
+
   return (
-    <FormControl sx={{ width: '200px' }} size="small">
-      <Select
-        value={currentLocale}
-        onChange={handleLocaleChange}
-        variant='outlined'
+    <Box>
+      <IconButton
+        onClick={handleButtonClick}
         disabled={isPending}
+        disableRipple
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+        }}
       >
-        {locales.map(({ value, label }) => (
-          <MenuItem key={value} value={value}>
+        <Languages />
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            transition: 'transform 0.25s',
+            transform: isMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+          }}
+        >
+          <ChevronDown />
+        </Box>
+      </IconButton>
+      <Menu
+        anchorEl={anchorEl}
+        open={isMenuOpen}
+        onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+        disableScrollLock={true}
+        sx={{
+          mt: 1,
+          position: 'absolute',
+          '& .MuiPaper-root': {
+            position: 'absolute',
+          },
+        }}
+      >
+        {sortedLocales.map(({ value, label }) => (
+          <MenuItem
+            key={value}
+            selected={value === currentLocale}
+            onClick={() => handleLocaleChange(value)}
+            sx={{
+              color: 'white',
+              backgroundColor: 'transparent',
+              '&.Mui-selected': {
+                backgroundColor: 'transparent',
+                color: '#A7A0F8',
+              },
+            }}
+          >
             {label}
           </MenuItem>
         ))}
-      </Select>
-    </FormControl>
+      </Menu>
+    </Box>
   )
 }
 

@@ -5,32 +5,33 @@
     "contact": "Kontakt",
     "localeSwitcher": {
       "en": "English",
-      "sl": "Slovenščina"
+      "sl": "slovenščina"
     }
   },
   "home": {
     "hero": {
-      "title": "Hero Naslov",
-      "subtitle": "To je navadno besedilo pod glavnim naslovom. Lahko je kratek opis ali slogan.",
-      "cta": "Začni"
+      "title": "Revolucija vašega spletnega mesta - Lama Bot",
+      "subtitle": "Enostavna integracija asistenta z umetno inteligenco po meri v nekaj minutah - brez znanja programiranja!",
+      "cta": "Začnite zdaj"
     },
     "features": {
-      "title": "Značilnosti",
+      "title": "Lastnosti",
+      "subtitle": "Zakaj izbrati Lama Bot?",
       "items": [
         {
-          "title": "Značilnost 1",
-          "description": "To je kratek opis značilnosti. Lahko je kratek pojasnilo ali seznam ključnih točk.",
-          "icon": "home"
+          "title": "Točni odgovori",
+          "description": "Lama Bot za zagotavljanje natančnih in ustreznih odgovorov uporabi znanje iz vaše poslovne domene in vsebino spletnega mesta.",
+          "icon": "botMessageSquare"
         },
         {
-          "title": "Značilnost 2",
-          "description": "To je kratek opis značilnosti. Lahko je kratek pojasnilo ali seznam ključnih točk.",
-          "icon": "user"
+          "title": "Prilagodljive možnosti integracije",
+          "description": "Uporabite naš vtičnik za WordPress ali ga vgradite s preprosto skripto - združljivo z vsakim spletnim mestom.",
+          "icon": "unplug"
         },
         {
-          "title": "Značilnost 3",
-          "description": "To je kratek opis značilnosti. Lahko je kratek pojasnilo ali seznam ključnih točk.",
-          "icon": "settings"
+          "title": "Razumevanje konteksta vprašanja",
+          "description": "Pomočnik za zagotavljanje natančne pomoči uporablja vsebino strani, ki si jo ogleduje vaš obiskovalec.",
+          "icon": "bookMarked"
         }
       ]
     },
@@ -38,25 +39,31 @@
       "title": "Odstavki",
       "items": [
         {
-          "title": "Odstavek 1",
-          "content": "To je daljši odstavek, ki lahko vsebuje bolj podrobne informacije. Uporablja se lahko za zagotavljanje konteksta ali ozadja.",
-          "image": "/matte-background.png"
+          "pretitle": "Podpora z umetno inteligenco 24/7",
+          "title": "Izboljšajte uporabniško izkušnjo",
+          "content": "Zagotovite takojšnjo podporo, odgovarjajte na vprašanja in pritegnite obiskovalce kot še nikoli prej z našim inteligentnim pomočnikom.",
+          "image": "/matte-background.png",
+          "icon": "sparkles"
         },
         {
-          "title": "Odstavek 2",
-          "content": "To je daljši odstavek, ki lahko vsebuje bolj podrobne informacije. Uporablja se lahko za zagotavljanje konteksta ali ozadja.",
-          "image": "/matte-background.png"
+          "pretitle": "Ustrezen kontekst",
+          "title": "Prilagojeni odgovori",
+          "content": "Pomočnik za odgovore na uporabnikova vprašanja uporabi vsebino strani, ki si jo ogleduje, kar združi s svojo bazo znanja, da zagotovi ustrezno pomoč.",
+          "image": "/matte-background.png",
+          "icon": "userRoundSearch"
         },
         {
-          "title": "Odstavek 3",
-          "content": "To je daljši odstavek, ki lahko vsebuje bolj podrobne informacije. Uporablja se lahko za zagotavljanje konteksta ali ozadja.",
-          "image": "/matte-background.png"
+          "pretitle": "Razširljivo in zanesljivo",
+          "title": "Najsodobnejša tehnologija",
+          "content": "Z uporabo najnovejše tehnologije umetne inteligence in robustne infrastrukture zagotavljamo hitro in zanesljivo delovanje ter tako vašim obiskovalcem zagotavljamo brezhibno izkušnjo.",
+          "image": "/matte-background.png",
+          "icon": "trophy"
         }
       ]
     },
     "cta": {
-      "title": "Zahtevaj Demo",
-      "subtitle": "Vnesite svoj e-poštni naslov in stopili vas bomo v stik...",
+      "title": "Ste pripravljeni izboljšati izkušnjo svojega spletnega mesta?",
+      "subtitle": "Vpišite svoj e-poštni naslov in naša podpora vas bo kontaktirala v najkrajšem možnem času."
       "errors": {
         "email": "Prosimo, vnesite veljaven e-poštni naslov."
       }
