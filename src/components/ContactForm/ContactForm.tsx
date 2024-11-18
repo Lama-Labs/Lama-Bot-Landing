@@ -7,10 +7,11 @@ import {
   Card,
   Container,
   Link,
+  Snackbar,
   TextField,
   Typography,
 } from '@mui/material'
-import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar'
+import type { SnackbarCloseReason } from '@mui/material/Snackbar/Snackbar'
 import { sendGAEvent } from '@next/third-parties/google'
 import { Send } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -53,7 +54,7 @@ const ContactForm = () => {
 
       const validEmail = validateEmail(email)
       setIsValidEmail(validEmail) // Update validity based on email format
-      if(!validEmail) {
+      if (!validEmail) {
         return
       }
 
@@ -167,15 +168,10 @@ const ContactForm = () => {
                   value={email}
                   onChange={handleChange}
                   error={!isValidEmail}
-                  helperText={
-                    !isValidEmail
-                      ? t('errors.email')
-                      : ' '
-                  }
+                  helperText={!isValidEmail ? t('errors.email') : ' '}
                   sx={{
                     '& .MuiFormHelperText-root': {
-                      visibility:
-                        !isValidEmail ? 'visible' : 'hidden', // Toggle visibility
+                      visibility: !isValidEmail ? 'visible' : 'hidden', // Toggle visibility
                       minHeight: '1.5em', // Fixed height for the helper text
                     },
                   }}

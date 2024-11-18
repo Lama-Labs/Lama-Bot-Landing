@@ -33,7 +33,7 @@ const ChatField: React.FC = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ question, pageContent })
+          body: JSON.stringify({ question, pageContent }),
         }
       )
 

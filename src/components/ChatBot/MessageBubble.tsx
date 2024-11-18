@@ -7,7 +7,6 @@ interface MessageBubbleProps {
 }
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isUser }) => {
-
   return (
     <Paper
       elevation={2}

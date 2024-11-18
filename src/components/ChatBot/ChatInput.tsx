@@ -10,11 +10,11 @@ interface ChatInputProps {
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
-                                               newQuestion,
-                                               setNewQuestion,
-                                               handleSend,
-                                               disabled,
-                                             }) => {
+  newQuestion,
+  setNewQuestion,
+  handleSend,
+  disabled,
+}) => {
   const onSend = () => {
     console.log('Sending message:', newQuestion)
     setNewQuestion(newQuestion.trim())
