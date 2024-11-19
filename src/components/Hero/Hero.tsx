@@ -12,6 +12,8 @@ import { sendGAEvent } from '@next/third-parties/google'
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef } from 'react'
 
+import TextParser from '@/utils/TextParser'
+
 const Hero = () => {
   const t = useTranslations('home')
   const theme = useTheme()
@@ -19,13 +21,20 @@ const Hero = () => {
 
   const invisibleClone = useRef<HTMLDivElement>(null)
   const originalBox = useRef<HTMLDivElement>(null)
+  const button = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
-    // Initial pointer position
-    if (invisibleClone.current && originalBox.current) {
-      const rect = originalBox.current.getBoundingClientRect()
-      const x = rect.width / 2
-      const y = rect.height / 2
+    // Initial gradient position
+    if (invisibleClone.current && originalBox.current && button.current) {
+      let x, y
+      if (isSmallScreen) {
+        x = window.innerWidth / 2
+        y = window.innerHeight / 2
+      } else {
+        const rect = button.current.getBoundingClientRect()
+        x = rect.left + rect.width / 2
+        y = rect.top + rect.height / 2
+      }
       invisibleClone.current.style.maskImage = `radial-gradient(circle 400px at ${x}px ${y}px, rgba(0,0,0,0.4) 0%, black 100%)`
     }
 
@@ -88,12 +97,15 @@ const Hero = () => {
             variant='h1'
             sx={{
               fontSize: { xs: '2.5rem', md: '4rem' },
-              fontWeight: 'bold',
               mb: 2,
               textShadow: '0 0 10px rgba(255, 255, 255, 0.8)',
+              '& strong': {
+                fontWeight: 'bold',
+                color: { xs: '#A7A0F8', md: 'white' },
+              },
             }}
           >
-            {t('hero.title')}
+            <TextParser text={t('hero.title')} />
           </Typography>
           <Typography
             variant='body1'
@@ -106,6 +118,7 @@ const Hero = () => {
             {t('hero.subtitle')}
           </Typography>
           <Button
+            ref={button}
             variant='contained'
             color='primary'
             size='large'
@@ -142,11 +155,14 @@ const Hero = () => {
             variant='h1'
             sx={{
               fontSize: { xs: '2.5rem', md: '4rem' },
-              fontWeight: 'bold',
               mb: 2,
+              '& strong': {
+                fontWeight: 'bold',
+                color: '#A7A0F8',
+              },
             }}
           >
-            {t('hero.title')}
+            <TextParser text={t('hero.title')} />
           </Typography>
           <Typography variant='body1' sx={{ mb: 4 }}>
             {t('hero.subtitle')}
