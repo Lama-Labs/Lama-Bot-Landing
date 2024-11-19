@@ -103,7 +103,7 @@ const ContactForm = () => {
   }
 
   return (
-    <Container maxWidth='xl'>
+    <Container maxWidth='xl' id='contact'>
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={4000}

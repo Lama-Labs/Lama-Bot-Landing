@@ -8,6 +8,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material'
+import { sendGAEvent } from '@next/third-parties/google'
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef } from 'react'
 
@@ -47,10 +48,25 @@ const Hero = () => {
     }
   }, [isSmallScreen])
 
+  const scrollTo = (id: string) => {
+    sendGAEvent({
+      action: 'click',
+      category: 'Button',
+      label: 'CTA clicked',
+      value: 'CTA',
+    })
+    
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
   return (
     <>
       {/* Original*/}
       <Box
+        id='home'
         ref={originalBox}
         sx={{
           height: '100vh',
@@ -117,6 +133,7 @@ const Hero = () => {
           background: 'black',
           '& .MuiButton-root': {
             boxShadow: '0 0 20px #A7A0F880',
+            pointerEvents: 'auto',
           },
         }}
       >
@@ -134,7 +151,7 @@ const Hero = () => {
           <Typography variant='body1' sx={{ mb: 4 }}>
             {t('hero.subtitle')}
           </Typography>
-          <Button variant='outlined' color='primary' size='large'>
+          <Button variant='outlined' color='primary' size='large' onClick={() => scrollTo('contact')}>
             {t('hero.cta')}
           </Button>
         </Container>

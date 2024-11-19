@@ -14,7 +14,7 @@ const FeatureGrid = () => {
   }
 
   return (
-    <Container maxWidth='xl'>
+    <Container maxWidth='xl' id='about'>
       <Box display='flex' maxWidth='xl' flexDirection='column' gap={6} pb={6}>
         <Typography variant='h2' sx={{ alignSelf: 'center' }}>
           {t('title')}
