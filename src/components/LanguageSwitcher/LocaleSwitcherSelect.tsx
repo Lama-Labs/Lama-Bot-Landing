@@ -56,6 +56,18 @@ const LocaleSwitcherSelect = ({
           display: 'flex',
           alignItems: 'center',
           gap: 1,
+          color: '#A7A0F8',
+          '&:hover': {
+            '& svg': {
+              color: 'white',
+              filter: 'drop-shadow(0 0 1px white)',
+              transition:
+                'text-shadow 0.25s ease-in-out, color 0.25s ease-in-out',
+            },
+          },
+          '& svg': {
+            transition: 'text-shadow 0.5s ease-in-out, color 0.5s ease-in-out',
+          },
         }}
       >
         <Languages />

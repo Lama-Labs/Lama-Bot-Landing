@@ -1,11 +1,20 @@
 'use client'
 
-import { Box, Button, Container, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Container,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef } from 'react'
 
 const Hero = () => {
   const t = useTranslations('home')
+  const theme = useTheme()
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'))
 
   const invisibleClone = useRef<HTMLDivElement>(null)
   const originalBox = useRef<HTMLDivElement>(null)
@@ -18,6 +27,9 @@ const Hero = () => {
       const y = rect.height / 2
       invisibleClone.current.style.maskImage = `radial-gradient(circle 400px at ${x}px ${y}px, rgba(0,0,0,0.4) 0%, black 100%)`
     }
+
+    if (isSmallScreen) return
+
     const handlePointerMove = (e: PointerEvent) => {
       if (invisibleClone.current && originalBox.current) {
         const { clientX, clientY } = e
@@ -33,7 +45,7 @@ const Hero = () => {
     return () => {
       document.body.removeEventListener('pointermove', handlePointerMove)
     }
-  }, [])
+  }, [isSmallScreen])
 
   return (
     <>

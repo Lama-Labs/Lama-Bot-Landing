@@ -13,8 +13,8 @@ const Paragraphs = () => {
         display='flex'
         flexDirection='column'
         justifyContent='center'
-        gap={6}
-        pb={6}
+        gap={18}
+        py={9}
       >
         {/*todo: fix*/}
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any*/}

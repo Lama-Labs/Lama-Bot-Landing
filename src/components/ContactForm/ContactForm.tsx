@@ -130,7 +130,7 @@ const ContactForm = () => {
             px: 4,
             justifyItems: 'center',
             '&:hover': {
-              boxShadow: '0px 2px 5px #A7A0F8',
+              boxShadow: '0px 2px 10px #A7A0F866',
             },
           }}
         >

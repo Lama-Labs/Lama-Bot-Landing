@@ -26,7 +26,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
           transition: 'filter 0.25s ease-in-out',
         },
         '&:hover': {
-          filter: 'drop-shadow(0 0 5px #A7A0F8)',
+          filter: 'drop-shadow(0 0 5px #A7A0F866)',
           transition: 'filter 0.25s ease-in-out',
           '& .icon': {
             filter: 'drop-shadow(0 0 5px #A7A0F8)',

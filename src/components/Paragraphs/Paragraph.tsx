@@ -23,6 +23,7 @@ const Paragraph: React.FC<ParagraphProps> = ({
         display: 'flex',
         flexDirection: { xs: 'column', md: 'row' },
         gap: 4,
+        alignItems: 'center',
       }}
     >
       <Box
@@ -33,6 +34,7 @@ const Paragraph: React.FC<ParagraphProps> = ({
           justifyContent: 'start',
           gap: 2,
           width: { xs: '100%', md: '50%' },
+          px: { xs: 2, md: 10 },
         }}
       >
         <Box display='flex' gap={1} alignItems='center'>
@@ -54,8 +56,14 @@ const Paragraph: React.FC<ParagraphProps> = ({
           justifyContent: 'center',
         }}
       >
-        <Card variant='outlined' sx={{ p: 4, width: '100%' }}>
-          <Image src={image} alt='Car' width={400} height={300} />
+        <Card variant='outlined' sx={{ p: { xs: 1, md: 4 }, width: '100%' }}>
+          <Image
+            src={image}
+            alt='Car'
+            layout='responsive'
+            width={400}
+            height={300}
+          />
         </Card>
       </Box>
     </Box>
