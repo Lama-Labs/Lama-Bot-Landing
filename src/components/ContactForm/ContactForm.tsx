@@ -13,9 +13,10 @@ import {
 } from '@mui/material'
 import type { SnackbarCloseReason } from '@mui/material/Snackbar/Snackbar'
 import { sendGAEvent } from '@next/third-parties/google'
+import Cookies from 'js-cookie'
 import { Send } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { RefObject, useRef, useState } from 'react'
+import React, { RefObject, useRef, useState } from 'react'
 import ReCAPTCHA from 'react-google-recaptcha'
 
 import { sendToPushBullet } from '@/app/api/PushBulletSend'
@@ -43,7 +44,8 @@ const ContactForm = () => {
   }
 
   // Show an alert with the email when the button is clicked
-  const handleClick = async () => {
+  const handleClick = async (event: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
     try {
       setSending(true)
 
@@ -71,12 +73,15 @@ const ContactForm = () => {
         throw new Error('reCAPTCHA validation error')
       }
 
-      sendGAEvent({
-        action: 'click',
-        category: 'Button',
-        label: 'Send email clicked',
-        value: email,
-      })
+      if (Cookies.get('analytics-consent') === 'true') {
+        sendGAEvent({
+          action: 'click',
+          category: 'Button',
+          label: 'Send email clicked',
+          value: email,
+        })
+      }
+
       await sendToPushBullet('email', email)
 
       // clear captcha
@@ -202,7 +207,7 @@ const ContactForm = () => {
                 </Typography>
               </Box>
               <LoadingButton
-                type='button'
+                type='submit'
                 variant='contained'
                 color='primary'
                 loading={sending}

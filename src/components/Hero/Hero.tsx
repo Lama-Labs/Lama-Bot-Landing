@@ -9,6 +9,7 @@ import {
   useTheme,
 } from '@mui/material'
 import { sendGAEvent } from '@next/third-parties/google'
+import Cookies from 'js-cookie'
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef } from 'react'
 
@@ -58,12 +59,14 @@ const Hero = () => {
   }, [isSmallScreen])
 
   const scrollTo = (id: string) => {
-    sendGAEvent({
-      action: 'click',
-      category: 'Button',
-      label: 'CTA clicked',
-      value: 'CTA',
-    })
+    if (Cookies.get('analytics-consent') === 'true') {
+      sendGAEvent({
+        action: 'click',
+        category: 'Button',
+        label: 'CTA clicked',
+        value: 'CTA',
+      })
+    }
 
     const element = document.getElementById(id)
     if (element) {

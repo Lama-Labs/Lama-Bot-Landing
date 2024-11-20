@@ -8,7 +8,8 @@ export async function sendToPushBullet(
   title: string,
   body: string
 ): Promise<void> {
-  const accessToken = process.env.PUSHBULLET_ACCESS_TOKEN // Store this in .env.local
+  const accessToken = process.env.PUSHBULLET_ACCESS_TOKEN
+  const channelId = process.env.PUSHBULLET_CHANNEL_ID
 
   console.log('Sending push to Pushbullet:', title, body)
 
@@ -16,6 +17,13 @@ export async function sendToPushBullet(
     throw {
       status: 400,
       message: 'Pushbullet access token is missing in environment variables',
+    } as PushbulletError
+  }
+
+  if (!channelId) {
+    throw {
+      status: 400,
+      message: 'Pushbullet channel id is missing in environment variables',
     } as PushbulletError
   }
 
@@ -30,6 +38,7 @@ export async function sendToPushBullet(
         type: 'note',
         title,
         body,
+        channel_tag : channelId
       }),
     })
 
