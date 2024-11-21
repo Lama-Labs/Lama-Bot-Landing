@@ -2,16 +2,13 @@
 
 import { LoadingButton } from '@mui/lab'
 import {
-  Alert,
   Box,
   Card,
   Container,
   Link,
-  Snackbar,
   TextField,
   Typography,
 } from '@mui/material'
-import type { SnackbarCloseReason } from '@mui/material/Snackbar/Snackbar'
 import { sendGAEvent } from '@next/third-parties/google'
 import Cookies from 'js-cookie'
 import { Send } from 'lucide-react'
@@ -21,16 +18,17 @@ import ReCAPTCHA from 'react-google-recaptcha'
 
 import { sendToPushBullet } from '@/app/api/PushBulletSend'
 import { validateRecaptchaToken } from '@/app/api/validateRecaptcha'
+import SnackbarComponent, { SnackbarHandle } from '@/components/Snackbar/Snackbar'
 
 const ContactForm = () => {
   const t = useTranslations('home.cta')
 
   const [email, setEmail] = useState<string>('')
   const [isValidEmail, setIsValidEmail] = useState<boolean>(true)
-  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false)
   const [sending, setSending] = useState<boolean>(false)
 
   const recaptchaRef = useRef<ReCAPTCHA>()
+  const snackbarRef = useRef<SnackbarHandle>(null);
 
   const validateEmail = (value: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -50,7 +48,6 @@ const ContactForm = () => {
       setSending(true)
 
       if (!recaptchaRef.current) {
-        setSnackbarOpen(true)
         throw new Error('reCAPTCHA ref error')
       }
 
@@ -88,36 +85,18 @@ const ContactForm = () => {
       recaptchaRef.current.reset()
       setEmail('')
       setIsValidEmail(true)
+      snackbarRef?.current?.snackbarOpenSuccess();
     } catch (error) {
       console.error('An error occurred while sending to PushBullet:', error)
-      setSnackbarOpen(true)
+      snackbarRef?.current?.snackbarOpenError();
     } finally {
       setSending(false)
     }
   }
 
-  const handleClose = (
-    event: React.SyntheticEvent | Event,
-    reason?: SnackbarCloseReason
-  ) => {
-    if (reason === 'clickaway') {
-      return
-    }
-
-    setSnackbarOpen(false)
-  }
-
   return (
     <Container maxWidth='xl' id='contact'>
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={4000}
-        onClose={handleClose}
-      >
-        <Alert onClose={handleClose} severity='error' sx={{ width: '100%' }}>
-          An error occurred while sending the email.
-        </Alert>
-      </Snackbar>
+      <SnackbarComponent ref={snackbarRef}/>
       <Box
         className='animate animate-bottom'
         sx={{

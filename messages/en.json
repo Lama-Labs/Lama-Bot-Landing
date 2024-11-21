@@ -74,5 +74,9 @@
     "message": "We use cookies to enhance your experience and analyze our website’s performance. Please choose whether to accept or reject non-essential cookies.",
     "accept": "Accept",
     "reject": "Reject"
+  },
+  "snackbar": {
+    "success": "Message sent successfully!",
+    "error": "An error occurred. Please try again later."
   }
 }
