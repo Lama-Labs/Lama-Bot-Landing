@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, IconButton, Menu, MenuItem } from '@mui/material'
+import type { MenuProps } from '@mui/material/Menu'
 import { ChevronDown, Languages } from 'lucide-react'
 import { useState, useTransition } from 'react'
 
@@ -14,11 +15,15 @@ type LocaleOption = {
 type LocaleSwitcherSelectProps = {
   currentLocale: string
   locales: LocaleOption[]
+  anchorOrigin: MenuProps['anchorOrigin'];
+  transformOrigin: MenuProps['transformOrigin'];
 }
 
 const LocaleSwitcherSelect = ({
   currentLocale,
   locales,
+  anchorOrigin,
+  transformOrigin,
 }: LocaleSwitcherSelectProps) => {
   const router = useRouter()
   const pathname = usePathname()
@@ -86,14 +91,8 @@ const LocaleSwitcherSelect = ({
         anchorEl={anchorEl}
         open={isMenuOpen}
         onClose={handleMenuClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
-        }}
+        anchorOrigin={anchorOrigin}
+        transformOrigin={transformOrigin}
         disableScrollLock={true}
         sx={{
           mt: 1,

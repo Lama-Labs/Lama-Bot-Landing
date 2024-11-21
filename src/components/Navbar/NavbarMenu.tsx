@@ -107,7 +107,16 @@ const NavbarMenu = () => {
             display: { xs: 'none', sm: 'flex' },
           }}
         >
-          <LocaleSwitcher />
+          <LocaleSwitcher
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'center',
+            }}
+          />
         </Box>
       </Box>
       <Drawer
@@ -128,7 +137,16 @@ const NavbarMenu = () => {
           </List>
           <Divider />
           <Box sx={{ mx: 1, my: 2 }}>
-            <LocaleSwitcher />
+            <LocaleSwitcher
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'center',
+              }}
+            />
           </Box>
         </Box>
       </Drawer>

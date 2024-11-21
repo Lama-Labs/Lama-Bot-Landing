@@ -18,7 +18,7 @@ import ReCAPTCHA from 'react-google-recaptcha'
 
 import { sendToPushBullet } from '@/app/api/PushBulletSend'
 import { validateRecaptchaToken } from '@/app/api/validateRecaptcha'
-import SnackbarComponent, { SnackbarHandle } from '@/components/Snackbar/Snackbar'
+import SnackbarComponent, { SnackbarHandle } from '@/components/Snackbar/SnackbarComponent'
 
 const ContactForm = () => {
   const t = useTranslations('home.cta')
