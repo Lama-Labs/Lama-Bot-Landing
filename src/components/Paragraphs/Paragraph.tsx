@@ -1,6 +1,6 @@
 /*import Image from 'next/image'
 import { height } from '@mui/system'*/
-import { Box, Card, Typography } from '@mui/material'
+import { Box, Card, Typography, Avatar } from '@mui/material'
 import React from 'react'
 
 import MessageBubble from '@/components/ChatBot/MessageBubble'
@@ -82,19 +82,45 @@ const Paragraph: React.FC<ParagraphProps> = ({
                 flex: 1,
                 padding: 2,
                 display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
                 flexDirection: 'column',
-                opacity: 0.9,
                 gap: 1,
+                opacity: 0.9,
               }}
             >
               {messages.map((msg, index) => (
-                <MessageBubble
+                <Box
                   key={index}
-                  message={msg.text}
-                  isUser={msg.isUser}
-                />
+                  sx={{
+                    display: 'flex',
+                    justifyContent: msg.isUser ? 'flex-end' : 'flex-start',
+                    alignItems: 'flex-end',
+                    gap: 1,
+                  }}
+                >
+                  {!msg.isUser && (
+                    <Avatar
+                      sx={{
+                        bgcolor: 'chat.bubble',
+                        p: 0.7,
+                      }}
+                      alt="LamaBot logo"
+                      src="./lamashop logo.png"
+                    />
+                  )}
+                  <MessageBubble message={msg.text} isUser={msg.isUser} />
+                  {msg.isUser && (
+                    <Avatar
+                      sx={{
+                        bgcolor: 'chat.bubble',
+                        color: 'chat.userText',
+                        fontSize: '1.3rem',
+                      }}
+                      alt="LamaBot user"
+                    >
+                      U
+                    </Avatar>
+                  )}
+                </Box>
               ))}
             </Box>
           </Box>
