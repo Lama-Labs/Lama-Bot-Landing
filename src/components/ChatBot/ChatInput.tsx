@@ -24,7 +24,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      if (disabled) return // Prevent any action if `disabled` is true
+      if (disabled || !newQuestion.length) return // Prevent any action if `disabled` is true
       onSend()
     }
   }

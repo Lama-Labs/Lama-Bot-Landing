@@ -21,6 +21,8 @@ const ChatField: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
   const handleSend = async () => {
+    setIsBusy(true)
+
     const pageContent = document.body.innerText
     setResponses([...responses, { text: question, isUser: true }])
     setQuestion('')
@@ -41,7 +43,6 @@ const ChatField: React.FC = () => {
         throw new Error('Response body is null')
       }
 
-      setIsBusy(true)
       // Add an empty entry for the incoming API response
       const responseEntry = { text: '', isUser: false }
       setResponses((prevResponses) => [...prevResponses, responseEntry])
