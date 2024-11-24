@@ -5,6 +5,7 @@ import React from 'react'
 
 import MessageBubble from '@/components/ChatBot/MessageBubble'
 import MapIcon from '@/utils/MapIcon'
+import { User } from 'lucide-react'
 
 interface Message {
   text: string
@@ -113,11 +114,10 @@ const Paragraph: React.FC<ParagraphProps> = ({
                       sx={{
                         bgcolor: 'chat.bubble',
                         color: 'chat.userText',
-                        fontSize: '1.3rem',
                       }}
                       alt="LamaBot user"
                     >
-                      U
+                      <User opacity={0.8}/>
                     </Avatar>
                   )}
                 </Box>
