@@ -1,5 +1,3 @@
-/*import Image from 'next/image'
-import { height } from '@mui/system'*/
 import { Box, Card, Typography } from '@mui/material'
 import React from 'react'
 
@@ -24,7 +22,6 @@ const Paragraph: React.FC<ParagraphProps> = ({
   pretitle,
   title,
   description,
-  //image,
   icon,
   messages = [],
 }) => {
