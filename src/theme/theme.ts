@@ -60,7 +60,7 @@ const theme = createTheme({
       scrollbarThumb: '#4B4B4D',
       scrollbarTrack: '#2C2C2E',
       userText: '#ffffff',
-      botText: '#8692a6',
+      botText: '#ffffff',
     },
   },
   components: {
