@@ -43,21 +43,51 @@
           "title": "Enhance User Experience",
           "content": "Provide instant support, answer queries, and engage your visitors like never before with our intelligent AI assistant.",
           "image": "/matte-background.png",
-          "icon": "sparkles"
+          "icon": "sparkles",
+          "messages": [
+            {
+              "text": "Can you tell me more about your express shipping service?",
+              "isUser": true
+            },
+            {
+              "text": "Absolutely! Our express shipping service ensures your order is delivered within 1-2 business days. It’s available for all products and costs an additional $9.99. If you place your order before 3 PM, we’ll process it the same day. Would you like me to guide you through the checkout process?",
+              "isUser": false
+            }
+          ]
         },
         {
           "pretitle": "Relevant Context",
           "title": "Personalized Responses",
           "content": "The assistant utilizes the content of the page your visitor is viewing and combines it with its knowledge base to deliver precise assistance.",
           "image": "/matte-background.png",
-          "icon": "userRoundSearch"
+          "icon": "userRoundSearch",
+          "messages": [
+            {
+              "text": "I'm reading about your fitness programs. Which one would you suggest for someone new to working out?",
+              "isUser": true
+            },
+            {
+              "text": "For beginners, our 'Fit Start Program' is a great choice! It includes guided workouts, nutrition tips, and a 4-week plan to help you ease into fitness. Would you like me to help you sign up?",
+              "isUser": false
+            }
+          ]
         },
         {
           "pretitle": "Scalable and Reliable",
           "title": "State-of-the-Art Technology",
           "content": "Using the lates AI technology and robust infrastructure to ensure speed and uptime, providing a seamless experience for your visitors.",
           "image": "/matte-background.png",
-          "icon": "trophy"
+          "icon": "trophy",
+          "messages": [
+            {
+              "text": "Does the Alpine Adventure trip include any activities for families?\"\nLama Bot:",
+              "isUser": true
+            },
+            {
+              "text": "Yes, the trip includes family-friendly activities like easy hiking trails, a family picnic by a mountain lake, and a guided nature walk tailored for all ages. There’s also a kid-friendly treasure hunt on one of the stops. Would you like more details on these activities?",
+              "isUser": false
+            }
+          ]
         }
       ]
     },

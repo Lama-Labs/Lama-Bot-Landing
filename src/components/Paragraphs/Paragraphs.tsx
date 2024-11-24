@@ -26,6 +26,7 @@ const Paragraphs = () => {
             description={paragraph.content}
             image={paragraph.image}
             icon={paragraph.icon}
+            messages={paragraph.messages}
           />
         ))}
       </Box>

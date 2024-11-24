@@ -1,8 +1,15 @@
-import { Box, Card, Typography } from '@mui/material'
 /*import Image from 'next/image'
 import { height } from '@mui/system'*/
+import { Box, Card, Typography } from '@mui/material'
+import React from 'react'
 
+import MessageBubble from '@/components/ChatBot/MessageBubble'
 import MapIcon from '@/utils/MapIcon'
+
+interface Message {
+  text: string
+  isUser: boolean
+}
 
 interface ParagraphProps {
   pretitle: string
@@ -10,13 +17,16 @@ interface ParagraphProps {
   description: string
   image: string
   icon: string
+  messages: [Message]
 }
+
 const Paragraph: React.FC<ParagraphProps> = ({
   pretitle,
   title,
   description,
   //image,
   icon,
+  messages = [],
 }) => {
   return (
     <Box
@@ -35,7 +45,7 @@ const Paragraph: React.FC<ParagraphProps> = ({
           justifyContent: 'start',
           gap: 2,
           width: { xs: '100%', md: '50%' },
-          px: { xs: 2, md: 10 },
+          pr: { xs: 2, md: 10 },
         }}
       >
         <Box display='flex' gap={1} alignItems='center'>
@@ -58,21 +68,36 @@ const Paragraph: React.FC<ParagraphProps> = ({
         }}
       >
         <Card variant='outlined' sx={{ p: { xs: 1, md: 4 }, width: '100%' }}>
-          {/*<Image
-            src={image}
-            alt='Car'
-            layout='responsive'
-            width={400}
-            height={300}
-          />*/}
           <Box
             sx={{
-              height: 300,
-              width: 400,
+              minHeight: 225,
+              minWidth: 300,
+              display: 'flex',
               background:
                 'radial-gradient(ellipse, #A7A0F844 0%, transparent 70%)',
             }}
-          />
+          >
+            <Box
+              sx={{
+                flex: 1,
+                padding: 2,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'column',
+                opacity: 0.9,
+                gap: 1,
+              }}
+            >
+              {messages.map((msg, index) => (
+                <MessageBubble
+                  key={index}
+                  message={msg.text}
+                  isUser={msg.isUser}
+                />
+              ))}
+            </Box>
+          </Box>
         </Card>
       </Box>
     </Box>

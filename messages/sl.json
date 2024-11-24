@@ -43,21 +43,51 @@
           "title": "Izboljšajte uporabniško izkušnjo",
           "content": "Zagotovite takojšnjo podporo, odgovarjajte na vprašanja in pritegnite obiskovalce kot še nikoli prej z našim inteligentnim pomočnikom.",
           "image": "/matte-background.png",
-          "icon": "sparkles"
+          "icon": "sparkles",
+          "messages": [
+            {
+              "text": "Kako deluje storitev hitre dostave?",
+              "isUser": true
+            },
+            {
+              "text": "Naša storitev hitre dostave zagotavlja, da bo Vaše naročilo dostavljeno v 1-2 delovnih dneh. Na voljo je za vse izdelke, cena pa znaša 9,99 €. Če naročilo oddate pred 15. uro, ga bomo obdelali še isti dan. Želite, da Vas vodim skozi postopek oddaje naročila?",
+              "isUser": false
+            }
+          ]
         },
         {
           "pretitle": "Ustrezen kontekst",
           "title": "Prilagojeni odgovori",
           "content": "Pomočnik za odgovore na uporabnikova vprašanja uporabi vsebino strani, ki si jo ogleduje, kar združi s svojo bazo znanja, da zagotovi ustrezno pomoč.",
           "image": "/matte-background.png",
-          "icon": "userRoundSearch"
+          "icon": "userRoundSearch",
+          "messages": [
+            {
+              "text": "Ogledujem si cenik vaših fitnes programov. Katerega bi priporočili začetniku?",
+              "isUser": true
+            },
+            {
+              "text": "Za začetnike je najprimernejši program 'Fit Start Program'! Vključuje vodene vadbe, nasvete o prehrani in 4-tedenski načrt, ki Vam pomaga postopoma začeti z vadbo. Potrebujete pomoč pri prijavi?",
+              "isUser": false
+            }
+          ]
         },
         {
           "pretitle": "Razširljivo in zanesljivo",
           "title": "Najsodobnejša tehnologija",
           "content": "Z uporabo najnovejše tehnologije umetne inteligence in robustne infrastrukture zagotavljamo hitro in zanesljivo delovanje ter tako vašim obiskovalcem zagotavljamo brezhibno izkušnjo.",
           "image": "/matte-background.png",
-          "icon": "trophy"
+          "icon": "trophy",
+          "messages": [
+            {
+              "text": "Ali je Alpska avantura primerna za družine?",
+              "isUser": true
+            },
+            {
+              "text": "Da, potovanje vključuje aktivnosti, primerne za družine, kot so lahke pohodniške poti, družinski piknik ob gorskem jezeru in voden naravoslovni sprehod, prilagojen vsem starostim. Prav tako 2. dan za otroke organiziramo lov na zaklad. Želite več podrobnosti o kateri izmed aktivnostih?\"",
+              "isUser": false
+            }
+          ]
         }
       ]
     },
