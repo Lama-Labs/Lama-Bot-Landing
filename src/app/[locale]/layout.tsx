@@ -17,7 +17,8 @@ import '@/globals.css'
 
 export const metadata: Metadata = {
   title: 'LamaBot',
-  description: 'Seamless custom AI chatbot integration in minutes — no coding skills required',
+  description:
+    'Seamless custom AI chatbot integration in minutes — no coding skills required',
 }
 
 export default async function RootLayout({

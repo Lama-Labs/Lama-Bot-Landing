@@ -11,7 +11,6 @@ const FloatingActionButton: React.FC = () => {
 
   return (
     <>
-
       <Box
         sx={{
           position: 'fixed',

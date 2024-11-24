@@ -1,11 +1,9 @@
-/*import Image from 'next/image'
-import { height } from '@mui/system'*/
-import { Box, Card, Typography, Avatar } from '@mui/material'
+import { Avatar, Box, Card, Typography } from '@mui/material'
+import { User } from 'lucide-react'
 import React from 'react'
 
 import MessageBubble from '@/components/ChatBot/MessageBubble'
 import MapIcon from '@/utils/MapIcon'
-import { User } from 'lucide-react'
 
 interface Message {
   text: string
@@ -103,8 +101,8 @@ const Paragraph: React.FC<ParagraphProps> = ({
                         bgcolor: 'chat.bubble',
                         p: 0.7,
                       }}
-                      alt="LamaBot logo"
-                      src="./lamashop logo.png"
+                      alt='LamaBot logo'
+                      src='./lamashop logo.png'
                     />
                   )}
                   <MessageBubble message={msg.text} isUser={msg.isUser} />
@@ -114,9 +112,9 @@ const Paragraph: React.FC<ParagraphProps> = ({
                         bgcolor: 'chat.bubble',
                         color: 'chat.userText',
                       }}
-                      alt="LamaBot user"
+                      alt='LamaBot user'
                     >
-                      <User opacity={0.8}/>
+                      <User opacity={0.8} />
                     </Avatar>
                   )}
                 </Box>

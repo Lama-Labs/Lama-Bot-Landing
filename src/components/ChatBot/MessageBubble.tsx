@@ -20,7 +20,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isUser }) => {
         margin: '4px 0',
       }}
     >
-      <Typography variant='body1' sx={{ whiteSpace: 'pre-wrap', color:'inherit' }}>
+      <Typography
+        variant='body1'
+        sx={{ whiteSpace: 'pre-wrap', color: 'inherit' }}
+      >
         {message}
       </Typography>
     </Paper>

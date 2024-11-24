@@ -15,7 +15,7 @@ interface Message {
 
 const ChatField: React.FC = () => {
   const t = useTranslations('chat')
-  
+
   const [responses, setResponses] = useState<Message[]>([
     { text: t('initialMessage'), isUser: false },
   ])

@@ -15,8 +15,8 @@ type LocaleOption = {
 type LocaleSwitcherSelectProps = {
   currentLocale: string
   locales: LocaleOption[]
-  anchorOrigin: MenuProps['anchorOrigin'];
-  transformOrigin: MenuProps['transformOrigin'];
+  anchorOrigin: MenuProps['anchorOrigin']
+  transformOrigin: MenuProps['transformOrigin']
 }
 
 const LocaleSwitcherSelect = ({

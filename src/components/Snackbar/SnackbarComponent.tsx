@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { Alert, Snackbar } from '@mui/material'
 import type { AlertColor } from '@mui/material/Alert/Alert'
@@ -7,8 +7,8 @@ import { useTranslations } from 'next-intl'
 import React, { forwardRef, useImperativeHandle, useState } from 'react'
 
 export interface SnackbarHandle {
-  snackbarOpenError: () => void;
-  snackbarOpenSuccess: () => void;
+  snackbarOpenError: () => void
+  snackbarOpenSuccess: () => void
 }
 
 const SnackbarComponent = forwardRef<SnackbarHandle>((props, ref) => {
@@ -47,7 +47,7 @@ const SnackbarComponent = forwardRef<SnackbarHandle>((props, ref) => {
   useImperativeHandle(ref, () => ({
     snackbarOpenError,
     snackbarOpenSuccess,
-  }));
+  }))
 
   return (
     <Snackbar
@@ -66,5 +66,5 @@ const SnackbarComponent = forwardRef<SnackbarHandle>((props, ref) => {
   )
 })
 
-SnackbarComponent.displayName = 'SnackbarComponent';
+SnackbarComponent.displayName = 'SnackbarComponent'
 export default SnackbarComponent

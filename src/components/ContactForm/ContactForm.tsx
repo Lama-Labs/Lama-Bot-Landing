@@ -18,7 +18,9 @@ import ReCAPTCHA from 'react-google-recaptcha'
 
 import { sendToPushBullet } from '@/app/api/PushBulletSend'
 import { validateRecaptchaToken } from '@/app/api/validateRecaptcha'
-import SnackbarComponent, { SnackbarHandle } from '@/components/Snackbar/SnackbarComponent'
+import SnackbarComponent, {
+  SnackbarHandle,
+} from '@/components/Snackbar/SnackbarComponent'
 
 const ContactForm = () => {
   const t = useTranslations('home.cta')
@@ -28,7 +30,7 @@ const ContactForm = () => {
   const [sending, setSending] = useState<boolean>(false)
 
   const recaptchaRef = useRef<ReCAPTCHA>()
-  const snackbarRef = useRef<SnackbarHandle>(null);
+  const snackbarRef = useRef<SnackbarHandle>(null)
 
   const validateEmail = (value: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -89,10 +91,10 @@ const ContactForm = () => {
       recaptchaRef.current.reset()
       setEmail('')
       setIsValidEmail(true)
-      snackbarRef?.current?.snackbarOpenSuccess();
+      snackbarRef?.current?.snackbarOpenSuccess()
     } catch (error) {
       console.error('An error occurred while sending to PushBullet:', error)
-      snackbarRef?.current?.snackbarOpenError();
+      snackbarRef?.current?.snackbarOpenError()
     } finally {
       setSending(false)
     }
@@ -100,7 +102,7 @@ const ContactForm = () => {
 
   return (
     <Container maxWidth='xl' id='contact'>
-      <SnackbarComponent ref={snackbarRef}/>
+      <SnackbarComponent ref={snackbarRef} />
       <Box
         className='animate animate-bottom'
         sx={{
