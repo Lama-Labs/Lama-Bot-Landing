@@ -14,12 +14,20 @@ declare module '@mui/material/styles/createPalette' {
     chat: {
       background: string
       bubble: string
+      scrollbarThumb: string
+      scrollbarTrack: string
+      userText: string
+      botText: string
     }
   }
   interface PaletteOptions {
     chat: {
       background: string
       bubble: string
+      scrollbarThumb: string
+      scrollbarTrack: string
+      userText: string
+      botText: string
     }
   }
 }
@@ -49,6 +57,10 @@ const theme = createTheme({
     chat: {
       background: '#1C1C1E',
       bubble: '#2C2C2E',
+      scrollbarThumb: '#4B4B4D',
+      scrollbarTrack: '#2C2C2E',
+      userText: '#ffffff',
+      botText: '#8692a6',
     },
   },
   components: {

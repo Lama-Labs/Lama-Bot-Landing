@@ -15,12 +15,12 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isUser }) => {
         maxWidth: '80%',
         alignSelf: isUser ? 'flex-end' : 'flex-start',
         bgcolor: isUser ? 'primary.main' : 'chat.bubble', // Use primary color from theme
-        color: isUser ? 'primary.contrastText' : '#ffffff', // Adjust text color for contrast
-        borderRadius: isUser ? '16px 16px 0px 16px' : '16px 16px 16px 0px',
+        color: isUser ? 'chat.userText' : 'chat.botText', // Adjust text color for contrast
+        borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
         margin: '4px 0',
       }}
     >
-      <Typography variant='body1' sx={{ whiteSpace: 'pre-wrap' }}>
+      <Typography variant='body1' sx={{ whiteSpace: 'pre-wrap', color:'inherit' }}>
         {message}
       </Typography>
     </Paper>

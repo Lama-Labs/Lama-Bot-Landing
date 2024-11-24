@@ -77,8 +77,8 @@ const ChatField: React.FC = () => {
         position: 'fixed',
         bottom: 90,
         right: 16,
-        width: 300,
-        height: 400,
+        width: '22em',
+        height: '30em',
         display: 'flex',
         flexDirection: 'column',
         boxShadow: 3,
@@ -103,15 +103,16 @@ const ChatField: React.FC = () => {
             width: '8px', // Width of the scrollbar
           },
           '&::-webkit-scrollbar-track': {
-            backgroundColor: '#f1f1f1', // Background color of the scrollbar track
+            backgroundColor: 'chat.scrollbarTrack', // Background color of the scrollbar track
             borderRadius: '8px',
           },
           '&::-webkit-scrollbar-thumb': {
-            backgroundColor: '#c1c1c1', // Color of the scrollbar thumb
+            backgroundColor: 'chat.scrollbarThumb', // Color of the scrollbar thumb
             borderRadius: '8px',
           },
           '&::-webkit-scrollbar-thumb:hover': {
-            backgroundColor: '#a1a1a1', // Color of the scrollbar thumb on hover
+            backgroundColor: 'primary.dark', // Color of the scrollbar thumb on hover
+            cursor: 'default',
           },
         }}
       >

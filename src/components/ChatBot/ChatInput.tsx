@@ -33,21 +33,54 @@ const ChatInput: React.FC<ChatInputProps> = ({
     <Stack
       direction='row'
       spacing={1}
-      sx={{ padding: 1, borderTop: '1px solid #ccc' }}
+      sx={{
+        padding: 1,
+        borderTop: '1px solid',
+        borderColor: 'chat.bubble',
+        display: 'flex',
+        alignItems: 'center',
+      }}
     >
       <TextField
         fullWidth
         variant='outlined'
         placeholder='Type a message'
+        size='small'
         value={newQuestion}
         multiline
         onChange={(e) => setNewQuestion(e.target.value)}
         onKeyDown={handleKeyDown}
+        minRows={1}
+        maxRows={8}
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            '& textarea': {
+              /* Custom Scrollbar Styles */
+              '&::-webkit-scrollbar': {
+                width: '6px', // Width of the scrollbar,
+              },
+              '&::-webkit-scrollbar-track': {
+                backgroundColor: 'chat.scrollbarTrack', // Background color of the scrollbar track
+                borderRadius: '8px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: 'chat.scrollbarThumb', // Color of the scrollbar thumb
+                borderRadius: '8px',
+                transition: 'background-color 2s ease',
+              },
+              '&::-webkit-scrollbar-thumb:hover': {
+                backgroundColor: 'primary.dark', // Color of the scrollbar thumb on hover
+                cursor: 'default',
+              },
+            },
+          },
+        }}
       />
       <IconButton
         color='primary'
         onClick={onSend}
         disabled={newQuestion === '' || disabled}
+        size='large'
       >
         <Send />
       </IconButton>
