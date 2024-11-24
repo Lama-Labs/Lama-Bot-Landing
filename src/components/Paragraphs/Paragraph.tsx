@@ -1,5 +1,6 @@
 import { Box, Card, Typography } from '@mui/material'
-import Image from 'next/image'
+/*import Image from 'next/image'
+import { height } from '@mui/system'*/
 
 import MapIcon from '@/utils/MapIcon'
 
@@ -14,7 +15,7 @@ const Paragraph: React.FC<ParagraphProps> = ({
   pretitle,
   title,
   description,
-  image,
+  //image,
   icon,
 }) => {
   return (
@@ -57,12 +58,20 @@ const Paragraph: React.FC<ParagraphProps> = ({
         }}
       >
         <Card variant='outlined' sx={{ p: { xs: 1, md: 4 }, width: '100%' }}>
-          <Image
+          {/*<Image
             src={image}
             alt='Car'
             layout='responsive'
             width={400}
             height={300}
+          />*/}
+          <Box
+            sx={{
+              height: 300,
+              width: 400,
+              background:
+                'radial-gradient(ellipse, #A7A0F844 0%, transparent 70%)',
+            }}
           />
         </Card>
       </Box>
