@@ -25,7 +25,6 @@ const Paragraph: React.FC<ParagraphProps> = ({
   pretitle,
   title,
   description,
-  //image,
   icon,
   messages = [],
 }) => {
