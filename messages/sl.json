@@ -78,5 +78,9 @@
   "snackbar": {
     "success": "Sporočilo uspešno poslano!",
     "error": "Prišlo je do napake. Poskusite znova pozneje."
+  },
+  "chat": {
+    "initialMessage": "Kako vam lahko danes pomagam?",
+    "inputPlaceholder": "Vnesite svoje vprašanje tukaj..."
   }
 }

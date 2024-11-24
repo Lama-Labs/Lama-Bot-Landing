@@ -78,5 +78,9 @@
   "snackbar": {
     "success": "Message sent successfully!",
     "error": "An error occurred. Please try again later."
+  },
+  "chat": {
+    "initialMessage": "How can I help you today?",
+    "inputPlaceholder": "Type your question here..."
   }
 }

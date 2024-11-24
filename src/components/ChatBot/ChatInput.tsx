@@ -1,5 +1,6 @@
 import { IconButton, Stack, TextField } from '@mui/material'
 import { Send } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 interface ChatInputProps {
@@ -15,6 +16,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
   handleSend,
   disabled,
 }) => {
+  const t = useTranslations('chat')
+
   const onSend = () => {
     console.log('Sending message:', newQuestion)
     setNewQuestion(newQuestion.trim())
@@ -44,7 +47,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       <TextField
         fullWidth
         variant='outlined'
-        placeholder='Type a message'
+        placeholder={t('inputPlaceholder')}
         size='small'
         value={newQuestion}
         multiline

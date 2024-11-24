@@ -1,6 +1,7 @@
 'use client'
 
 import { Box } from '@mui/material'
+import { useTranslations } from 'next-intl'
 import React, { useEffect, useRef, useState } from 'react'
 
 import ChatInput from '@/components/ChatBot/ChatInput'
@@ -13,8 +14,10 @@ interface Message {
 }
 
 const ChatField: React.FC = () => {
+  const t = useTranslations('chat')
+  
   const [responses, setResponses] = useState<Message[]>([
-    { text: 'Hello! How can I help you today?', isUser: false },
+    { text: t('initialMessage'), isUser: false },
   ])
   const [question, setQuestion] = useState<string>('')
   const [isBusy, setIsBusy] = useState<boolean>(false)
