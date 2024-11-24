@@ -38,7 +38,7 @@ export async function sendToPushBullet(
         type: 'note',
         title,
         body,
-        channel_tag : channelId
+        channel_tag: channelId,
       }),
     })
 

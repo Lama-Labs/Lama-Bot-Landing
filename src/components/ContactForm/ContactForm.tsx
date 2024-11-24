@@ -42,7 +42,11 @@ const ContactForm = () => {
   }
 
   // Show an alert with the email when the button is clicked
-  const handleClick = async (event: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = async (
+    event:
+      | React.FormEvent<HTMLFormElement>
+      | React.MouseEvent<HTMLButtonElement>
+  ) => {
     event.preventDefault()
     try {
       setSending(true)
