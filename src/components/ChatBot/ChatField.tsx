@@ -1,7 +1,8 @@
 'use client'
 
-import { Box } from '@mui/material'
+import { Box, IconButton } from '@mui/material'
 import Cookies from 'js-cookie'
+import { Trash } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { MessageContent, Message as OpenAiMessage, TextContentBlock } from "openai/resources/beta/threads/messages";
 import React, { useEffect, useRef, useState } from 'react'
@@ -170,6 +171,30 @@ const ChatField: React.FC = () => {
         bgcolor: 'chat.background',
       }}
     >
+      {/* Delete button */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 4,
+          right: 4,
+        }}
+      >
+        <IconButton
+          onClick={() => {
+            Cookies.remove('thread_id')
+            setResponses([{ text: t('initialMessage'), isUser: false }])
+          }}
+          sx={{
+            color: 'chat.scrollbarThumb',
+            '&:hover': {
+              color: 'primary.main',
+            },
+          }}
+        >
+          <Trash size={20} />
+        </IconButton>
+      </Box>
+
       {/* Messages Display */}
       <Box
         sx={{
