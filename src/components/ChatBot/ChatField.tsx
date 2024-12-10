@@ -1,6 +1,7 @@
 'use client'
 
 import { Box } from '@mui/material'
+import Cookies from 'js-cookie'
 import { useTranslations } from 'next-intl'
 import React, { useEffect, useRef, useState } from 'react'
 
@@ -26,29 +27,70 @@ const ChatField: React.FC = () => {
   const handleSend = async () => {
     setIsBusy(true)
 
-    const pageContent = document.body.innerText
+    // const pageContent = document.body.innerText TODO reimplement
     setResponses([...responses, { text: question, isUser: true }])
     setQuestion('')
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/chatQuery`,
+      let threadId = Cookies.get('thread_id')
+
+      if (!threadId) {
+        console.log('No thread ID found. Fetching from server...')
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/chatWindow/thread/create`,
+          { method: 'POST' }
+        )
+
+        const data = await response.json()
+        threadId = data.thread.id
+
+        if (!threadId) {
+          throw new Error('Thread ID is null')
+        }
+
+        // Set the thread ID in a cookie
+        Cookies.set('thread_id', threadId, { expires: 1 }) // 1 day TTL
+        console.log('New thread ID set in cookie:', threadId)
+      } else {
+        console.log('Thread ID exists in cookie:', threadId)
+        // Extend TTL for the cookie
+        Cookies.set('thread_id', threadId, { expires: 1 }) // Reset TTL to 1 day
+      }
+
+      // Proceed with sending the message
+      const messageResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/chatWindow/message/create`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ question, pageContent }),
+          body: JSON.stringify({ question, threadId }),
+        }
+      )
+
+      if (!messageResponse.body) {
+        throw new Error('Message is null')
+      }
+
+      // Add an empty entry for the incoming API response
+      const responseEntry = { text: '', isUser: false }
+      setResponses((prevResponses) => [...prevResponses, responseEntry])
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/chatWindow/run/create`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ threadId }),
         }
       )
 
       if (!response.body) {
         throw new Error('Response body is null')
       }
-
-      // Add an empty entry for the incoming API response
-      const responseEntry = { text: '', isUser: false }
-      setResponses((prevResponses) => [...prevResponses, responseEntry])
 
       const reader = response.body
         .pipeThrough(new TextDecoderStream())
@@ -59,8 +101,38 @@ const ChatField: React.FC = () => {
         const { value, done } = await reader.read()
         if (done) break
 
-        responseEntry.text += value
-        setResponses((prevResponses) => [...prevResponses])
+        // Process each SSE message
+        const eventMessage = value.trim()
+        eventMessage
+          .replaceAll('}{', '};{')
+          .split(';')
+          .forEach((msg) => {
+            console.log("msg", msg)
+            const eventData = JSON.parse(msg)
+
+            // Handle different event types
+            switch (eventData.type) {
+              case 'textDelta':
+                responseEntry.text += eventData.text
+                break
+              // case 'toolCallCreated':
+              //   responseEntry.text += `\nTool Call: ${eventData.toolCall.type}\n`;
+              //   break;
+              // case 'codeInterpreterInput':
+              //   responseEntry.text += `\nCode Input: ${eventData.input}\n`;
+              //   break;
+              // case 'codeInterpreterOutputs':
+              //   responseEntry.text += `\nCode Output: ${eventData.outputs
+              //     .map((output) => (output.type === 'logs' ? output.logs : ''))
+              //     .join('\n')}\n`;
+              //   break;
+              default:
+                console.warn('Unhandled event type:', eventData.type)
+            }
+
+            // Update the state with the new response content
+            setResponses((prevResponses) => [...prevResponses])
+          })
       }
     } catch (error) {
       console.error('Error fetching from API:', error)
