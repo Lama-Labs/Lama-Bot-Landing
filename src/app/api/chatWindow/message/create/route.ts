@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     return Response.json(threadMessage);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return Response.json({ error: e });
   }
 }

@@ -32,7 +32,6 @@ export async function POST(req: NextRequest) {
               type: 'textDelta',
               text: textDelta.value,
             })
-            console.log('Text delta:', message)
             controller.enqueue(encoder.encode(message))
           })
           // .on('toolCallCreated', (toolCall) => {
@@ -81,7 +80,7 @@ export async function POST(req: NextRequest) {
       },
     })
   } catch (e) {
-    console.log(e)
+    console.error(e)
     return Response.json({ error: e })
   }
 }

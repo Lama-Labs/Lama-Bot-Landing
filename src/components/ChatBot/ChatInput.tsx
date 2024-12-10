@@ -19,7 +19,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const t = useTranslations('chat')
 
   const onSend = () => {
-    console.log('Sending message:', newQuestion)
     setNewQuestion(newQuestion.trim())
     handleSend()
   }

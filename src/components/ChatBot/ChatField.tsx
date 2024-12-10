@@ -3,10 +3,12 @@
 import { Box } from '@mui/material'
 import Cookies from 'js-cookie'
 import { useTranslations } from 'next-intl'
+import { MessageContent, Message as OpenAiMessage, TextContentBlock } from "openai/resources/beta/threads/messages";
 import React, { useEffect, useRef, useState } from 'react'
 
 import ChatInput from '@/components/ChatBot/ChatInput'
 import MessageBubble from '@/components/ChatBot/MessageBubble'
+import { getThreadId, getThreadMessages } from '@/utils/OpenAiHelpers'
 
 // Define message type
 interface Message {
@@ -32,30 +34,7 @@ const ChatField: React.FC = () => {
     setQuestion('')
 
     try {
-      let threadId = Cookies.get('thread_id')
-
-      if (!threadId) {
-        console.log('No thread ID found. Fetching from server...')
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/chatWindow/thread/create`,
-          { method: 'POST' }
-        )
-
-        const data = await response.json()
-        threadId = data.thread.id
-
-        if (!threadId) {
-          throw new Error('Thread ID is null')
-        }
-
-        // Set the thread ID in a cookie
-        Cookies.set('thread_id', threadId, { expires: 1 }) // 1 day TTL
-        console.log('New thread ID set in cookie:', threadId)
-      } else {
-        console.log('Thread ID exists in cookie:', threadId)
-        // Extend TTL for the cookie
-        Cookies.set('thread_id', threadId, { expires: 1 }) // Reset TTL to 1 day
-      }
+      const threadId = await getThreadId()
 
       // Proceed with sending the message
       const messageResponse = await fetch(
@@ -107,7 +86,6 @@ const ChatField: React.FC = () => {
           .replaceAll('}{', '};{')
           .split(';')
           .forEach((msg) => {
-            console.log("msg", msg)
             const eventData = JSON.parse(msg)
 
             // Handle different event types
@@ -146,6 +124,35 @@ const ChatField: React.FC = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [responses])
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const threadId = Cookies.get('thread_id')
+
+        if (!threadId) {
+          return
+        }
+
+        const threadMessages = await getThreadMessages(threadId)
+        if (Array.isArray(threadMessages)) {
+          // Process the valid messages
+          const messages = threadMessages.map((msg: OpenAiMessage) => ({
+            text: msg.content
+              .filter((content: MessageContent) => content.type === 'text')
+              .map((content: TextContentBlock) => content.text?.value)
+              .join(' '),
+            isUser: msg.role === 'user',
+          }));
+          setResponses(messages);
+        }
+      } catch (error) {
+        console.error('Error fetching messages from API:', error)
+      }
+    }
+
+    fetchMessages()
+  }, [])
 
   return (
     <Box

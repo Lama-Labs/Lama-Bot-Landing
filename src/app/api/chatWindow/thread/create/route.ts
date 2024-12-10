@@ -8,7 +8,7 @@ export async function POST() {
 
     return Response.json(thread);
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return Response.json({ error: e });
   }
 }
