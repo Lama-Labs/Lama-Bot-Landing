@@ -1,4 +1,4 @@
-import { Paper, Typography } from '@mui/material'
+import { Box, Paper, Typography } from '@mui/material'
 import React from 'react'
 
 interface MessageBubbleProps {
@@ -20,6 +20,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isUser }) => {
         margin: '4px 0',
       }}
     >
+      {!message && <Box className='loader' />}
       <Typography
         variant='body1'
         sx={{ whiteSpace: 'pre-wrap', color: 'inherit' }}

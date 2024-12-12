@@ -110,7 +110,14 @@
     "error": "An error occurred. Please try again later."
   },
   "chat": {
-    "initialMessage": "How can I help you today?",
-    "inputPlaceholder": "Type your question here..."
+    "initialMessage": "How can I help you today? You can ask me anything about the page or you can choose of the predefined personas.",
+    "inputPlaceholder": "Type your question here...",
+    "initialAssistants": [
+      {
+        "name": "Test Assistant",
+        "initialMessage": "Hello, I am Test Assistant",
+        "id": "asst_iQSzlm53x3ntYW5OKBU63D1I"
+      }
+    ]
   }
 }
