@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
 export async function POST(req: NextRequest) {
-  const { threadId } = await req.json()
-  const assistantId = process.env.ASSISTANT_ID
+  const { threadId, assId } = await req.json()
+  const assistantId = assId || process.env.ASSISTANT_ID
 
   if (!threadId || !assistantId)
     return Response.json(
@@ -23,6 +23,10 @@ export async function POST(req: NextRequest) {
         const run = openai.beta.threads.runs.stream(threadId, {
           assistant_id: assistantId,
         })
+
+        if (!run) {
+          throw new Error('Run is null')
+        }
 
         // Handle the OpenAI stream events
         // TODO implement other outputs than text

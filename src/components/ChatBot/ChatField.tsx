@@ -4,10 +4,15 @@ import { Box, IconButton } from '@mui/material'
 import Cookies from 'js-cookie'
 import { Trash } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { MessageContent, Message as OpenAiMessage, TextContentBlock } from "openai/resources/beta/threads/messages";
+import {
+  MessageContent,
+  Message as OpenAiMessage,
+  TextContentBlock,
+} from 'openai/resources/beta/threads/messages'
 import React, { useEffect, useRef, useState } from 'react'
 
 import ChatInput from '@/components/ChatBot/ChatInput'
+import ExampleAssistantMessageBubble from '@/components/ChatBot/ExampleAssistantMessageBubble'
 import MessageBubble from '@/components/ChatBot/MessageBubble'
 import { getThreadId, getThreadMessages } from '@/utils/OpenAiHelpers'
 
@@ -20,11 +25,10 @@ interface Message {
 const ChatField: React.FC = () => {
   const t = useTranslations('chat')
 
-  const [responses, setResponses] = useState<Message[]>([
-    { text: t('initialMessage'), isUser: false },
-  ])
+  const [responses, setResponses] = useState<Message[]>([])
   const [question, setQuestion] = useState<string>('')
   const [isBusy, setIsBusy] = useState<boolean>(false)
+  const [assistantId, setAssistantId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
   const handleSend = async () => {
@@ -64,7 +68,7 @@ const ChatField: React.FC = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ threadId }),
+          body: JSON.stringify({ threadId, assId: assistantId }),
         }
       )
 
@@ -129,31 +133,41 @@ const ChatField: React.FC = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
+        const assistantId = Cookies.get('assistant_id')
+        const responsesToSet: Message[] = []
+        if (assistantId) {
+          setAssistantId(assistantId)
+          const initialText = t
+            .raw('initialAssistants')
+            .find(
+              (assistant: { id: string }) => assistant.id === assistantId
+            )?.initialMessage
+          responsesToSet.push({ text: initialText, isUser: false })
+        }
+
         const threadId = Cookies.get('thread_id')
-
-        if (!threadId) {
-          return
+        if (threadId) {
+          const threadMessages = await getThreadMessages(threadId)
+          if (Array.isArray(threadMessages)) {
+            // Process the valid messages
+            const messages = threadMessages.map((msg: OpenAiMessage) => ({
+              text: msg.content
+                .filter((content: MessageContent) => content.type === 'text')
+                .map((content: TextContentBlock) => content.text?.value)
+                .join(' '),
+              isUser: msg.role === 'user',
+            }))
+            responsesToSet.push(...messages)
+          }
         }
-
-        const threadMessages = await getThreadMessages(threadId)
-        if (Array.isArray(threadMessages)) {
-          // Process the valid messages
-          const messages = threadMessages.map((msg: OpenAiMessage) => ({
-            text: msg.content
-              .filter((content: MessageContent) => content.type === 'text')
-              .map((content: TextContentBlock) => content.text?.value)
-              .join(' '),
-            isUser: msg.role === 'user',
-          }));
-          setResponses(messages);
-        }
+        setResponses(responsesToSet)
       } catch (error) {
         console.error('Error fetching messages from API:', error)
       }
     }
-
     fetchMessages()
-  }, [])
+  }, []) //eslint-disable-line
+  // disabled eslint because we only want to run this once
 
   return (
     <Box
@@ -182,7 +196,9 @@ const ChatField: React.FC = () => {
         <IconButton
           onClick={() => {
             Cookies.remove('thread_id')
-            setResponses([{ text: t('initialMessage'), isUser: false }])
+            Cookies.remove('assistant_id')
+            setResponses([])
+            setAssistantId(null)
           }}
           sx={{
             color: 'chat.scrollbarThumb',
@@ -224,6 +240,15 @@ const ChatField: React.FC = () => {
           },
         }}
       >
+        {/* show initial assistant selector */}
+        {!assistantId && (
+          <ExampleAssistantMessageBubble
+            setAssistantId={setAssistantId}
+            setResponses={setResponses}
+          />
+        )}
+
+        {/* show assistant messages */}
         {responses.map((msg, index) => (
           <MessageBubble key={index} message={msg.text} isUser={msg.isUser} />
         ))}

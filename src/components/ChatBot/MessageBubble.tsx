@@ -20,7 +20,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isUser }) => {
         margin: '4px 0',
       }}
     >
-      {!message && <Box className="loader" />}
+      {!message && <Box className='loader' />}
       <Typography
         variant='body1'
         sx={{ whiteSpace: 'pre-wrap', color: 'inherit' }}
