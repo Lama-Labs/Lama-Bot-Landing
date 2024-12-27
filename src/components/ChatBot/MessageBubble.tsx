@@ -1,6 +1,8 @@
 import { Box, Paper, Typography } from '@mui/material'
 import React from 'react'
 
+import MarkdownParser from '@/utils/MarkdownParser'
+
 interface MessageBubbleProps {
   message: string
   isUser: boolean
@@ -25,7 +27,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isUser }) => {
         variant='body1'
         sx={{ whiteSpace: 'pre-wrap', color: 'inherit' }}
       >
-        {message}
+        <MarkdownParser text={message} />
       </Typography>
     </Paper>
   )
