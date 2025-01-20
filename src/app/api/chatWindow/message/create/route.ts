@@ -2,7 +2,8 @@ import { NextRequest } from 'next/server'
 import OpenAI from 'openai'
 
 export async function POST(req: NextRequest) {
-  const { question: message, threadId } = await req.json()
+  const { question, threadId, lang } = await req.json()
+  const message = `[${lang}] ${question}`
 
   if (!threadId || !message)
     return Response.json({ error: 'Invalid message' }, { status: 400 })

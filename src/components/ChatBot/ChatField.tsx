@@ -3,7 +3,7 @@
 import { Box, IconButton } from '@mui/material'
 import Cookies from 'js-cookie'
 import { Trash } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import {
   MessageContent,
   Message as OpenAiMessage,
@@ -24,6 +24,7 @@ interface Message {
 
 const ChatField: React.FC = () => {
   const t = useTranslations('chat')
+  const lang = useLocale()
 
   const [responses, setResponses] = useState<Message[]>([])
   const [question, setQuestion] = useState<string>('')
@@ -49,7 +50,7 @@ const ChatField: React.FC = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ question, threadId }),
+          body: JSON.stringify({ question, threadId, lang }),
         }
       )
 

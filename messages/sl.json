@@ -114,9 +114,9 @@
     "inputPlaceholder": "Vnesite svoje vprašanje tukaj...",
     "initialAssistants": [
       {
-        "name": "Testni assistent",
-        "initialMessage": "Zdravo, sem Testni asistent",
-        "id": "asst_iQSzlm53x3ntYW5OKBU63D1I"
+        "name": "Fitnes assistent",
+        "initialMessage": "Pozdravljeni! Potrebujete informacije o vadbenih programih, možnostih članstva ali delovnem času? Tu sem, da pomagam!",
+        "id": "asst_EFxvhDNtArBx9phA28fJpO8X"
       }
     ]
   }
