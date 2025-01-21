@@ -1,13 +1,34 @@
 'use client'
 
 import { Box, Fab, Fade } from '@mui/material'
-import { MessageCircle } from 'lucide-react'
 import React, { useState } from 'react'
 
+import ChatBotAnimation from '@/components/ChatBot/ChatBotAnimation'
 import ChatField from '@/components/ChatBot/ChatField'
 
 const FloatingActionButton: React.FC = () => {
   const [isChatOpen, setIsChatOpen] = useState(false)
+  const [animationStarted, setAnimationStarted] = useState(false)
+
+  const restartAnimation = () => {
+    if (!animationStarted && !isChatOpen) {
+      const svgAnimation = document.getElementById(
+        'svgAnimation'
+      ) as unknown as SVGAnimateElement
+      if (svgAnimation) {
+        svgAnimation.beginElement()
+        setAnimationStarted(true)
+        setTimeout(() => {
+          setAnimationStarted(false)
+        }, 3000)
+      }
+    }
+  }
+
+  const handleChatOpen = () => {
+    setIsChatOpen(!isChatOpen)
+    restartAnimation()
+  }
 
   return (
     <>
@@ -28,14 +49,22 @@ const FloatingActionButton: React.FC = () => {
       <Fab
         color='primary'
         aria-label='open chat'
-        onClick={() => setIsChatOpen(!isChatOpen)}
+        onClick={handleChatOpen}
         sx={{
           position: 'fixed',
           bottom: { xs: 10, md: 20 },
           right: { xs: 10, md: 20 },
         }}
+        onMouseEnter={restartAnimation}
       >
-        <MessageCircle />
+        <Box
+          sx={{
+            transform: 'scale(0.025) translate(0, -100px)',
+            pointerEvents: 'none',
+          }}
+        >
+          <ChatBotAnimation />
+        </Box>
       </Fab>
     </>
   )

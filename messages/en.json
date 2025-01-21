@@ -31,7 +31,7 @@
         {
           "title": "Real-Time Page Context",
           "description": "The assistant utilizes the content of the page your visitor is viewing to deliver precise assistance.",
-          "icon": "bookMarked"
+          "icon": "refresh"
         }
       ]
     },
@@ -114,9 +114,9 @@
     "inputPlaceholder": "Type your question here...",
     "initialAssistants": [
       {
-        "name": "Test Assistant",
-        "initialMessage": "Hello, I am Test Assistant",
-        "id": "asst_iQSzlm53x3ntYW5OKBU63D1I"
+        "name": "Fitness Assistant",
+        "initialMessage": "Hello! Need details on our workout programs, membership options, or opening hours? I’m here to help!",
+        "id": "asst_EFxvhDNtArBx9phA28fJpO8X"
       }
     ]
   }

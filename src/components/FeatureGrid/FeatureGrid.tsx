@@ -19,6 +19,9 @@ const FeatureGrid = () => {
         <Typography variant='h2' sx={{ alignSelf: 'center' }}>
           {t('title')}
         </Typography>
+        <Typography variant='body1' sx={{ alignSelf: 'center' }}>
+          {t('subtitle')}
+        </Typography>
         <Grid container spacing={3}>
           {/*todo: fix*/}
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any*/}

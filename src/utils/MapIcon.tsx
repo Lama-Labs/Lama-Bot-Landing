@@ -1,6 +1,6 @@
 import {
-  BookMarked,
   BotMessageSquare,
+  RefreshCcw,
   Sparkles,
   Trophy,
   Unplug,
@@ -14,7 +14,7 @@ type IconMap = {
 
 // Define the mapping between strings and icons
 const iconMap: IconMap = {
-  bookMarked: BookMarked,
+  refresh: RefreshCcw,
   botMessageSquare: BotMessageSquare,
   sparkles: Sparkles,
   trophy: Trophy,
