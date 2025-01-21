@@ -118,6 +118,7 @@
         "initialMessage": "Hello! Need details on our workout programs, membership options, or opening hours? I’m here to help!",
         "id": "asst_EFxvhDNtArBx9phA28fJpO8X"
       }
-    ]
+    ],
+    "errorMessage": "I'm experiencing some technical difficulties. Please try again later."
   }
 }

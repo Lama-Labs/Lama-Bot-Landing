@@ -1,6 +1,8 @@
 import { Box, Paper, Typography } from '@mui/material'
 import React from 'react'
 
+import MarkdownParser from '@/utils/MarkdownParser'
+
 interface MessageBubbleProps {
   message: string
   isUser: boolean
@@ -26,7 +28,11 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isUser }) => {
         sx={{ whiteSpace: 'pre-wrap', color: 'inherit' }}
       >
         {/* regex to hide locale and source in message */}
-        {message.replace(/^\[\w+]\s*/, '').replace(/【\d+:\d+†.+】/g, '')}
+        <MarkdownParser
+          text={message
+            .replace(/^\[\w+]\s*/, '')
+            .replace(/【\d+:\d+†.+】/g, '')}
+        />
       </Typography>
     </Paper>
   )
