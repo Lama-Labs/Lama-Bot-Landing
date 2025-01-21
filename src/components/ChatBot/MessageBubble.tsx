@@ -28,7 +28,11 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isUser }) => {
         sx={{ whiteSpace: 'pre-wrap', color: 'inherit' }}
       >
         {/* regex to hide locale and source in message */}
-        <MarkdownParser text={message.replace(/^\[\w+]\s*/, '').replace(/【\d+:\d+†.+】/g, '')} />
+        <MarkdownParser
+          text={message
+            .replace(/^\[\w+]\s*/, '')
+            .replace(/【\d+:\d+†.+】/g, '')}
+        />
       </Typography>
     </Paper>
   )

@@ -118,6 +118,7 @@
         "initialMessage": "Pozdravljeni! Sem asistent namišljenega fitnes studia. Potrebujete informacije o vadbenih programih, možnostih članstva ali delovnem času? Tu sem, da pomagam!",
         "id": "asst_EFxvhDNtArBx9phA28fJpO8X"
       }
-    ]
+    ],
+    "errorMessage": "Imam nekaj tehničnih težav. Prosim, poskusite znova pozneje."
   }
 }
