@@ -31,7 +31,7 @@
         {
           "title": "Real-Time Page Context",
           "description": "The assistant utilizes the content of the page your visitor is viewing to deliver precise assistance.",
-          "icon": "bookMarked"
+          "icon": "refresh"
         }
       ]
     },

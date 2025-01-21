@@ -14,7 +14,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isUser }) => {
         padding: '8px 12px',
         maxWidth: '80%',
         alignSelf: isUser ? 'flex-end' : 'flex-start',
-        bgcolor: isUser ? 'primary.main' : 'chat.bubble', // Use primary color from theme
+        bgcolor: isUser ? 'chat.bubble' : 'primary.main', // Use primary color from theme
         color: isUser ? 'chat.userText' : 'chat.botText', // Adjust text color for contrast
         borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
         margin: '4px 0',

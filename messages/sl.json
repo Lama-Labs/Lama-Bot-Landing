@@ -1,7 +1,7 @@
 {
   "navbar": {
     "home": "Domov",
-    "about": "O nas",
+    "about": "Storitev",
     "contact": "Kontakt",
     "localeSwitcher": {
       "en": "English",
@@ -11,27 +11,27 @@
   "home": {
     "hero": {
       "title": "[BOLD]Lama Bot[/BOLD][BREAK]Revolucija vašega spletnega mesta",
-      "subtitle": "Enostavna integracija asistenta z umetno inteligenco po meri v nekaj minutah - brez znanja programiranja!",
+      "subtitle": "Zagotovite neprekinjeno podporo strankam z umetno inteligenco po meri v nekaj minutah - brez znanja programiranja!",
       "cta": "Začnite zdaj"
     },
     "features": {
-      "title": "Lastnosti",
-      "subtitle": "Zakaj izbrati Lama Bot?",
+      "title": "Kaj omogoča Lama Bot",
+      "subtitle": "Razbremenite ekipo, a hkrati poskrbite za odlično uporabniško izkušnjo ves čas.",
       "items": [
         {
-          "title": "Točni odgovori",
-          "description": "Lama Bot za zagotavljanje natančnih in ustreznih odgovorov uporabi znanje iz vaše poslovne domene in vsebino spletnega mesta.",
+          "title": "Virtualni asistent za pomoč strankam",
+          "description": "Lama Bot prepozna, kaj si obiskovalec ogleduje, in to združi z znanjem o vaših izdelkih in storitvah ter tako zagotavlja natančne, prilagojene odgovore.",
           "icon": "botMessageSquare"
         },
         {
-          "title": "Prilagodljive možnosti integracije",
-          "description": "Uporabite naš vtičnik za WordPress ali ga vgradite s preprosto skripto - združljivo z vsakim spletnim mestom.",
+          "title": "Enostavna namestitev",
+          "description": "Stranke se z Lama Botom pogovarjajo preko pogovornega okna, ki se odpre z gumbom v kotu strani. Vgradimo ga hitro, brez posegov v trenutno stran.",
           "icon": "unplug"
         },
         {
-          "title": "Razumevanje konteksta vprašanja",
-          "description": "Pomočnik za zagotavljanje natančne pomoči uporablja vsebino strani, ki si jo ogleduje vaš obiskovalec.",
-          "icon": "bookMarked"
+          "title": "Podpora strankam 24/7",
+          "description": "Lama Bot na vprašanja odgovarja tudi izven vašega delovnega časa. Stranke lahko kadarkoli dobijo odgovore na svoja vprašanja.",
+          "icon": "refresh"
         }
       ]
     },
@@ -58,7 +58,7 @@
         {
           "pretitle": "Ustrezen kontekst",
           "title": "Prilagojeni odgovori",
-          "content": "Pomočnik za odgovore na uporabnikova vprašanja uporabi vsebino strani, ki si jo ogleduje, kar združi s svojo bazo znanja, da zagotovi ustrezno pomoč.",
+          "content": "Pomočnik za odgovore na uporabnikova vprašanja uporabi vsebino strani, ki si jo ogleduje, kar združi s svojim znanjem o vaših produktih ali storitvah, da zagotovi ustrezno pomoč.",
           "image": "/matte-background.png",
           "icon": "userRoundSearch",
           "messages": [
@@ -115,7 +115,7 @@
     "initialAssistants": [
       {
         "name": "Fitnes assistent",
-        "initialMessage": "Pozdravljeni! Potrebujete informacije o vadbenih programih, možnostih članstva ali delovnem času? Tu sem, da pomagam!",
+        "initialMessage": "Pozdravljeni! Sem asistent namišljenega fitnes studia. Potrebujete informacije o vadbenih programih, možnostih članstva ali delovnem času? Tu sem, da pomagam!",
         "id": "asst_EFxvhDNtArBx9phA28fJpO8X"
       }
     ]

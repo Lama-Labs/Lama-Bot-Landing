@@ -132,6 +132,8 @@ const theme = createTheme({
     },
     body2: {
       fontWeight: 400,
+      fontSize: '18px',
+      color: '#8692a6',
     },
     subtitle1: {
       fontWeight: 400,

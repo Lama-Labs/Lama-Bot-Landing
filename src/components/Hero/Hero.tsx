@@ -111,7 +111,7 @@ const Hero = () => {
             <TextParser text={t('hero.title')} />
           </Typography>
           <Typography
-            variant='body1'
+            variant='body2'
             sx={{
               mb: 4,
               color: 'white',
@@ -167,14 +167,14 @@ const Hero = () => {
           >
             <TextParser text={t('hero.title')} />
           </Typography>
-          <Typography variant='body1' sx={{ mb: 4 }}>
+          <Typography variant='body2' sx={{ mb: 4 }}>
             {t('hero.subtitle')}
           </Typography>
           <Button
             variant='outlined'
             color='primary'
             size='large'
-            onClick={() => scrollTo('contact')}
+            onClick={() => scrollTo('about')}
           >
             {t('hero.cta')}
           </Button>
