@@ -1,7 +1,6 @@
 'use client'
 
 import { Box, Fab, Fade } from '@mui/material'
-
 import React, { useState } from 'react'
 
 import ChatBotAnimation from '@/components/ChatBot/ChatBotAnimation'
