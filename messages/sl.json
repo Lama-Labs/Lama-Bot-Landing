@@ -110,11 +110,11 @@
     "error": "Prišlo je do napake. Poskusite znova pozneje."
   },
   "chat": {
-    "initialMessage": "Kako vam lahko danes pomagam? Vprašate me lahko karkoli o strani ali pa izberete eno od vnaprej prednastavljenih osebnosti.",
+    "initialMessage": "Kako vam lahko danes pomagam? Vprašate me lahko karkoli o Lama Labs storitvah ali pa preizkusite eno od vnaprej prednastavljenih osebnosti.",
     "inputPlaceholder": "Vnesite svoje vprašanje tukaj...",
     "initialAssistants": [
       {
-        "name": "Fitnes assistent",
+        "name": "Fitnes asistent",
         "initialMessage": "Pozdravljeni! Sem asistent namišljenega fitnes studia. Potrebujete informacije o vadbenih programih, možnostih članstva ali delovnem času? Tu sem, da pomagam!",
         "id": "asst_EFxvhDNtArBx9phA28fJpO8X"
       }
