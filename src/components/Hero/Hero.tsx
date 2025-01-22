@@ -13,6 +13,7 @@ import Cookies from 'js-cookie'
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef } from 'react'
 
+import { useChat } from '@/context/ChatContext'
 import TextParser from '@/utils/TextParser'
 
 const Hero = () => {
@@ -23,6 +24,8 @@ const Hero = () => {
   const invisibleClone = useRef<HTMLDivElement>(null)
   const originalBox = useRef<HTMLDivElement>(null)
   const button = useRef<HTMLButtonElement>(null)
+
+  const { isChatOpen, setIsChatOpen } = useChat()
 
   useEffect(() => {
     // Initial gradient position
@@ -58,7 +61,7 @@ const Hero = () => {
     }
   }, [isSmallScreen])
 
-  const scrollTo = (id: string) => {
+  /*const scrollTo = (id: string) => {
     if (Cookies.get('analytics-consent') === 'true') {
       sendGAEvent({
         action: 'click',
@@ -72,6 +75,19 @@ const Hero = () => {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
+  }*/
+
+  const openCTA = () => {
+    if (Cookies.get('analytics-consent') === 'true') {
+      sendGAEvent({
+        action: 'click',
+        category: 'Button',
+        label: 'CTA clicked',
+        value: 'CTA',
+      })
+    }
+
+    setIsChatOpen(!isChatOpen)
   }
 
   return (
@@ -174,7 +190,8 @@ const Hero = () => {
             variant='outlined'
             color='primary'
             size='large'
-            onClick={() => scrollTo('about')}
+            /*onClick={() => scrollTo('about')}*/
+            onClick={openCTA}
           >
             {t('hero.cta')}
           </Button>
