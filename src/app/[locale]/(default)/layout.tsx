@@ -11,6 +11,7 @@ import AnimateOnScroll from '@/components/Animations/AnimateOnScroll'
 import FloatingActionButton from '@/components/ChatBot/FloatingActionButton'
 import Footer from '@/components/Footer/Footer'
 import Navbar from '@/components/Navbar/Navbar'
+import { ChatProvider } from '@/context/ChatContext'
 import { routing } from '@/i18n/routing'
 import theme from '@/theme/theme'
 import '@/globals.css'
@@ -44,12 +45,14 @@ export default async function RootLayout({
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <NextIntlClientProvider messages={messages}>
-              <Navbar />
-              <AnimateOnScroll />
-              {children}
-              <FloatingActionButton />
-              <Footer />
-              <AnalyticsConsentProvider />
+              <ChatProvider>
+                <Navbar />
+                <AnimateOnScroll />
+                {children}
+                <FloatingActionButton />
+                <Footer />
+                <AnalyticsConsentProvider />
+              </ChatProvider>
             </NextIntlClientProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>

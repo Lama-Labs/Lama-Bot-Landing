@@ -5,9 +5,10 @@ import React, { useState } from 'react'
 
 import ChatBotAnimation from '@/components/ChatBot/ChatBotAnimation'
 import ChatField from '@/components/ChatBot/ChatField'
+import { useChat } from '@/context/ChatContext'
 
 const FloatingActionButton: React.FC = () => {
-  const [isChatOpen, setIsChatOpen] = useState(false)
+  const { isChatOpen, setIsChatOpen } = useChat()
   const [animationStarted, setAnimationStarted] = useState(false)
 
   const restartAnimation = () => {

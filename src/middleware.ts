@@ -32,7 +32,16 @@ export async function middleware(req: NextRequest): Promise<NextResponse> {
 
     // If valid, set the cookie with a 1-day expiration
     if (assistantId && isValidAssistant) {
-      response.cookies.set('assistant_id', assistantId, { maxAge: 86400 })
+      response.cookies.set('assistant_id', assistantId, {
+        maxAge: 86400,
+        path: '/',
+        sameSite: 'lax',
+        secure: true,
+      })
+      console.log(
+        'Middleware setting cookie:',
+        response.cookies.get('assistant_id')
+      )
     }
   } catch (error) {
     console.error('Error fetching locale messages:', error)

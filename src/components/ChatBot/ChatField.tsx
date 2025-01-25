@@ -120,7 +120,10 @@ const ChatField: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching from API:', error)
-      // setResponse('Error occurred while fetching the stream.')
+      setResponses((prevResponses) => [
+        ...prevResponses,
+        { text: t('errorMessage'), isUser: false },
+      ])
     } finally {
       setIsBusy(false)
     }

@@ -29,7 +29,7 @@ const MessageBubble: React.FC<InputProps> = ({
         padding: '8px 12px',
         maxWidth: '80%',
         alignSelf: 'flex-start',
-        bgcolor: 'chat.bubble',
+        bgcolor: 'primary.main',
         color: 'chat.botText',
         borderRadius: '16px 16px 16px 4px',
         margin: '4px 0',
@@ -47,7 +47,8 @@ const MessageBubble: React.FC<InputProps> = ({
           <Chip
             label={assistant.name}
             key={assistant.id}
-            sx={{ m: 1 }}
+            sx={{ m: 1, color: 'white' }}
+            color='secondary'
             clickable
             onClick={() => {
               // set assistantId to the selected assistant
