@@ -22,8 +22,12 @@ import SnackbarComponent, {
   SnackbarHandle,
 } from '@/components/Snackbar/SnackbarComponent'
 
-const ContactForm = () => {
-  const t = useTranslations('home.cta')
+interface FormProps {
+  type?: 'contact' | 'unsubscribe'
+}
+
+const ContactForm = ({ type = 'contact' }: FormProps) => {
+  const t = useTranslations(type === 'contact' ? 'home.cta' : 'unsubscribe')
 
   const [email, setEmail] = useState<string>('')
   const [isValidEmail, setIsValidEmail] = useState<boolean>(true)
@@ -80,12 +84,16 @@ const ContactForm = () => {
         sendGAEvent({
           action: 'click',
           category: 'Button',
-          label: 'Send email clicked',
+          label:
+            type === 'contact' ? 'Send email clicked' : 'Unsubscribe clicked',
           value: email,
         })
       }
 
-      await sendToPushBullet('email', email)
+      await sendToPushBullet(
+        type === 'contact' ? 'email' : 'Unsubscribe',
+        email
+      )
 
       // clear captcha
       recaptchaRef.current.reset()
@@ -104,7 +112,7 @@ const ContactForm = () => {
     <Container maxWidth='xl' id='contact'>
       <SnackbarComponent ref={snackbarRef} />
       <Box
-        className='animate animate-bottom'
+        className={type === 'contact' ? 'animate animate-bottom' : undefined}
         sx={{
           display: 'flex',
           flexDirection: 'column',

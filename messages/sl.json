@@ -109,6 +109,13 @@
     "success": "Sporočilo uspešno poslano!",
     "error": "Prišlo je do napake. Poskusite znova pozneje."
   },
+  "unsubscribe": {
+    "title": "Odjavite se od naših e-poštnih sporočil",
+    "subtitle": "Vpišite svoj e-poštni naslov in odstranili ga bomo iz seznama naših kontaktnih naslovov.",
+    "errors": {
+      "email": "Prosimo, vnesite veljaven e-poštni naslov."
+    }
+  },
   "chat": {
     "initialMessage": "Kako vam lahko danes pomagam? Vprašate me lahko karkoli o strani ali pa izberete eno od vnaprej prednastavljenih osebnosti.",
     "inputPlaceholder": "Vnesite svoje vprašanje tukaj...",
