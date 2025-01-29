@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 import createMiddleware from 'next-intl/middleware'
 
 import { routing } from './i18n/routing'
-import { handleAssistantLogic } from './middleware/assistants-middleware';
+import { handleAssistantLogic } from './middleware/assistants-middleware'
 // import { handleImageRequests } from './middleware/email-middleware';
 
 // Initialize next-intl middleware
@@ -14,7 +14,7 @@ export async function middleware(req: NextRequest): Promise<NextResponse> {
   const response = intlMiddleware(req)
 
   // Handle assistant logic
-  await handleAssistantLogic(req, response);
+  await handleAssistantLogic(req, response)
 
   // Handle image requests
   // handleImageRequests(req);
@@ -24,5 +24,5 @@ export async function middleware(req: NextRequest): Promise<NextResponse> {
 
 // Apply middleware only to internationalized paths
 export const config = {
-  matcher: ['/', '/(en|sl)/:path*', ], // Matches only localized paths
+  matcher: ['/', '/(en|sl)/:path*'], // Matches only localized paths
 }
