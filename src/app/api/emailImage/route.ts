@@ -33,5 +33,6 @@ export async function GET(req: NextRequest) {
   });
 }
 
-export const revalidate = 0
+export const revalidate = 60; // Cache for 60 seconds (1 minute)
+
 
