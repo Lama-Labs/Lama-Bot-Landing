@@ -127,7 +127,7 @@
       },
       {
         "name": "Wristway ergonomski asistent",
-        "initialMessage": "Pozdravljeni! Sem asistent za Wristway, edinstveno ergonomsko oporo za zapestje, ki izboljšuje udobje in produktivnost. Potrebujete informacije o lastnostih, uporabi ali prednostih Wristway izdelkov? Tu sem, da vam pomagam!",
+        "initialMessage": "Pozdravljeni! Sem asistent za Wristway, edinstven ergonomski pripomoček za zapestje, ki izboljšuje udobje in produktivnost. Potrebujete informacije o lastnostih, uporabi ali prednostih Wristway izdelkov? Tu sem, da vam pomagam!",
         "id": "asst_wTLWhkdxcyy7vgy7FpfZFVB3"
       }
     ],
