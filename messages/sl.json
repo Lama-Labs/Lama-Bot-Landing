@@ -129,6 +129,11 @@
         "name": "Wristway ergonomski asistent",
         "initialMessage": "Pozdravljeni! Sem asistent za Wristway, edinstveno ergonomsko oporo za zapestje, ki izboljšuje udobje in produktivnost. Potrebujete informacije o lastnostih, uporabi ali prednostih Wristway izdelkov? Tu sem, da vam pomagam!",
         "id": "asst_wTLWhkdxcyy7vgy7FpfZFVB3"
+      },
+      {
+        "name": "Seedbox assistent",
+        "initialMessage": "Pozdravljeni! Sem asistent za Seedbox, domači sledilnik zdravja sperme, ki ga poganja umetna inteligenca. Potrebujete informacije o funkcijah, uporabi ali prednostih Seedboxa? Tu sem, da vam pomagam!",
+        "id": "asst_PN6Oyk3VjTtt0tAsMWt2bVOM"
       }
     ],
     "errorMessage": "Imam nekaj tehničnih težav. Prosim, poskusite znova pozneje."

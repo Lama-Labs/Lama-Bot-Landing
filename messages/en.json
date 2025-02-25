@@ -129,6 +129,11 @@
         "name": "Wristway Ergonomic Assistant",
         "initialMessage": "Hello! I am the assistant for Wristway, a unique ergonomic wrist rest designed to enhance comfort and productivity. Do you need information about Wristway's features, usage, or benefits? I'm here to help!",
         "id": "asst_wTLWhkdxcyy7vgy7FpfZFVB3"
+      },
+      {
+        "name": "Seedbox Assistant",
+        "initialMessage": "Hello! I am the assistant for Seedbox, an AI-powered at-home sperm health tracker. Do you need information about Seedbox’s features, usage, or benefits? I'm here to help!",
+        "id": "asst_PN6Oyk3VjTtt0tAsMWt2bVOM"
       }
     ],
     "errorMessage": "I'm experiencing some technical difficulties. Please try again later."
