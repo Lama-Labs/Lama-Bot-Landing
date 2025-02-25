@@ -11,36 +11,36 @@
   "home": {
     "hero": {
       "title": "[BOLD]Lama Bot[/BOLD][BREAK]Revolutionize Your Website",
-      "subtitle": "Seamless custom AI chatbot integration in minutes — no coding skills required",
+      "subtitle": "Provide continuous customer support with tailor-made AI in minutes — no coding required",
       "cta": "Get Started Now"
     },
     "features": {
-      "title": "Features",
-      "subtitle": "Why Choose Lama Bot?",
+      "title": "What Lama Bot Offers",
+      "subtitle": "Reduce your team's workload while ensuring an excellent user experience at all times.",
       "items": [
         {
-          "title": "On-Point Responses",
-          "description": "Lama Bot leverages your business domain and website's content to provide accurate and relevant answers.",
+          "title": "Virtual Assistant for Customer Support",
+          "description": "Lama Bot recognizes what visitors are viewing and combines that knowledge with information about your products and services to provide accurate, personalized answers.",
           "icon": "botMessageSquare"
         },
         {
-          "title": "Flexible Integration Options",
-          "description": "Use our WordPress plugin or embed via a simple script — compatible with any website.",
+          "title": "Easy Installation",
+          "description": "Customers interact with Lama Bot through a chat window that opens with a button in the corner of the page. It can be integrated quickly without modifying the existing website.",
           "icon": "unplug"
         },
         {
-          "title": "Real-Time Page Context",
-          "description": "The assistant utilizes the content of the page your visitor is viewing to deliver precise assistance.",
+          "title": "24/7 Customer Support",
+          "description": "Lama Bot answers inquiries even outside of your working hours. Customers can get answers to their questions anytime.",
           "icon": "refresh"
         }
       ]
     },
     "paragraphs": {
-      "title": "Introducing Lama Bot custom AI chatbot",
+      "title": "Paragraphs",
       "items": [
         {
-          "pretitle": "24/7 AI Support",
-          "title": "Enhance User Experience",
+          "pretitle": "AI-Powered Support 24/7",
+          "title": "Enhance the User Experience",
           "content": "Provide instant support, answer queries, and engage your visitors like never before with our intelligent AI assistant.",
           "image": "/matte-background.png",
           "icon": "sparkles",
@@ -58,7 +58,7 @@
         {
           "pretitle": "Relevant Context",
           "title": "Personalized Responses",
-          "content": "The assistant utilizes the content of the page your visitor is viewing and combines it with its knowledge base to deliver precise assistance.",
+          "content": "The assistant uses the content of the page the user is viewing and combines it with its knowledge of your products or services to provide appropriate assistance.",
           "image": "/matte-background.png",
           "icon": "userRoundSearch",
           "messages": [
@@ -74,8 +74,8 @@
         },
         {
           "pretitle": "Scalable and Reliable",
-          "title": "State-of-the-Art Technology",
-          "content": "Using the lates AI technology and robust infrastructure to ensure speed and uptime, providing a seamless experience for your visitors.",
+          "title": "Cutting-Edge Technology",
+          "content": "By leveraging the latest AI technology and a robust infrastructure, we ensure fast and reliable performance, providing your visitors with a seamless experience.",
           "image": "/matte-background.png",
           "icon": "trophy",
           "messages": [
