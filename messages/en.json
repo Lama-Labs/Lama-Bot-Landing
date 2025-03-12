@@ -134,6 +134,11 @@
         "name": "Seedbox Assistant",
         "initialMessage": "Hello! I am the assistant for Seedbox, an AI-powered at-home sperm health tracker. Do you need information about Seedbox’s features, usage, or benefits? I'm here to help!",
         "id": "asst_PN6Oyk3VjTtt0tAsMWt2bVOM"
+      },
+      {
+        "name": "Shopify Snowboard Assistant",
+        "initialMessage": "I'm a shopify assistant, who can get live data from a snowboard store. I can help you with the latest snowboard products, their prices, and availability.",
+        "id": "asst_LkSPCqE7g1TcRayQGkoCMSyS"
       }
     ],
     "errorMessage": "I'm experiencing some technical difficulties. Please try again later."
