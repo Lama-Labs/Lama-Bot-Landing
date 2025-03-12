@@ -136,8 +136,8 @@
         "id": "asst_PN6Oyk3VjTtt0tAsMWt2bVOM"
       },
       {
-        "name": "Tool test assistant",
-        "initialMessage": "I'm a shopify test assistant, ask me about our products.",
+        "name": "Shopify Snowboard Assistant",
+        "initialMessage": "I'm a shopify assistant, who can get live data from a snowboard store. I can help you with the latest snowboard products, their prices, and availability.",
         "id": "asst_LkSPCqE7g1TcRayQGkoCMSyS"
       }
     ],
