@@ -5,6 +5,7 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter'
 import { notFound } from 'next/navigation'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
+import type { Metadata } from 'next'
 
 import AnalyticsConsentProvider from '@/components/Analytics/AnalyticsConsentProvider'
 import Footer from '@/components/Footer/Footer'
@@ -13,6 +14,15 @@ import { routing } from '@/i18n/routing'
 import theme from '@/theme/theme'
 
 import '@/globals.css'
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    googleBot: {
+      index: false,
+    },
+  },
+}
 
 export default async function DashboardLayout({
   children,
