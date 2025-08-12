@@ -32,7 +32,7 @@ export async function DELETE(req: NextRequest) {
     const fileInUserStore = documents.some((doc) => doc.id === fileId)
     if (!fileInUserStore) {
       return Response.json(
-        { error: 'File not found in user\'s vector store' },
+        { error: "File not found in user's vector store" },
         { status: 404 }
       )
     }

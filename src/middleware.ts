@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import createMiddleware from 'next-intl/middleware'
 
 import { routing } from './i18n/routing'
+import { handleAssistantLogic } from './middleware/assistants-middleware'
 
 const intlMiddleware = createMiddleware(routing)
 
@@ -18,7 +19,10 @@ export default clerkMiddleware(async (auth, req) => {
   if (req.nextUrl.pathname.startsWith('/api/')) {
     return NextResponse.next()
   }
-  return intlMiddleware(req)
+  // run assistant logic
+  const response = intlMiddleware(req)
+  await handleAssistantLogic(req, response)
+  return response
 })
 
 // Your matcher

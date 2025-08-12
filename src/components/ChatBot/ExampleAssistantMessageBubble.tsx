@@ -1,7 +1,13 @@
 import { Chip, Paper, Typography } from '@mui/material'
-import Cookies from 'js-cookie'
 import { useTranslations } from 'next-intl'
 import React from 'react'
+
+import {
+  appendConversationTurn,
+  clearConversation,
+  clearThreadId,
+  setAssistantId as setAssistantIdCookie,
+} from '@/utils/CookieHelpers'
 
 type Assistant = {
   name: string
@@ -54,8 +60,14 @@ const MessageBubble: React.FC<InputProps> = ({
               // set assistantId to the selected assistant
               setAssistantId(assistant.id)
               setResponses([{ text: assistant.initialMessage, isUser: false }])
-              Cookies.set('assistant_id', assistant.id, { expires: 1 })
-              Cookies.remove('thread_id')
+              setAssistantIdCookie(assistant.id)
+              clearThreadId()
+              clearConversation()
+              // Persist the assistant's initial message so it survives reload
+              appendConversationTurn({
+                role: 'assistant',
+                content: assistant.initialMessage,
+              })
             }}
           />
         )

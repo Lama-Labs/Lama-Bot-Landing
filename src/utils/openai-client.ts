@@ -1,8 +1,10 @@
-import OpenAI from 'openai';
+import { createOpenAI } from '@ai-sdk/openai'
+import OpenAI from 'openai'
 
-// Create a singleton OpenAI client instance
-const openaiClient = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+export const openaiClient = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+})
 
-export default openaiClient; 
+export const openaiVercelClient = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+})

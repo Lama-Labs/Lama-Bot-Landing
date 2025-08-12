@@ -18,12 +18,15 @@ export async function handleAssistantLogic(
     )
 
     if (assistantId && isValidAssistant) {
+      // Reset related chat cookies so the user can start directly with the selected assistant
       res.cookies.set('assistant_id', assistantId, {
         maxAge: 86400, // 1 day
         path: '/',
         sameSite: 'lax',
         secure: true,
       })
+      res.cookies.set('thread_id', '', { maxAge: 0, path: '/' })
+      res.cookies.set('conversation', '', { maxAge: 0, path: '/' })
       console.log('Middleware setting cookie:', res.cookies.get('assistant_id'))
     }
   } catch (error) {

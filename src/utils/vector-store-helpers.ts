@@ -1,7 +1,7 @@
 import { clerkClient } from '@clerk/nextjs/server'
 import { Uploadable } from 'openai/uploads'
 
-import openaiClient from './openai-client'
+import { openaiClient } from './openai-client'
 
 /**
  * Get the vector store ID for a user from their private metadata
@@ -98,6 +98,7 @@ export async function uploadFileToVectorStore(
 
     // Prefer returning the underlying Files API id so downstream delete/list work consistently
     const returnedFileId =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (uploadedFile as any).file_id ?? (uploadedFile as any).id
     console.log(
       `File ${fileName} uploaded to vector store ${vectorStoreId} for user ${userId}`
@@ -117,6 +118,7 @@ export async function uploadFileToVectorStore(
  */
 export async function getUserVectorStoreDocuments(
   userId: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any[] | null> {
   try {
     const vectorStoreId = await getUserVectorStoreId(userId)
@@ -131,12 +133,14 @@ export async function getUserVectorStoreDocuments(
 
     // Map to underlying Files API objects to obtain original filename and unified timestamps
     const documents = await Promise.all(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vsFiles.data.map(async (vsf: any) => {
         const fileId: string = vsf.file_id ?? vsf.id
         let filename: string | undefined = undefined
         let createdAtIso: string = new Date().toISOString()
 
         try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const fileObj: any = await openaiClient.files.retrieve(fileId)
           filename = fileObj.filename
           const createdAtSec: number | undefined =
@@ -144,7 +148,7 @@ export async function getUserVectorStoreDocuments(
           if (typeof createdAtSec === 'number') {
             createdAtIso = new Date(createdAtSec * 1000).toISOString()
           }
-        } catch (e) {
+        } catch (_e) {
           const fallbackSec: number | undefined = vsf.created_at
           if (typeof fallbackSec === 'number') {
             createdAtIso = new Date(fallbackSec * 1000).toISOString()

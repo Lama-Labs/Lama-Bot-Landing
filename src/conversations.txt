@@ -1,0 +1,33 @@
+I.
+
+User:
+"Can you tell me more about your express shipping service?"
+Lama Bot:
+"Absolutely! Our express shipping service ensures your order is delivered within 1-2 business days. It’s available for all products and costs an additional $9.99. If you place your order before 3 PM, we’ll process it the same day. Would you like me to guide you through the checkout process?"
+---
+Uporabnik:
+"Kako deluje storitev hitre dostave?"
+Lama Bot:
+"Naša storitev hitre dostave zagotavlja, da bo Vaše naročilo dostavljeno v 1-2 delovnih dneh. Na voljo je za vse izdelke, cena pa znaša 9,99 €. Če naročilo oddate pred 15. uro, ga bomo obdelali še isti dan. Želite, da Vas vodim skozi postopek oddaje naročila?"
+
+II.
+User:
+"I'm reading about your fitness programs. Which one would you suggest for someone new to working out?"
+Lama Bot:
+"For beginners, our 'Fit Start Program' is a great choice! It includes guided workouts, nutrition tips, and a 4-week plan to help you ease into fitness. Would you like me to help you sign up?"
+---
+Uporabnik:
+"Ogledujem si cenik vaših fitnes programov. Katerega bi priporočili začetniku?"
+Lama Bot:
+"Za začetnike je najprimernejši program 'Fit Start Program'! Vključuje vodene vadbe, nasvete o prehrani in 4-tedenski načrt, ki Vam pomaga postopoma začeti z vadbo. Potrebujete pomoč pri prijavi?"
+
+III.
+User:
+"Does the Alpine Adventure trip include any activities for families?"
+Lama Bot:
+"Yes, the trip includes family-friendly activities like easy hiking trails, a family picnic by a mountain lake, and a guided nature walk tailored for all ages. There’s also a kid-friendly treasure hunt on one of the stops. Would you like more details on these activities?"
+---
+Uporabnik:
+"Ali je Alpska avantura primerna za družine?"
+Lama Bot:
+"Da, potovanje vključuje aktivnosti, primerne za družine, kot so lahke pohodniške poti, družinski piknik ob gorskem jezeru in voden naravoslovni sprehod, prilagojen vsem starostim. Prav tako 2. dan za otroke organiziramo lov na zaklad. Želite več podrobnosti o kateri izmed aktivnostih?"
