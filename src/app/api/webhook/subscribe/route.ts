@@ -6,6 +6,11 @@ import { headers } from 'next/headers'
 import { Webhook } from 'svix'
 
 import { openaiClient } from '@/utils/openai-client'
+import {
+  getClerkUser,
+  mergeUserPrivateMetadata,
+  mergeUserPublicMetadata,
+} from '@/utils/clerk/users'
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET
@@ -88,8 +93,7 @@ export async function POST(req: Request) {
           console.log(`Processing subscription for user: ${userId}`)
 
           // Get the user from Clerk
-          const client = await clerkClient()
-          const user = await client.users.getUser(userId)
+          const user = await getClerkUser(userId)
 
           if (user) {
             // Check if API key and vector store ID already exist in public metadata
@@ -104,26 +108,20 @@ export async function POST(req: Request) {
               const apiKey = `lama-${crypto.randomBytes(32).toString('hex')}`
 
               // Store the API key and vector store ID in Clerk's metadata
-              await client.users.updateUser(userId, {
-                publicMetadata: {
-                  ...user.publicMetadata,
-                  apiKey: apiKey,
-                  apiKeyCreatedAt: new Date().toISOString(),
-                  subscriptionPlan: activePaidItems[0].plan.slug,
-                  subscriptionStatus: 'active',
-                },
+              await mergeUserPublicMetadata(userId, {
+                apiKey: apiKey,
+                apiKeyCreatedAt: new Date().toISOString(),
+                subscriptionPlan: activePaidItems[0].plan.slug,
+                subscriptionStatus: 'active',
               })
 
               console.log(`API key generated and saved for user: ${userId}`)
               console.log(`Subscription plan: ${activePaidItems[0].plan.slug}`)
             } else {
               // Update subscription info even if API key exists
-              await client.users.updateUser(userId, {
-                publicMetadata: {
-                  ...user.publicMetadata,
-                  subscriptionPlan: activePaidItems[0].plan.slug,
-                  subscriptionStatus: 'active',
-                },
+              await mergeUserPublicMetadata(userId, {
+                subscriptionPlan: activePaidItems[0].plan.slug,
+                subscriptionStatus: 'active',
               })
 
               console.log(
@@ -140,11 +138,8 @@ export async function POST(req: Request) {
                   name: vectorStoreName,
                 })
                 vectorStoreId = vectorStore.id
-                await client.users.updateUser(userId, {
-                  privateMetadata: {
-                    ...user.privateMetadata,
-                    vectorStoreId: vectorStoreId,
-                  },
+                await mergeUserPrivateMetadata(userId, {
+                  vectorStoreId: vectorStoreId,
                 })
                 console.log(
                   `Vector store created for user ${userId}: ${vectorStoreId}`

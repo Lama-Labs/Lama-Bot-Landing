@@ -2,13 +2,23 @@ import { auth } from '@clerk/nextjs/server'
 import { NextRequest } from 'next/server'
 
 import { uploadFileToVectorStore } from '@/utils/vector-store-helpers'
+import { hasAnyPlan } from '@/utils/clerk/subscription'
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await auth()
+    const { userId, has } = await auth()
 
     if (!userId) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Ensure user has an eligible paid plan (e.g., basic)
+    const isEligible = hasAnyPlan(has, 'basic')
+    if (!isEligible) {
+      return Response.json(
+        { error: 'Requires an active paid plan' },
+        { status: 403 }
+      )
     }
 
     const formData = await req.formData()

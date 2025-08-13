@@ -4,6 +4,8 @@
 */
 
 import { openaiClient } from '@/utils/openai-client'
+import { clerkClient } from '@clerk/nextjs/server'
+import type { User } from '@clerk/backend'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -30,10 +32,90 @@ export async function OPTIONS() {
   })
 }
 
+async function findUserByApiKey(apiKey: string) {
+  // Paginates through Clerk users to find one with matching publicMetadata.apiKey
+  // Intended for smaller instances. For large instances, consider maintaining a lookup table.
+  const client = await clerkClient()
+  const pageSize = 100
+  let offset = 0
+
+  let foundUser: User | null = null
+  // Safeguard to avoid unbounded scans
+  const maxScans = 20
+  let scans = 0
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const list = await client.users.getUserList({ limit: pageSize, offset })
+    for (const u of list.data) {
+      const storedKey =
+        (u.publicMetadata?.apiKey as string | undefined) ?? undefined
+      if (storedKey && storedKey === apiKey) {
+        foundUser = u
+        break
+      }
+    }
+
+    if (foundUser) break
+
+    const nextOffset = offset + list.data.length
+    if (nextOffset >= list.totalCount) break
+
+    offset = nextOffset
+    scans += 1
+    if (scans >= maxScans) break
+  }
+
+  return foundUser
+}
+
 export async function POST(request: Request) {
   const nowIso = () => new Date().toISOString()
 
   try {
+    // Require Authorization: Bearer <api-key>
+    const authHeader =
+      request.headers.get('authorization') ??
+      request.headers.get('Authorization')
+    const isBearer =
+      typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+    if (!isBearer) {
+      return Response.json(
+        { error: 'Unauthorized: missing Bearer token' },
+        { status: 401, headers: { ...corsHeaders() } }
+      )
+    }
+    const apiKey = authHeader!.slice('Bearer '.length).trim()
+    if (!apiKey) {
+      return Response.json(
+        { error: 'Unauthorized: empty token' },
+        { status: 401, headers: { ...corsHeaders() } }
+      )
+    }
+
+    // Resolve Clerk user by API key stored in public metadata
+    const user = await findUserByApiKey(apiKey)
+    if (!user) {
+      return Response.json(
+        { error: 'Unauthorized: invalid API key' },
+        { status: 401, headers: { ...corsHeaders() } }
+      )
+    }
+
+    const vectorStoreId: string | null =
+      (user.privateMetadata?.vectorStoreId as string | undefined) ?? null
+    // TODO: check that subscription status is always set and implement a webhook to update it
+    const subscriptionStatus: string | undefined = user.publicMetadata
+      ?.subscriptionStatus as string | undefined
+    const hasActiveSubscription = subscriptionStatus === 'active'
+
+    if (!hasActiveSubscription) {
+      return Response.json(
+        { error: 'Unauthorized: user does not have an active subscription' },
+        { status: 401, headers: { ...corsHeaders() } }
+      )
+    }
+
     const { sessionId, message }: ChatRequestBody = await request
       .json()
       .catch(() => ({}))
@@ -47,17 +129,21 @@ export async function POST(request: Request) {
 
     const client = openaiClient
 
+    const tools = vectorStoreId
+      ? [
+          {
+            type: 'file_search' as const,
+            vector_store_ids: [vectorStoreId],
+            max_num_results: 20,
+          },
+        ]
+      : []
+
     const sdkStream = await client.responses.stream({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       input: message,
       instructions: 'You are a helpful assistant.',
-      tools: [
-        {
-          type: 'file_search',
-          vector_store_ids: ['vs_688ab57c9b3c81919f2a5c730f12c06e'],
-          max_num_results: 20,
-        },
-      ],
+      ...(tools.length > 0 ? { tools } : {}),
       tool_choice: 'auto',
       store: true,
       text: { format: { type: 'text' } },

@@ -1,4 +1,4 @@
-import { clerkClient } from '@clerk/nextjs/server'
+import { getClerkUser, mergeUserPrivateMetadata } from './clerk/users'
 import { Uploadable } from 'openai/uploads'
 
 import { openaiClient } from './openai-client'
@@ -10,8 +10,7 @@ export async function getUserVectorStoreId(
   userId: string
 ): Promise<string | null> {
   try {
-    const client = await clerkClient()
-    const user = await client.users.getUser(userId)
+    const user = await getClerkUser(userId)
 
     if (!user) {
       console.error(`User not found: ${userId}`)
@@ -52,16 +51,10 @@ export async function ensureUserVectorStore(
     console.log(`Vector store created for user ${userId}: ${vectorStoreId}`)
 
     // Save the vector store ID to user's private metadata
-    const client = await clerkClient()
-    const user = await client.users.getUser(userId)
-
-    if (user) {
-      await client.users.updateUser(userId, {
-        privateMetadata: {
-          ...user.privateMetadata,
-          vectorStoreId: vectorStoreId,
-        },
-      })
+    const saved = await mergeUserPrivateMetadata(userId, {
+      vectorStoreId: vectorStoreId,
+    })
+    if (saved) {
       console.log(
         `Vector store ID saved to private metadata for user ${userId}: ${vectorStoreId}`
       )
