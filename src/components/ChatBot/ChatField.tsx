@@ -1,22 +1,29 @@
 'use client'
 
+import { readStreamableValue } from '@ai-sdk/rsc'
 import { Box, IconButton } from '@mui/material'
-import Cookies from 'js-cookie'
 import { Trash } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import {
-  MessageContent,
-  Message as OpenAiMessage,
-  TextContentBlock,
-} from 'openai/resources/beta/threads/messages'
 import React, { useEffect, useRef, useState } from 'react'
 
+import { submitChatMessage } from '@/app/actions/chat'
 import ChatInput from '@/components/ChatBot/ChatInput'
 import ExampleAssistantMessageBubble from '@/components/ChatBot/ExampleAssistantMessageBubble'
 import MessageBubble from '@/components/ChatBot/MessageBubble'
-import { getThreadId, getThreadMessages } from '@/utils/OpenAiHelpers'
+import {
+  appendConversationTurn,
+  clearAssistantId as clearAssistantIdCookie,
+  clearConversation,
+  clearThreadId,
+  getAssistantId,
+  getConversation,
+  getThreadId,
+  hasActiveThread,
+  setAssistantId as setAssistantIdCookie,
+  setConversation,
+} from '@/utils/CookieHelpers'
 
-// Define message type
+// Define the message type
 interface Message {
   text: string
   isUser: boolean
@@ -33,95 +40,62 @@ const ChatField: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
   const handleSend = async () => {
+    if (!question.trim()) return
+
     setIsBusy(true)
 
-    // const pageContent = document.body.innerText TODO reimplement
-    setResponses([...responses, { text: question, isUser: true }])
+    // push the user message
+    setResponses((prev) => [...prev, { text: question, isUser: true }])
+    const sent = question
     setQuestion('')
 
     try {
       const threadId = await getThreadId()
 
-      // Proceed with sending the message
-      const messageResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/chatWindow/message/create`,
+      // add a placeholder assistant message
+      const responseEntry: Message = { text: '', isUser: false }
+      setResponses((prev) => [...prev, responseEntry])
+
+      // Build and persist conversation with the new user turn
+      const conversation: ChatTurn[] = appendConversationTurn({
+        role: 'user',
+        content: `[${lang}] ${sent}`,
+      })
+
+      // Refresh assistant cookie TTL on interaction
+      if (assistantId) {
+        setAssistantIdCookie(assistantId)
+      }
+
+      // Call the streaming server action with full conversation
+      const { text } = await submitChatMessage({
+        threadId,
+        message: sent,
+        assistantId,
+        lang,
+        conversation,
+      })
+
+      // Read the stream and progressively update the last assistant message
+      for await (const full of readStreamableValue<string>(text)) {
+        responseEntry.text = full ?? ''
+        // trigger re-render
+        setResponses((prev) => [...prev])
+      }
+
+      // Persist assistant turn when streaming finishes
+      const updated: ChatTurn[] = [
+        ...getConversation(),
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ question, threadId, lang }),
-        }
-      )
-
-      if (!messageResponse.body) {
-        throw new Error('Message is null')
-      }
-
-      // Add an empty entry for the incoming API response
-      const responseEntry = { text: '', isUser: false }
-      setResponses((prevResponses) => [...prevResponses, responseEntry])
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/chatWindow/run/create`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ threadId, assId: assistantId }),
-        }
-      )
-
-      if (!response.body) {
-        throw new Error('Response body is null')
-      }
-
-      const reader = response.body
-        .pipeThrough(new TextDecoderStream())
-        .getReader()
-
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const { value, done } = await reader.read()
-        if (done) break
-
-        // Process each SSE message
-        const eventMessage = value.trim()
-        eventMessage
-          .replaceAll('}{', '};{')
-          .split(';')
-          .forEach((msg) => {
-            const eventData = JSON.parse(msg)
-
-            // Handle different event types
-            switch (eventData.type) {
-              case 'textDelta':
-                responseEntry.text += eventData.text
-                break
-              // case 'toolCallCreated':
-              //   responseEntry.text += `\nTool Call: ${eventData.toolCall.type}\n`;
-              //   break;
-              // case 'codeInterpreterInput':
-              //   responseEntry.text += `\nCode Input: ${eventData.input}\n`;
-              //   break;
-              // case 'codeInterpreterOutputs':
-              //   responseEntry.text += `\nCode Output: ${eventData.outputs
-              //     .map((output) => (output.type === 'logs' ? output.logs : ''))
-              //     .join('\n')}\n`;
-              //   break;
-              default:
-                console.warn('Unhandled event type:', eventData.type)
-            }
-
-            // Update the state with the new response content
-            setResponses((prevResponses) => [...prevResponses])
-          })
-      }
+          role: 'assistant',
+          content: responseEntry.text,
+        },
+      ]
+      setConversation(updated)
     } catch (error) {
       console.error('Error fetching from API:', error)
-      setResponses((prevResponses) => [
-        ...prevResponses,
+      setResponses((prev) => [
+        ...prev,
         { text: t('errorMessage'), isUser: false },
       ])
     } finally {
@@ -135,43 +109,45 @@ const ChatField: React.FC = () => {
   }, [responses])
 
   useEffect(() => {
-    const fetchMessages = async () => {
+    const init = async () => {
       try {
-        const assistantId = Cookies.get('assistant_id')
+        const assistantIdCookie = getAssistantId()
         const responsesToSet: Message[] = []
-        if (assistantId) {
-          setAssistantId(assistantId)
-          const initialText = t
-            .raw('initialAssistants')
-            .find(
-              (assistant: { id: string }) => assistant.id === assistantId
-            )?.initialMessage
-          responsesToSet.push({ text: initialText, isUser: false })
+
+        // Always restore existing conversation, regardless of assistant selection
+        const conv = getConversation()
+        for (const turn of conv) {
+          responsesToSet.push({
+            text: turn.content,
+            isUser: turn.role === 'user',
+          })
         }
 
-        const threadId = Cookies.get('thread_id')
-        if (threadId) {
-          const threadMessages = await getThreadMessages(threadId)
-          if (Array.isArray(threadMessages)) {
-            // Process the valid messages
-            const messages = threadMessages.map((msg: OpenAiMessage) => ({
-              text: msg.content
-                .filter((content: MessageContent) => content.type === 'text')
-                .map((content: TextContentBlock) => content.text?.value)
-                .join(' '),
-              isUser: msg.role === 'user',
-            }))
-            responsesToSet.push(...messages)
+        if (assistantIdCookie) {
+          setAssistantId(assistantIdCookie)
+          // Show initial assistant message only if starting fresh
+          if (!hasActiveThread() && conv.length === 0) {
+            const initialText = t
+              .raw('initialAssistants')
+              .find(
+                (assistant: { id: string }) =>
+                  assistant.id === assistantIdCookie
+              )?.initialMessage
+            if (initialText) {
+              responsesToSet.push({ text: initialText, isUser: false })
+            }
           }
         }
+
         setResponses(responsesToSet)
       } catch (error) {
-        console.error('Error fetching messages from API:', error)
+        console.error('Error initializing chat:', error)
       }
     }
-    fetchMessages()
-  }, []) //eslint-disable-line
-  // disabled eslint because we only want to run this once
+    // run once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    init()
+  }, [t])
 
   return (
     <Box
@@ -189,18 +165,13 @@ const ChatField: React.FC = () => {
         bgcolor: 'chat.background',
       }}
     >
-      {/* Delete button */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 4,
-          right: 4,
-        }}
-      >
+      {/* Clear button */}
+      <Box sx={{ position: 'absolute', top: 4, right: 4 }}>
         <IconButton
           onClick={() => {
-            Cookies.remove('thread_id')
-            Cookies.remove('assistant_id')
+            clearThreadId()
+            clearAssistantIdCookie()
+            clearConversation()
             setResponses([])
             setAssistantId(null)
           }}
@@ -215,7 +186,7 @@ const ChatField: React.FC = () => {
         </IconButton>
       </Box>
 
-      {/* Messages Display */}
+      {/* Messages */}
       <Box
         sx={{
           flex: 1,

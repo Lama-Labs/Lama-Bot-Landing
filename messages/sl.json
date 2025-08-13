@@ -109,6 +109,60 @@
     "success": "Sporočilo uspešno poslano!",
     "error": "Prišlo je do napake. Poskusite znova pozneje."
   },
+  "dashboard": {
+    "account": {
+      "title": "Moj račun",
+      "subtitle": "Upravljajte naročnino in podatke o zaračunavanju za svoj račun ({email})"
+    },
+    "subscription": {
+      "manageLink": "Upravljajte svojo naročnino"
+    },
+    "signedOut": {
+      "title": "Pridobite svojega pomočnika z umetno inteligenco",
+      "subtitle": "Ustvarite račun, da pridobite svojega pomočnika z umetno inteligenco."
+    },
+    "apiKey": {
+      "title": "Vaš API ključ",
+      "tooltip": "Ta API ključ uporabite za overjanje svojih zahtevkov do Lama Bot API-ja. Hranite ga varno in ga ne delite javno.",
+      "messages": {
+        "noSubscription": "Ni aktivne naročnine. Izberite paket, da pridobite API ključ.",
+        "noKey": "API ključa ni mogoče najti",
+        "fetchError": "Napaka pri pridobivanju API ključa",
+        "subscribeToGetKey": "API ključa ni mogoče najti. Naročite se na plačljiv paket, da pridobite svoj API ključ."
+      }
+    },
+    "files": {
+      "title": "Vaše datoteke",
+      "tooltip": "Upravljajte naložene datoteke, ki se uporabljajo za učenje vašega AI klepetalnega robota. Lahko nalagate dokumente, jih brišete in spremljate stanje obdelave.",
+      "counters": {
+        "uploaded": "{count, plural, =0 {0 naloženih datotek} one {# naložena datoteka} two {# naloženi datoteki} few {# naložene datoteke} other {# naloženih datotek}}"
+      },
+      "buttons": {
+        "uploadFile": "Naloži datoteko",
+        "upload": "Naloži"
+      },
+      "status": {
+        "uploading": "Nalaganje…"
+      },
+      "empty": {
+        "title": "Še ni naloženih datotek",
+        "subtitle": "Naložite svoj prvi dokument, da začnete učiti svojega AI klepetalnega robota"
+      },
+      "actions": {
+        "delete": "Izbriši"
+      },
+      "tooltips": {
+        "uploadedOn": "Naloženo dne {date}"
+      },
+      "errors": {
+        "noVectorStore": "Vektorske shrambe ni mogoče najti. Naložite prvo datoteko, da jo ustvarite.",
+        "fetchDocuments": "Napaka pri pridobivanju dokumentov",
+        "uploadFile": "Napaka pri nalaganju datoteke",
+        "deleteFile": "Napaka pri brisanju datoteke"
+      },
+      "documentLabel": "Dokument"
+    }
+  },
   "unsubscribe": {
     "title": "Odjavite se od naših e-poštnih sporočil",
     "subtitle": "Vpišite svoj e-poštni naslov in odstranili ga bomo iz seznama naših kontaktnih naslovov.",
@@ -129,11 +183,6 @@
         "name": "Wristway ergonomski asistent",
         "initialMessage": "Pozdravljeni! Sem asistent za Wristway, edinstven ergonomski pripomoček za zapestje, ki izboljšuje udobje in produktivnost. Potrebujete informacije o lastnostih, uporabi ali prednostih Wristway izdelkov? Tu sem, da vam pomagam!",
         "id": "asst_wTLWhkdxcyy7vgy7FpfZFVB3"
-      },
-      {
-        "name": "Seedbox assistent",
-        "initialMessage": "Pozdravljeni! Sem asistent za Seedbox, domači sledilnik zdravja sperme, ki ga poganja umetna inteligenca. Potrebujete informacije o funkcijah, uporabi ali prednostih Seedboxa? Tu sem, da vam pomagam!",
-        "id": "asst_PN6Oyk3VjTtt0tAsMWt2bVOM"
       }
     ],
     "errorMessage": "Imam nekaj tehničnih težav. Prosim, poskusite znova pozneje."

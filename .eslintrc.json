@@ -6,8 +6,17 @@
     "plugin:import/errors",
     "plugin:import/warnings"
   ],
-  "plugins": ["import"],
+  "plugins": ["import", "@typescript-eslint"],
   "rules": {
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "varsIgnorePattern": "^_",
+        "argsIgnorePattern": "^_",
+        "caughtErrors": "all",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
     "import/order": [
       "error",
       {
