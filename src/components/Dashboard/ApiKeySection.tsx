@@ -11,8 +11,8 @@ import {
   Typography,
 } from '@mui/material'
 import { Check, Copy, Info } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { useCallback, useEffect, useState } from 'react'
 
 interface ApiKeyResponse {
   message: string
@@ -33,13 +33,7 @@ const ApiKeySection = ({ user, isLoaded }: ApiKeySectionProps) => {
   const [copied, setCopied] = useState(false)
   const t = useTranslations('dashboard.apiKey')
 
-  useEffect(() => {
-    if (user && isLoaded) {
-      fetchApiKey()
-    }
-  }, [user, isLoaded])
-
-  const fetchApiKey = async () => {
+  const fetchApiKey = useCallback(async () => {
     setLoading(true)
     try {
       const response = await fetch('/api/api-key')
@@ -60,7 +54,7 @@ const ApiKeySection = ({ user, isLoaded }: ApiKeySectionProps) => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [t])
 
   const handleCopyApiKey = async () => {
     if (apiKeyData?.apiKey) {
@@ -81,6 +75,12 @@ const ApiKeySection = ({ user, isLoaded }: ApiKeySectionProps) => {
     const chunks = rest.match(/.{1,8}/g) || []
     return `${prefix}${chunks.join('-')}`
   }
+
+  useEffect(() => {
+    if (user && isLoaded) {
+      fetchApiKey()
+    }
+  }, [user, isLoaded, fetchApiKey])
 
   return (
     <Box>

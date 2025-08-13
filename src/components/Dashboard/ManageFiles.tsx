@@ -15,8 +15,8 @@ import {
   Typography,
 } from '@mui/material'
 import { FileText, Info, Trash2, Upload } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
-import { useTranslations, useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface Document {
   id: string
@@ -41,11 +41,7 @@ const ManageFiles = () => {
   const t = useTranslations('dashboard.files')
   const locale = useLocale()
 
-  useEffect(() => {
-    fetchDocuments()
-  }, [])
-
-  const fetchDocuments = async () => {
+  const fetchDocuments = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -65,7 +61,7 @@ const ManageFiles = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [t])
 
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -145,6 +141,10 @@ const ManageFiles = () => {
       minute: '2-digit',
     })
   }
+
+  useEffect(() => {
+    fetchDocuments()
+  }, [fetchDocuments])
 
   return (
     <Box>

@@ -3,9 +3,10 @@
   and streams back only the text deltas as a plain text stream. Uses the official `openai` SDK.
 */
 
-import { openaiClient } from '@/utils/openai-client'
-import { clerkClient } from '@clerk/nextjs/server'
 import type { User } from '@clerk/backend'
+import { clerkClient } from '@clerk/nextjs/server'
+
+import { openaiClient } from '@/utils/openai-client'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

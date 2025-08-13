@@ -1,16 +1,15 @@
 import crypto from 'crypto'
 
-import { clerkClient } from '@clerk/nextjs/server'
 import type { WebhookEvent } from '@clerk/nextjs/server'
 import { headers } from 'next/headers'
 import { Webhook } from 'svix'
 
-import { openaiClient } from '@/utils/openai-client'
 import {
   getClerkUser,
   mergeUserPrivateMetadata,
   mergeUserPublicMetadata,
 } from '@/utils/clerk/users'
+import { openaiClient } from '@/utils/openai-client'
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET

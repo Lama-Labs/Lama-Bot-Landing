@@ -1,8 +1,8 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextRequest } from 'next/server'
 
-import { uploadFileToVectorStore } from '@/utils/vector-store-helpers'
 import { hasAnyPlan } from '@/utils/clerk/subscription'
+import { uploadFileToVectorStore } from '@/utils/vector-store-helpers'
 
 export async function POST(req: NextRequest) {
   try {

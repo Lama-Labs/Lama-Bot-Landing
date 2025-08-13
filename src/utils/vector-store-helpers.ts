@@ -1,6 +1,6 @@
-import { getClerkUser, mergeUserPrivateMetadata } from './clerk/users'
 import { Uploadable } from 'openai/uploads'
 
+import { getClerkUser, mergeUserPrivateMetadata } from './clerk/users'
 import { openaiClient } from './openai-client'
 
 /**
