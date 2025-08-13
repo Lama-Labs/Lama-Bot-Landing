@@ -109,6 +109,60 @@
     "success": "Message sent successfully!",
     "error": "An error occurred. Please try again later."
   },
+  "dashboard": {
+    "account": {
+      "title": "My Account",
+      "subtitle": "Manage subscription and billing details for your account ({email})"
+    },
+    "subscription": {
+      "manageLink": "Manage your subscription"
+    },
+    "signedOut": {
+      "title": "Get your own AI-powered chatbot",
+      "subtitle": "Sign up for an account to get your own AI-powered chatbot."
+    },
+    "apiKey": {
+      "title": "Your API Key",
+      "tooltip": "Use this API key to authenticate your requests to the Lama Bot API. Keep it secure and don't share it publicly.",
+      "messages": {
+        "noSubscription": "No active subscription. Select a plan to get the API key.",
+        "noKey": "No API key found",
+        "fetchError": "Error fetching API key",
+        "subscribeToGetKey": "No API key found. Subscribe to a paid plan to get your API key."
+      }
+    },
+    "files": {
+      "title": "Your Files",
+      "tooltip": "Manage your uploaded files that are used to train your AI chatbot. You can upload documents, delete them, and monitor their processing status.",
+      "counters": {
+        "uploaded": "{count, plural, =0 {0 files uploaded} one {# file uploaded} other {# files uploaded}}"
+      },
+      "buttons": {
+        "uploadFile": "Upload File",
+        "upload": "Upload"
+      },
+      "status": {
+        "uploading": "Uploading…"
+      },
+      "empty": {
+        "title": "No files uploaded yet",
+        "subtitle": "Upload your first document to start training your AI chatbot"
+      },
+      "actions": {
+        "delete": "Delete"
+      },
+      "tooltips": {
+        "uploadedOn": "Uploaded on {date}"
+      },
+      "errors": {
+        "noVectorStore": "No vector store found. Upload your first file to create one.",
+        "fetchDocuments": "Error fetching documents",
+        "uploadFile": "Error uploading file",
+        "deleteFile": "Error deleting file"
+      },
+      "documentLabel": "Document"
+    }
+  },
   "unsubscribe": {
     "title": "Unsubscribe from Our Emails",
     "subtitle": "Enter your email address and we will remove it from our contact list.",

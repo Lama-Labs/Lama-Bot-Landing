@@ -14,7 +14,7 @@ import {
   Skeleton,
   Typography,
 } from '@mui/material'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 import ApiKeySection from '@/components/Dashboard/ApiKeySection'
 import ManageFiles from '@/components/Dashboard/ManageFiles'
@@ -23,6 +23,7 @@ const Dashboard = () => {
   const { user, isLoaded } = useUser()
   const locale = useLocale()
   const { openUserProfile } = useClerk()
+  const t = useTranslations('dashboard')
 
   if (!isLoaded) {
     return (
@@ -51,11 +52,12 @@ const Dashboard = () => {
             {user && (
               <>
                 <Typography variant='h4' gutterBottom>
-                  My Account
+                  {t('account.title')}
                 </Typography>
                 <Typography variant='body1' color='text.secondary'>
-                  Manage subscription and billing details for your account (
-                  {user?.emailAddresses[0]?.emailAddress})
+                  {t('account.subtitle', {
+                    email: user?.emailAddresses[0]?.emailAddress ?? '',
+                  })}
                 </Typography>
 
                 {/* File Management Section */}
@@ -79,7 +81,7 @@ const Dashboard = () => {
                   }}
                   onClick={() => openUserProfile()}
                 >
-                  Manage your subscription
+                  {t('subscription.manageLink')}
                 </Typography>
               </>
             )}
@@ -93,10 +95,10 @@ const Dashboard = () => {
             sx={{ p: 4, display: 'flex', flexDirection: 'column', gap: 2 }}
           >
             <Typography variant='h4' gutterBottom>
-              Get your own AI-powered chatbot
+              {t('signedOut.title')}
             </Typography>
             <Typography variant='body1' color='text.secondary'>
-              Sign up for an account to get your own AI-powered chatbot.
+              {t('signedOut.subtitle')}
             </Typography>
             <PricingTable newSubscriptionRedirectUrl={`/${locale}/dashboard`} />
           </Paper>

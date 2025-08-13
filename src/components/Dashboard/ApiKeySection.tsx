@@ -12,6 +12,7 @@ import {
 } from '@mui/material'
 import { Check, Copy, Info } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 interface ApiKeyResponse {
   message: string
@@ -30,6 +31,7 @@ const ApiKeySection = ({ user, isLoaded }: ApiKeySectionProps) => {
   const [apiKeyData, setApiKeyData] = useState<ApiKeyResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
+  const t = useTranslations('dashboard.apiKey')
 
   useEffect(() => {
     if (user && isLoaded) {
@@ -46,15 +48,15 @@ const ApiKeySection = ({ user, isLoaded }: ApiKeySectionProps) => {
         setApiKeyData(data)
       } else if (response.status === 403) {
         setApiKeyData({
-          message: 'No active subscription. Select a plan to get the API key.',
+          message: t('messages.noSubscription'),
           apiKey: null,
         })
       } else {
-        setApiKeyData({ message: 'No API key found', apiKey: null })
+        setApiKeyData({ message: t('messages.noKey'), apiKey: null })
       }
     } catch (error) {
       console.error('Error fetching API key:', error)
-      setApiKeyData({ message: 'Error fetching API key', apiKey: null })
+      setApiKeyData({ message: t('messages.fetchError'), apiKey: null })
     } finally {
       setLoading(false)
     }
@@ -83,12 +85,8 @@ const ApiKeySection = ({ user, isLoaded }: ApiKeySectionProps) => {
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
-        <Typography variant='h6'>Your API Key</Typography>
-        <Tooltip
-          title="Use this API key to authenticate your requests to the Lama Bot API. Keep it secure and don't share it publicly."
-          placement='right'
-          arrow
-        >
+        <Typography variant='h6'>{t('title')}</Typography>
+        <Tooltip title={t('tooltip')} placement='right' arrow>
           <IconButton size='small' sx={{ color: 'primary.main' }}>
             <Info size={16} />
           </IconButton>
@@ -149,8 +147,7 @@ const ApiKeySection = ({ user, isLoaded }: ApiKeySectionProps) => {
           color='primary'
           sx={{ display: 'flex', alignItems: 'center' }}
         >
-          {apiKeyData?.message ||
-            'No API key found. Subscribe to a paid plan to get your API key.'}
+          {apiKeyData?.message || t('messages.subscribeToGetKey')}
         </Alert>
       )}
     </Box>

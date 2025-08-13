@@ -16,6 +16,7 @@ import {
 } from '@mui/material'
 import { FileText, Info, Trash2, Upload } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface Document {
   id: string
@@ -37,6 +38,8 @@ const ManageFiles = () => {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const t = useTranslations('dashboard.files')
+  const locale = useLocale()
 
   useEffect(() => {
     fetchDocuments()
@@ -52,13 +55,13 @@ const ManageFiles = () => {
         setDocuments(data.documents || [])
       } else if (response.status === 404) {
         setDocuments([])
-        setError('No vector store found. Upload your first file to create one.')
+        setError(t('errors.noVectorStore'))
       } else {
-        setError('Error fetching documents')
+        setError(t('errors.fetchDocuments'))
       }
     } catch (error) {
       console.error('Error fetching documents:', error)
-      setError('Error fetching documents')
+      setError(t('errors.fetchDocuments'))
     } finally {
       setLoading(false)
     }
@@ -92,11 +95,11 @@ const ManageFiles = () => {
         ])
       } else {
         const errorText = await response.text()
-        setError(errorText || 'Error uploading file')
+        setError(errorText || t('errors.uploadFile'))
       }
     } catch (error) {
       console.error('Error uploading file:', error)
-      setError('Error uploading file')
+      setError(t('errors.uploadFile'))
     } finally {
       setUploading(false)
       if (fileInputRef.current) {
@@ -121,11 +124,11 @@ const ManageFiles = () => {
         setDocuments((prev) => prev.filter((doc) => doc.id !== fileId))
       } else {
         const errorText = await response.text()
-        setError(errorText || 'Error deleting file')
+        setError(errorText || t('errors.deleteFile'))
       }
     } catch (error) {
       console.error('Error deleting file:', error)
-      setError('Error deleting file')
+      setError(t('errors.deleteFile'))
     } finally {
       setDeleting(null)
     }
@@ -134,7 +137,7 @@ const ManageFiles = () => {
   // Removed status icons and chips for a leaner UI
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString(locale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -146,12 +149,8 @@ const ManageFiles = () => {
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
-        <Typography variant='h6'>Your Files</Typography>
-        <Tooltip
-          title='Manage your uploaded files that are used to train your AI chatbot. You can upload documents, delete them, and monitor their processing status.'
-          placement='right'
-          arrow
-        >
+        <Typography variant='h6'>{t('title')}</Typography>
+        <Tooltip title={t('tooltip')} placement='right' arrow>
           <IconButton size='small' sx={{ color: 'primary.main' }}>
             <Info size={16} />
           </IconButton>
@@ -173,7 +172,7 @@ const ManageFiles = () => {
         }}
       >
         <Typography variant='body2' color='text.secondary'>
-          {documents.length} file{documents.length !== 1 ? 's' : ''} uploaded
+          {t('counters.uploaded', { count: documents.length })}
         </Typography>
         <>
           <input
@@ -191,7 +190,7 @@ const ManageFiles = () => {
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
           >
-            {uploading ? 'Uploading…' : 'Upload File'}
+            {uploading ? t('status.uploading') : t('buttons.uploadFile')}
           </Button>
         </>
       </Box>
@@ -218,10 +217,10 @@ const ManageFiles = () => {
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant='subtitle1' color='text.primary'>
-              No files uploaded yet
+              {t('empty.title')}
             </Typography>
             <Typography variant='body2' color='text.secondary'>
-              Upload your first document to start training your AI chatbot
+              {t('empty.subtitle')}
             </Typography>
           </Box>
           <Button
@@ -231,7 +230,7 @@ const ManageFiles = () => {
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
           >
-            Upload
+            {t('buttons.upload')}
           </Button>
         </Paper>
       ) : (
@@ -251,7 +250,7 @@ const ManageFiles = () => {
                     onClick={() => handleDelete(doc.id)}
                     disabled={doc.status !== 'completed'}
                   >
-                    Delete
+                    {t('actions.delete')}
                   </LoadingButton>
                 }
               >
@@ -259,10 +258,13 @@ const ManageFiles = () => {
                   primary={
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Typography variant='body1'>
-                        {doc.name || `Document ${doc.id.slice(-8)}`}
+                        {doc.name ||
+                          `${t('documentLabel')} ${doc.id.slice(-8)}`}
                       </Typography>
                       <Tooltip
-                        title={`Uploaded on ${formatDate(doc.createdAt)}`}
+                        title={t('tooltips.uploadedOn', {
+                          date: formatDate(doc.createdAt),
+                        })}
                         arrow
                       >
                         <IconButton

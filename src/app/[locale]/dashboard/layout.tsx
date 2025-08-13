@@ -41,7 +41,7 @@ export default async function DashboardLayout({
 
   return (
     <ClerkProvider afterSignOutUrl={`/${locale}/dashboard`}>
-      <html lang='en'>
+      <html lang={locale}>
         <body
           style={{
             minHeight: '100vh',
