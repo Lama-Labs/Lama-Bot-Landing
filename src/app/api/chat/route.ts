@@ -7,13 +7,16 @@ import type { User } from '@clerk/backend'
 import { clerkClient } from '@clerk/nextjs/server'
 
 import { openaiClient } from '@/utils/openai-client'
+import { ResponseCompletedEvent } from 'openai/resources/responses/responses.mjs'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 type ChatRequestBody = {
   sessionId?: string
-  message?: string
+  websiteContent?: string
+  userMessage?: string
+  conversation?: { role: 'user' | 'assistant'; content: string }[]
 }
 
 function corsHeaders() {
@@ -117,13 +120,13 @@ export async function POST(request: Request) {
       )
     }
 
-    const { sessionId, message }: ChatRequestBody = await request
+    const { sessionId, websiteContent, userMessage, conversation }: ChatRequestBody = await request
       .json()
       .catch(() => ({}))
 
-    if (!message) {
+    if (!websiteContent || !userMessage) {
       return Response.json(
-        { error: 'Missing required field: message' },
+        { error: 'Missing required fields: websiteContent and/or userMessage' },
         { status: 400, headers: { ...corsHeaders() } }
       )
     }
@@ -132,23 +135,45 @@ export async function POST(request: Request) {
 
     const tools = vectorStoreId
       ? [
-          {
-            type: 'file_search' as const,
-            vector_store_ids: [vectorStoreId],
-            max_num_results: 20,
-          },
-        ]
+        {
+          type: 'file_search' as const,
+          vector_store_ids: [vectorStoreId],
+          max_num_results: 20,
+        },
+      ]
+      : []
+
+    const history = Array.isArray(conversation)
+      ? conversation.map((m) => ({
+        role: m.role,
+        content: [{ type: 'input_text' as const, text: m.content }],
+      }))
       : []
 
     const sdkStream = await client.responses.stream({
       model: 'gpt-4o-mini',
-      input: message,
+      input: [
+        {
+          role: 'user',
+          content: [
+            { type: 'input_text', text: `Website context:\n${websiteContent}` },
+          ],
+        },
+        ...history,
+        {
+          role: 'user',
+          content: [
+            { type: 'input_text', text: `User question:\n${userMessage}` },
+          ],
+        },
+      ],
       instructions: 'You are a helpful assistant.',
       ...(tools.length > 0 ? { tools } : {}),
       tool_choice: 'auto',
       store: true,
       text: { format: { type: 'text' } },
-      prompt_cache_key: sessionId,
+      // vector store id is used as a cache key for the prompt because each tenant has a different vector store
+      prompt_cache_key: vectorStoreId ?? undefined,
     })
 
     const stream = new ReadableStream<Uint8Array>({
@@ -173,14 +198,15 @@ export async function POST(request: Request) {
           }
         })
 
-        sdkStream.on('response.completed', (event: unknown) => {
+        sdkStream.on('response.completed', (event: ResponseCompletedEvent) => {
           console.log('response.completed', event)
+          console.log('token info', JSON.stringify(event.response.usage, null, 2))
         })
 
         sdkStream.on('end', async () => {
           try {
             await sdkStream.done()
-          } catch {}
+          } catch { }
           controller.close()
           console.log(`[${nowIso()}] Chat request completed successfully`)
         })
@@ -191,13 +217,13 @@ export async function POST(request: Request) {
           })
           try {
             controller.close()
-          } catch {}
+          } catch { }
         })
       },
       cancel() {
         try {
           sdkStream.abort?.()
-        } catch {}
+        } catch { }
       },
     })
 
