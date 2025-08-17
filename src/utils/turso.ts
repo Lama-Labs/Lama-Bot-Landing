@@ -1,3 +1,4 @@
+import 'server-only'
 import { type Client, createClient } from '@libsql/client'
 
 export interface UsageDetails {
@@ -106,10 +107,11 @@ export const saveUsageEvent = async (
 
     await client.execute({
       sql: `INSERT INTO usage_events (
+              id,
               session_id, clerk_user_id, response_id, model,
               input_tokens, input_cached_tokens, output_tokens, output_reasoning_tokens, total_tokens,
               raw_usage_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ) VALUES (lower(hex(randomblob(16))), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         params.sessionId ?? null,
         params.clerkUserId,
