@@ -5,6 +5,7 @@
 
 import type { User } from '@clerk/backend'
 import { clerkClient } from '@clerk/nextjs/server'
+import { after } from 'next/server'
 import type { ResponseCompletedEvent } from 'openai/resources/responses/responses.mjs'
 
 import { openaiClient } from '@/utils/openai-client'
@@ -12,6 +13,7 @@ import { saveUsageEvent } from '@/utils/turso'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+export const maxDuration = 300
 
 type ChatRequestBody = {
   sessionId?: string
@@ -223,26 +225,28 @@ export async function POST(request: Request) {
         sdkStream.on(
           'response.completed',
           async (event: ResponseCompletedEvent) => {
-            try {
-              console.log('response.completed', event)
-              console.log(
-                'token info',
-                JSON.stringify(event.response.usage, null, 2)
-              )
-              const responseId = event.response.id
-              const model = event.response.model
-              await saveUsageEvent({
-                sessionId: sessionId ?? null,
-                clerkUserId: user.id,
-                usage: event.response.usage,
-                responseId,
-                model,
-              })
-            } catch (e) {
-              console.error('failed to save usage event', {
-                error: (e as Error).message,
-              })
-            }
+            console.log('response.completed', event)
+            console.log(
+              'token info',
+              JSON.stringify(event.response.usage, null, 2)
+            )
+            const responseId = event.response.id
+            const model = event.response.model
+            after(async () => {
+              try {
+                await saveUsageEvent({
+                  sessionId: sessionId ?? null,
+                  clerkUserId: user.id,
+                  usage: event.response.usage,
+                  responseId,
+                  model,
+                })
+              } catch (e) {
+                console.error('failed to save usage event', {
+                  error: (e as Error).message,
+                })
+              }
+            })
           }
         )
 
@@ -273,7 +277,8 @@ export async function POST(request: Request) {
     return new Response(stream, {
       status: 200,
       headers: {
-        'Content-Type': 'text/event-stream; charset=utf-8',
+        // Streaming plain text chunks (not SSE framing), so advertise as text/plain
+        'Content-Type': 'text/plain; charset=utf-8',
         'Cache-Control': 'no-cache, no-transform',
         Connection: 'keep-alive',
         ...corsHeaders(),
