@@ -42,48 +42,50 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
   const openAiTools =
     vectorStoreIds && vectorStoreIds.length > 0
       ? [
-        {
-          type: 'file_search',
-          vector_store_ids: vectorStoreIds,
-          max_num_results: 20,
-        },
-      ]
+          {
+            type: 'file_search',
+            vector_store_ids: vectorStoreIds,
+            max_num_results: 20,
+          },
+        ]
       : undefined
 
   // Create streamable value for text
   const stream = createStreamableValue<string>('')
 
-    ; (async () => {
-      const { textStream } = await streamText({
-        model: openaiVercelClient.responses('gpt-4o-mini'),
-        system: instructions,
-        // Provide full conversation if present; otherwise send only the current user message
-        ...(Array.isArray(conversation) && conversation.length > 0
-          ? { messages: conversation }
-          : { prompt: userMessage }),
+  ;(async () => {
+    const { textStream } = await streamText({
+      model: openaiVercelClient.responses('gpt-4o-mini'),
+      system: instructions,
+      // Provide full conversation if present; otherwise send only the current user message
+      ...(Array.isArray(conversation) && conversation.length > 0
+        ? { messages: conversation }
+        : { prompt: userMessage }),
 
-        // Pass-through OpenAI Responses API fields here:
-        providerOptions: {
-          openai: {
-            store: true,
-            // vector store id is used as a cache key for the prompt because each tenant has a different vector store
-            ...(vectorStoreIds && vectorStoreIds.length > 0 ? { prompt_cache_key: vectorStoreIds[0] } : {}),
-            text: { format: { type: 'text' } },
-            ...(openAiTools
-              ? { tools: openAiTools, tool_choice: 'auto' as const }
-              : {}),
-          },
+      // Pass-through OpenAI Responses API fields here:
+      providerOptions: {
+        openai: {
+          store: true,
+          // vector store id is used as a cache key for the prompt because each tenant has a different vector store
+          ...(vectorStoreIds && vectorStoreIds.length > 0
+            ? { prompt_cache_key: vectorStoreIds[0] }
+            : {}),
+          text: { format: { type: 'text' } },
+          ...(openAiTools
+            ? { tools: openAiTools, tool_choice: 'auto' as const }
+            : {}),
         },
-      })
+      },
+    })
 
-      // Accumulate full text so the client can just render “what we have so far”
-      let acc = ''
-      for await (const chunk of textStream) {
-        acc += chunk
-        stream.update(acc)
-      }
-      stream.done()
-    })()
+    // Accumulate full text so the client can just render “what we have so far”
+    let acc = ''
+    for await (const chunk of textStream) {
+      acc += chunk
+      stream.update(acc)
+    }
+    stream.done()
+  })()
 
   // Return the text stream handle; the client will read it progressively
   return { text: stream.value }
