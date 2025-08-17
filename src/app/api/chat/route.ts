@@ -5,9 +5,10 @@
 
 import type { User } from '@clerk/backend'
 import { clerkClient } from '@clerk/nextjs/server'
+import type { ResponseCompletedEvent } from 'openai/resources/responses/responses.mjs'
 
 import { openaiClient } from '@/utils/openai-client'
-import { ResponseCompletedEvent } from 'openai/resources/responses/responses.mjs'
+import { saveUsageEvent } from '@/utils/turso'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -120,9 +121,12 @@ export async function POST(request: Request) {
       )
     }
 
-    const { sessionId, websiteContent, userMessage, conversation }: ChatRequestBody = await request
-      .json()
-      .catch(() => ({}))
+    const {
+      sessionId,
+      websiteContent,
+      userMessage,
+      conversation,
+    }: ChatRequestBody = await request.json().catch(() => ({}))
 
     if (!websiteContent || !userMessage) {
       return Response.json(
@@ -135,19 +139,19 @@ export async function POST(request: Request) {
 
     const tools = vectorStoreId
       ? [
-        {
-          type: 'file_search' as const,
-          vector_store_ids: [vectorStoreId],
-          max_num_results: 20,
-        },
-      ]
+          {
+            type: 'file_search' as const,
+            vector_store_ids: [vectorStoreId],
+            max_num_results: 20,
+          },
+        ]
       : []
 
     const history = Array.isArray(conversation)
       ? conversation.map((m) => ({
-        role: m.role,
-        content: [{ type: 'input_text' as const, text: m.content }],
-      }))
+          role: m.role,
+          content: [{ type: 'input_text' as const, text: m.content }],
+        }))
       : []
 
     const sdkStream = await client.responses.stream({
@@ -198,15 +202,36 @@ export async function POST(request: Request) {
           }
         })
 
-        sdkStream.on('response.completed', (event: ResponseCompletedEvent) => {
-          console.log('response.completed', event)
-          console.log('token info', JSON.stringify(event.response.usage, null, 2))
-        })
+        sdkStream.on(
+          'response.completed',
+          async (event: ResponseCompletedEvent) => {
+            try {
+              console.log('response.completed', event)
+              console.log(
+                'token info',
+                JSON.stringify(event.response.usage, null, 2)
+              )
+              const responseId = event.response.id
+              const model = event.response.model
+              await saveUsageEvent({
+                sessionId: sessionId ?? null,
+                clerkUserId: user.id,
+                usage: event.response.usage,
+                responseId,
+                model,
+              })
+            } catch (e) {
+              console.error('failed to save usage event', {
+                error: (e as Error).message,
+              })
+            }
+          }
+        )
 
         sdkStream.on('end', async () => {
           try {
             await sdkStream.done()
-          } catch { }
+          } catch {}
           controller.close()
           console.log(`[${nowIso()}] Chat request completed successfully`)
         })
@@ -217,13 +242,13 @@ export async function POST(request: Request) {
           })
           try {
             controller.close()
-          } catch { }
+          } catch {}
         })
       },
       cancel() {
         try {
           sdkStream.abort?.()
-        } catch { }
+        } catch {}
       },
     })
 
