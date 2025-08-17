@@ -147,12 +147,23 @@ export async function POST(request: Request) {
         ]
       : []
 
-    const history = Array.isArray(conversation)
-      ? conversation.map((m) => ({
-          role: m.role,
-          content: [{ type: 'input_text' as const, text: m.content }],
-        }))
-      : []
+    // Mitigation: Do not trust client-provided roles as prior assistant messages.
+    // Serialize the entire prior conversation into a single user message where
+    // the content is one input_text containing lines formatted as
+    // "<role>: <message>\n".
+    const serializedConversationContent = Array.isArray(conversation)
+      ? (() => {
+          const text = conversation
+            .filter(
+              (m) =>
+                (m?.role === 'user' || m?.role === 'assistant') &&
+                typeof m?.content === 'string'
+            )
+            .map((m) => `${m.role}: ${m.content}`)
+            .join('\n')
+          return text.length > 0 ? { type: 'input_text' as const, text } : null
+        })()
+      : null
 
     const sdkStream = await client.responses.stream({
       model: 'gpt-4o-mini',
@@ -163,7 +174,14 @@ export async function POST(request: Request) {
             { type: 'input_text', text: `Website context:\n${websiteContent}` },
           ],
         },
-        ...history,
+        ...(serializedConversationContent
+          ? [
+              {
+                role: 'user' as const,
+                content: [serializedConversationContent],
+              },
+            ]
+          : []),
         {
           role: 'user',
           content: [
