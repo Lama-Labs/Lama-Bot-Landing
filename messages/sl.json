@@ -119,7 +119,9 @@
     },
     "signedOut": {
       "title": "Pridobite svojega pomočnika z umetno inteligenco",
-      "subtitle": "Ustvarite račun, da pridobite svojega pomočnika z umetno inteligenco."
+      "subtitle": "Ustvarite račun, da si zagotovite svojega pomočnika z umetno inteligenco.",
+      "haveAccount": "Imate račun?",
+      "logInButton": "Prijava"
     },
     "apiKey": {
       "title": "Vaš API ključ",

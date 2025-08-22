@@ -105,14 +105,14 @@ const Dashboard = () => {
             <PricingTable newSubscriptionRedirectUrl={`/${locale}/dashboard`} />
             <Divider />
             <Typography variant='body1' align='center'>
-              Have an account?
+              {t('signedOut.haveAccount')}
             </Typography>
             <Button
               variant='contained'
               sx={{ display: 'block', mx: 'auto' }}
               onClick={() => openSignIn()}
             >
-              Log in
+              {t('signedOut.logInButton')}
             </Button>
           </Paper>
         </Container>
