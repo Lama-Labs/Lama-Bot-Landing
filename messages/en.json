@@ -119,7 +119,9 @@
     },
     "signedOut": {
       "title": "Get your own AI-powered chatbot",
-      "subtitle": "Sign up for an account to get your own AI-powered chatbot."
+      "subtitle": "Sign up for an account to get your own AI-powered chatbot.",
+      "haveAccount": "Have an account?",
+      "logInButton": "Log in"
     },
     "apiKey": {
       "title": "Your API Key",
