@@ -93,10 +93,13 @@
     },
     "cta": {
       "title": "Ready to Elevate Your Website Experience?",
-      "subtitle": "Enter your email address and our support will contact you as soon as possible.",
+      "subtitle": "Enter your email address to subscribe to our newsletter and get the latest updates and news.",
       "errors": {
         "email": "Please enter a valid email address."
       }
+    },
+    "pricing": {
+      "title": "Simple Pricing"
     }
   },
   "cookies": {
