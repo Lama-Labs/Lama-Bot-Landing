@@ -5,9 +5,12 @@ import {
   Box,
   Card,
   Container,
+  Divider,
   Link,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import { sendGAEvent } from '@next/third-parties/google'
 import Cookies from 'js-cookie'
@@ -18,6 +21,7 @@ import ReCAPTCHA from 'react-google-recaptcha'
 
 import { sendToPushBullet } from '@/app/api/PushBulletSend'
 import { validateRecaptchaToken } from '@/app/api/validateRecaptcha'
+import PricingSection from '@/components/Pricing/PricingSection'
 import SnackbarComponent, {
   SnackbarHandle,
 } from '@/components/Snackbar/SnackbarComponent'
@@ -108,6 +112,9 @@ const ContactForm = ({ type = 'contact' }: FormProps) => {
     }
   }
 
+  const theme = useTheme()
+  const isMdUp = useMediaQuery(theme.breakpoints.up('md'))
+
   return (
     <Container maxWidth='xl' id='contact'>
       <SnackbarComponent ref={snackbarRef} />
@@ -132,87 +139,109 @@ const ContactForm = ({ type = 'contact' }: FormProps) => {
             },
           }}
         >
+          <Typography variant='h2' textAlign='center' sx={{ pt: 8 }}>
+            {t('title')}
+          </Typography>
           <Box
             display='flex'
-            flexDirection='column'
-            maxWidth='sm'
-            gap={5}
-            sx={{ pt: 8, pb: 20 }}
+            flexDirection={{ xs: 'column', md: 'row' }}
+            gap={6}
+            sx={{ pt: 4, pb: 16 }}
           >
-            <Typography variant='h2'>{t('title')}</Typography>
-            <Typography variant='body1'>{t('subtitle')}</Typography>
+            <Box flex={1} minWidth={0} sx={{ alignContent: 'center', my: 4 }}>
+              <PricingSection />
+            </Box>
+            <Divider
+              orientation={isMdUp ? 'vertical' : 'horizontal'}
+              flexItem
+            />
             <Box
-              component='form'
-              sx={{
-                display: 'flex',
-                alignItems: 'start',
-                width: '100%',
-                gap: 2,
-                pt: 2,
-              }}
+              display='flex'
+              flexDirection='column'
+              justifyContent='center'
+              gap={5}
+              flex={1}
+              maxWidth='sm'
             >
               <Box
-                display='flex'
-                flexDirection='column'
-                gap={0.5}
-                sx={{ width: '100%' }}
+                component='form'
+                sx={{
+                  display: 'flex',
+                  alignItems: 'start',
+                  width: '100%',
+                  gap: 2,
+                  pt: 0,
+                }}
               >
-                <TextField
-                  label='Email'
-                  type='email'
-                  variant='outlined'
-                  fullWidth
-                  size='small'
-                  value={email}
-                  onChange={handleChange}
-                  error={!isValidEmail}
-                  helperText={!isValidEmail ? t('errors.email') : ' '}
-                  sx={{
-                    '& .MuiFormHelperText-root': {
-                      visibility: !isValidEmail ? 'visible' : 'hidden', // Toggle visibility
-                      minHeight: '1.5em', // Fixed height for the helper text
-                    },
-                  }}
-                />
-                <Typography
-                  sx={{ px: 1, py: 0.5 }}
-                  variant='caption'
-                  textAlign='start'
-                  fontSize={10}
+                <Box
+                  display='flex'
+                  flexDirection='column'
+                  gap={0.5}
+                  sx={{ width: '100%' }}
                 >
-                  This site is protected by reCAPTCHA and the Google{' '}
-                  <Link
-                    href='https://policies.google.com/privacy'
-                    target='_blank'
-                    underline='none'
+                  <Typography variant='body1' align='left' sx={{ mb: 3 }}>
+                    {t('subtitle')}
+                  </Typography>
+                  <Box display='flex' gap={2}>
+                    <TextField
+                      label='Email'
+                      type='email'
+                      variant='outlined'
+                      fullWidth
+                      size='small'
+                      value={email}
+                      onChange={handleChange}
+                      error={!isValidEmail}
+                      helperText={!isValidEmail ? t('errors.email') : ' '}
+                      sx={{
+                        '& .MuiFormHelperText-root': {
+                          visibility: !isValidEmail ? 'visible' : 'hidden',
+                          minHeight: '1.5em',
+                        },
+                      }}
+                    />
+                    <LoadingButton
+                      type='submit'
+                      variant='contained'
+                      color='primary'
+                      loading={sending}
+                      onClick={handleClick}
+                      sx={{ height: '40px' }}
+                    >
+                      <Send />
+                    </LoadingButton>
+                  </Box>
+                  <Typography
+                    sx={{ px: 1, py: 0.5 }}
+                    variant='caption'
+                    textAlign='start'
+                    fontSize={10}
                   >
-                    Privacy Policy
-                  </Link>{' '}
-                  and{' '}
-                  <Link
-                    href='https://policies.google.com/terms'
-                    target='_blank'
-                    underline='none'
-                  >
-                    Terms of Service
-                  </Link>{' '}
-                  apply.
-                </Typography>
+                    This site is protected by reCAPTCHA and the Google{' '}
+                    <Link
+                      href='https://policies.google.com/privacy'
+                      target='_blank'
+                      underline='none'
+                    >
+                      Privacy Policy
+                    </Link>{' '}
+                    and{' '}
+                    <Link
+                      href='https://policies.google.com/terms'
+                      target='_blank'
+                      underline='none'
+                    >
+                      Terms of Service
+                    </Link>{' '}
+                    apply.
+                  </Typography>
+                </Box>
+                <ReCAPTCHA
+                  ref={recaptchaRef as RefObject<ReCAPTCHA>}
+                  size='invisible'
+                  sitekey={process.env.NEXT_PUBLIC_CAPTCHA_SITEKEY || 'aaa'}
+                />
               </Box>
-              <LoadingButton
-                type='submit'
-                variant='contained'
-                color='primary'
-                loading={sending}
-                onClick={handleClick}
-              >
-                <Send />
-              </LoadingButton>
-              <ReCAPTCHA
-                ref={recaptchaRef as RefObject<ReCAPTCHA>}
-                size='invisible'
-                sitekey={process.env.NEXT_PUBLIC_CAPTCHA_SITEKEY || 'aaa'}
-              />
             </Box>
           </Box>
         </Card>

@@ -93,10 +93,13 @@
     },
     "cta": {
       "title": "Ste pripravljeni izboljšati izkušnjo svojega spletnega mesta?",
-      "subtitle": "Vpišite svoj e-poštni naslov in naša podpora vas bo kontaktirala v najkrajšem možnem času.",
+      "subtitle": "Vpišite svoj e-poštni naslov in se prijavite na naše e-novice, da boste obveščeni o novostih in posodobitvah.",
       "errors": {
         "email": "Prosimo, vnesite veljaven e-poštni naslov."
       }
+    },
+    "pricing": {
+      "title": "Preprost cenik"
     }
   },
   "cookies": {
