@@ -39,7 +39,7 @@ export default async function RootLayout({
   const messages = await getMessages()
 
   return (
-    <html lang='en'>
+    <html lang={locale}>
       <body>
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>

@@ -232,6 +232,7 @@ export async function POST(request: Request) {
             )
             const responseId = event.response.id
             const model = event.response.model
+            // Using Vercel Fluid Compute (after hook) to save usage event
             after(async () => {
               try {
                 await saveUsageEvent({

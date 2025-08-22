@@ -8,8 +8,10 @@ import {
   useUser,
 } from '@clerk/nextjs'
 import {
+  Button,
   CircularProgress,
   Container,
+  Divider,
   Paper,
   Skeleton,
   Typography,
@@ -22,7 +24,7 @@ import ManageFiles from '@/components/Dashboard/ManageFiles'
 const Dashboard = () => {
   const { user, isLoaded } = useUser()
   const locale = useLocale()
-  const { openUserProfile } = useClerk()
+  const { openUserProfile, openSignIn } = useClerk()
   const t = useTranslations('dashboard')
 
   if (!isLoaded) {
@@ -101,6 +103,17 @@ const Dashboard = () => {
               {t('signedOut.subtitle')}
             </Typography>
             <PricingTable newSubscriptionRedirectUrl={`/${locale}/dashboard`} />
+            <Divider />
+            <Typography variant='body1' align='center'>
+              Have an account?
+            </Typography>
+            <Button
+              variant='contained'
+              sx={{ display: 'block', mx: 'auto' }}
+              onClick={() => openSignIn()}
+            >
+              Log in
+            </Button>
           </Paper>
         </Container>
       </SignedOut>
