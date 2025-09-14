@@ -133,14 +133,15 @@
         "noSubscription": "Ni aktivne naročnine. Izberite paket, da pridobite API ključ.",
         "noKey": "API ključa ni mogoče najti",
         "fetchError": "Napaka pri pridobivanju API ključa",
-        "subscribeToGetKey": "API ključa ni mogoče najti. Naročite se na plačljiv paket, da pridobite svoj API ključ."
+        "subscribeToGetKey": "Aktivnega API ključa ni mogoče najti. Naročite se na plačljiv paket, da pridobite svoj API ključ."
       }
     },
     "files": {
       "title": "Vaše datoteke",
       "tooltip": "Upravljajte naložene datoteke, ki se uporabljajo za učenje vašega AI klepetalnega robota. Lahko nalagate dokumente, jih brišete in spremljate stanje obdelave.",
       "counters": {
-        "uploaded": "{count, plural, =0 {0 naloženih datotek} one {# naložena datoteka} two {# naloženi datoteki} few {# naložene datoteke} other {# naloženih datotek}}"
+        "uploaded": "{count, plural, =0 {naloženih datotek} one {naložena datoteka} other {naloženih datotek}}",
+        "uploadedOld": "{count, plural, =0 {0 naloženih datotek} one {# naložena datoteka} two {# naloženi datoteki} few {# naložene datoteke} other {# naloženih datotek}}"
       },
       "buttons": {
         "uploadFile": "Naloži datoteko",
@@ -157,7 +158,9 @@
         "delete": "Izbriši"
       },
       "tooltips": {
-        "uploadedOn": "Naloženo dne {date}"
+        "uploadedOn": "Naloženo dne {date}",
+        "limitReached": "Dosežena omejitev datotek ({limit})",
+        "subscriptionRequired": "Za nalaganje datotek je potrebna aktivna naročnina"
       },
       "errors": {
         "noVectorStore": "Vektorske shrambe ni mogoče najti. Naložite prvo datoteko, da jo ustvarite.",

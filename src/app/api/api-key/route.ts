@@ -1,6 +1,8 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
+import { hasAnyPlan } from '@/utils/clerk/subscription'
+
 export async function GET() {
   console.log('=== API KEY RETRIEVAL REQUEST ===')
   console.log('Timestamp:', new Date().toISOString())
@@ -14,20 +16,19 @@ export async function GET() {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    // Check if the user is a paid user
-    const hasSubscription = has({ plan: 'basic' })
-    if (!hasSubscription) {
-      console.log('User is not a paid user')
-      return new NextResponse('User is not a paid user', { status: 403 })
-    }
-
-    // Get the current user to access public metadata
+    // Get the current user to access public metadata for trial/plan checks
     const user = await currentUser()
-    console.log('User email:', user?.emailAddresses?.[0]?.emailAddress)
 
     if (!user) {
       console.log('User not found in database')
       return new NextResponse('User not found', { status: 404 })
+    }
+
+    // Check if the user is eligible via trial tier or paid plan
+    const hasSubscription = hasAnyPlan(has, 'basic', user.publicMetadata)
+    if (!hasSubscription) {
+      console.log('User is not a paid user')
+      return new NextResponse('User is not a paid user', { status: 403 })
     }
 
     // Get the API key from public metadata (now stored by webhook)
@@ -49,13 +50,6 @@ export async function GET() {
       {
         message: 'API key retrieved successfully',
         apiKey: apiKey,
-        createdAt: user.publicMetadata?.apiKeyCreatedAt as string | undefined,
-        subscriptionPlan: user.publicMetadata?.subscriptionPlan as
-          | string
-          | undefined,
-        subscriptionStatus: user.publicMetadata?.subscriptionStatus as
-          | string
-          | undefined,
       },
       { status: 200 }
     )

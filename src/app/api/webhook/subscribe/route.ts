@@ -76,14 +76,12 @@ export async function POST(req: Request) {
     eventType === 'subscription.created'
   ) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const subscriptionData = evt.data as any
+      const subscriptionData = evt.data
 
       // Check if this is a subscription with paid items
       if (subscriptionData.items && Array.isArray(subscriptionData.items)) {
         const activePaidItems = subscriptionData.items.filter(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (item: any) =>
+          (item) =>
             item.status === 'active' && item.plan && item.plan.amount > 0
         )
 
@@ -96,9 +94,7 @@ export async function POST(req: Request) {
 
           if (user) {
             // Check if API key and vector store ID already exist in public metadata
-            const existingApiKey = user.publicMetadata?.apiKey as
-              | string
-              | undefined
+            const existingApiKey = user.publicMetadata?.apiKey
             const existingVectorStoreId = user.privateMetadata
               ?.vectorStoreId as string | undefined
 
@@ -109,19 +105,16 @@ export async function POST(req: Request) {
               // Store the API key and vector store ID in Clerk's metadata
               await mergeUserPublicMetadata(userId, {
                 apiKey: apiKey,
-                apiKeyCreatedAt: new Date().toISOString(),
-                subscriptionPlan: activePaidItems[0].plan.slug,
-                subscriptionStatus: 'active',
               })
 
               console.log(`API key generated and saved for user: ${userId}`)
               console.log(`Subscription plan: ${activePaidItems[0].plan.slug}`)
             } else {
               // Update subscription info even if API key exists
-              await mergeUserPublicMetadata(userId, {
+              /*await mergeUserPublicMetadata(userId, {
                 subscriptionPlan: activePaidItems[0].plan.slug,
                 subscriptionStatus: 'active',
-              })
+              })*/
 
               console.log(
                 `Subscription updated for user: ${userId} (API key already exists)`
@@ -154,6 +147,15 @@ export async function POST(req: Request) {
                 )
               }
             }
+
+            // Store the document count and total storage limit in Clerk's metadata
+            await mergeUserPublicMetadata(userId, {
+              documentCount: activePaidItems[0].plan.slug === 'basic' ? 10 : 20,
+              totalStorageLimit:
+                (activePaidItems[0].plan.slug === 'basic' ? 10 : 20) *
+                1024 *
+                1024,
+            })
           } else {
             console.error(`User not found: ${userId}`)
           }

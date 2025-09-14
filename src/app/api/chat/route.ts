@@ -4,10 +4,11 @@
 */
 
 import type { User } from '@clerk/backend'
-import { clerkClient } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import { after } from 'next/server'
 import type { ResponseCompletedEvent } from 'openai/resources/responses/responses.mjs'
 
+import { hasAnyPlan } from '@/utils/clerk/subscription'
 import { openaiClient } from '@/utils/openai-client'
 import { saveUsageEvent } from '@/utils/turso'
 
@@ -78,6 +79,7 @@ async function findUserByApiKey(apiKey: string) {
 
 export async function POST(request: Request) {
   const nowIso = () => new Date().toISOString()
+  const { has } = await auth()
 
   try {
     // Require Authorization: Bearer <api-key>
@@ -109,12 +111,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const vectorStoreId: string | null =
-      (user.privateMetadata?.vectorStoreId as string | undefined) ?? null
-    // TODO: check that subscription status is always set and implement a webhook to update it
-    const subscriptionStatus: string | undefined = user.publicMetadata
-      ?.subscriptionStatus as string | undefined
-    const hasActiveSubscription = subscriptionStatus === 'active'
+    const hasActiveSubscription = hasAnyPlan(has, 'basic', user.publicMetadata)
 
     if (!hasActiveSubscription) {
       return Response.json(
@@ -138,6 +135,9 @@ export async function POST(request: Request) {
     }
 
     const client = openaiClient
+
+    const vectorStoreId: string | null =
+      (user.privateMetadata?.vectorStoreId as string | undefined) ?? null
 
     const tools = vectorStoreId
       ? [

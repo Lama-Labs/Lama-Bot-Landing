@@ -4,7 +4,6 @@ import { LoadingButton } from '@mui/lab'
 import {
   Alert,
   Box,
-  Button,
   IconButton,
   List,
   ListItem,
@@ -23,6 +22,7 @@ interface Document {
   status: string
   createdAt: string
   name?: string
+  sizeBytes: number
 }
 
 interface FileUploadResponse {
@@ -40,6 +40,11 @@ const ManageFiles = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const t = useTranslations('dashboard.files')
   const locale = useLocale()
+  const [filesLimit, setFilesLimit] = useState(0)
+  const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null)
+  const [totalStorageLimit, setTotalStorageLimit] = useState<number>(0)
+
+  const isLimitReached = filesLimit > 0 && documents.length >= filesLimit
 
   const fetchDocuments = useCallback(async () => {
     setLoading(true)
@@ -49,6 +54,10 @@ const ManageFiles = () => {
       if (response.ok) {
         const data = await response.json()
         setDocuments(data.documents || [])
+        setFilesLimit(data.filesLimit)
+        setIsSubscribed(Boolean(data.isSubscribed))
+        setTotalStorageLimit(data.totalStorageLimit)
+        console.log(data.totalStorageLimit)
       } else if (response.status === 404) {
         setDocuments([])
         setError(t('errors.noVectorStore'))
@@ -85,13 +94,15 @@ const ManageFiles = () => {
           ...prev,
           {
             id: data.vectorStoreFileId,
+            name: data.fileName,
             status: 'completed',
             createdAt: new Date().toISOString(),
+            sizeBytes: file.size,
           },
         ])
       } else {
-        const errorText = await response.text()
-        setError(errorText || t('errors.uploadFile'))
+        const errorText = await response.json()
+        setError(errorText.error || t('errors.uploadFile'))
       }
     } catch (error) {
       console.error('Error uploading file:', error)
@@ -142,6 +153,25 @@ const ManageFiles = () => {
     })
   }
 
+  const formatBytes = (bytes: number): string => {
+    if (!bytes || bytes <= 0) return '0 B'
+    const units = ['B', 'KB', 'MB', 'GB', 'TB']
+    let value = bytes
+    let unitIndex = 0
+    while (value >= 1024 && unitIndex < units.length - 1) {
+      value /= 1024
+      unitIndex += 1
+    }
+    const rounded =
+      value >= 10 ? Math.round(value) : Math.round(value * 10) / 10
+    return `${rounded} ${units[unitIndex]}`
+  }
+
+  const usedBytes = documents.reduce((sum, doc) => {
+    const size = doc.sizeBytes
+    return sum + size
+  }, 0)
+
   useEffect(() => {
     fetchDocuments()
   }, [fetchDocuments])
@@ -171,9 +201,17 @@ const ManageFiles = () => {
           mb: 2,
         }}
       >
-        <Typography variant='body2' color='text.secondary'>
-          {t('counters.uploaded', { count: documents.length })}
-        </Typography>
+        {loading ? (
+          <Skeleton variant='text' width={160} height={20} />
+        ) : (
+          <Typography variant='body2' color='text.secondary'>
+            {documents.length}/{filesLimit}{' '}
+            {t('counters.uploaded', { count: documents.length })}
+            {totalStorageLimit > 0
+              ? ` • ${formatBytes(Math.max(totalStorageLimit - usedBytes, 0))} available`
+              : ''}
+          </Typography>
+        )}
         <>
           <input
             ref={fileInputRef}
@@ -184,14 +222,31 @@ const ManageFiles = () => {
             onChange={handleFileSelect}
             disabled={uploading}
           />
-          <Button
-            variant='contained'
-            startIcon={<Upload size={16} />}
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
+          <Tooltip
+            title={
+              !isSubscribed
+                ? t('tooltips.subscriptionRequired')
+                : isLimitReached
+                  ? t('tooltips.limitReached', { limit: filesLimit })
+                  : ''
+            }
+            disableHoverListener={!(isLimitReached || !isSubscribed)}
+            disableFocusListener={!(isLimitReached || !isSubscribed)}
+            disableTouchListener={!(isLimitReached || !isSubscribed)}
+            arrow
           >
-            {uploading ? t('status.uploading') : t('buttons.uploadFile')}
-          </Button>
+            <span>
+              <LoadingButton
+                variant='contained'
+                startIcon={<Upload size={16} />}
+                onClick={() => fileInputRef.current?.click()}
+                loading={uploading}
+                disabled={uploading || isLimitReached || !isSubscribed}
+              >
+                {uploading ? t('status.uploading') : t('buttons.uploadFile')}
+              </LoadingButton>
+            </span>
+          </Tooltip>
         </>
       </Box>
 
@@ -223,15 +278,32 @@ const ManageFiles = () => {
               {t('empty.subtitle')}
             </Typography>
           </Box>
-          <Button
-            size='small'
-            variant='contained'
-            startIcon={<Upload size={16} />}
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
+          <Tooltip
+            title={
+              !isSubscribed
+                ? t('tooltips.subscriptionRequired')
+                : isLimitReached
+                  ? t('tooltips.limitReached', { limit: filesLimit })
+                  : ''
+            }
+            disableHoverListener={!(isLimitReached || !isSubscribed)}
+            disableFocusListener={!(isLimitReached || !isSubscribed)}
+            disableTouchListener={!(isLimitReached || !isSubscribed)}
+            arrow
           >
-            {t('buttons.upload')}
-          </Button>
+            <span>
+              <LoadingButton
+                size='small'
+                variant='contained'
+                startIcon={<Upload size={16} />}
+                onClick={() => fileInputRef.current?.click()}
+                loading={uploading}
+                disabled={uploading || isLimitReached || !isSubscribed}
+              >
+                {t('buttons.upload')}
+              </LoadingButton>
+            </span>
+          </Tooltip>
         </Paper>
       ) : (
         <Paper elevation={1}>
@@ -248,7 +320,7 @@ const ManageFiles = () => {
                     size='small'
                     startIcon={<Trash2 size={16} />}
                     onClick={() => handleDelete(doc.id)}
-                    disabled={doc.status !== 'completed'}
+                    disabled={doc.status !== 'completed' || uploading}
                   >
                     {t('actions.delete')}
                   </LoadingButton>
@@ -257,10 +329,15 @@ const ManageFiles = () => {
                 <ListItemText
                   primary={
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant='body1'>
+                      <Typography variant='body1' color='text.secondary'>
                         {doc.name ||
                           `${t('documentLabel')} ${doc.id.slice(-8)}`}
                       </Typography>
+                      {typeof doc.sizeBytes === 'number' && (
+                        <Typography variant='body1'>
+                          {formatBytes(doc.sizeBytes)}
+                        </Typography>
+                      )}
                       <Tooltip
                         title={t('tooltips.uploadedOn', {
                           date: formatDate(doc.createdAt),
