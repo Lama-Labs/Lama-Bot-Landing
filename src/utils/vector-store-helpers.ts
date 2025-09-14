@@ -109,16 +109,13 @@ export async function uploadFileToVectorStore(
 /**
  * Get all documents from a user's vector store
  */
-export async function getUserVectorStoreDocuments(
-  userId: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any[] | null> {
+export async function getUserVectorStoreDocuments(userId: string) {
   try {
     const vectorStoreId = await getUserVectorStoreId(userId)
 
     if (!vectorStoreId) {
       console.error(`No vector store found for user ${userId}`)
-      return null
+      return []
     }
 
     // Get all vector store files
@@ -126,33 +123,23 @@ export async function getUserVectorStoreDocuments(
 
     // Map to underlying Files API objects to obtain original filename and unified timestamps
     const documents = await Promise.all(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      vsFiles.data.map(async (vsf: any) => {
-        const fileId: string = vsf.file_id ?? vsf.id
-        let filename: string | undefined = undefined
-        let createdAtIso: string = new Date().toISOString()
+      vsFiles.data.map(async (vsf) => {
+        const fileId = vsf.id
+        let filename = ''
 
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const fileObj: any = await openaiClient.files.retrieve(fileId)
+          const fileObj = await openaiClient.files.retrieve(fileId)
           filename = fileObj.filename
-          const createdAtSec: number | undefined =
-            fileObj.created_at ?? vsf.created_at
-          if (typeof createdAtSec === 'number') {
-            createdAtIso = new Date(createdAtSec * 1000).toISOString()
-          }
         } catch (_e) {
-          const fallbackSec: number | undefined = vsf.created_at
-          if (typeof fallbackSec === 'number') {
-            createdAtIso = new Date(fallbackSec * 1000).toISOString()
-          }
+          console.error(`Error retrieving file ${fileId} from files API:`, _e)
         }
 
         return {
           id: fileId,
           status: vsf.status,
-          createdAt: createdAtIso,
+          createdAt: vsf.created_at * 1000,
           name: filename,
+          sizeBytes: vsf.usage_bytes,
         }
       })
     )
@@ -166,7 +153,7 @@ export async function getUserVectorStoreDocuments(
       `Error retrieving documents from vector store for user ${userId}:`,
       error
     )
-    return null
+    return []
   }
 }
 

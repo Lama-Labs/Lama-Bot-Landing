@@ -133,14 +133,15 @@
         "noSubscription": "No active subscription. Select a plan to get the API key.",
         "noKey": "No API key found",
         "fetchError": "Error fetching API key",
-        "subscribeToGetKey": "No API key found. Subscribe to a paid plan to get your API key."
+        "subscribeToGetKey": "No active API key found. Subscribe to a paid plan to get your API key."
       }
     },
     "files": {
       "title": "Your Files",
       "tooltip": "Manage your uploaded files that are used to train your AI chatbot. You can upload documents, delete them, and monitor their processing status.",
       "counters": {
-        "uploaded": "{count, plural, =0 {0 files uploaded} one {# file uploaded} other {# files uploaded}}"
+        "uploaded": "{count, plural, =0 {files uploaded} one {file uploaded} other {files uploaded}}",
+        "uploadedOld": "{count, plural, =0 {0 files uploaded} one {# file uploaded} other {# files uploaded}}"
       },
       "buttons": {
         "uploadFile": "Upload File",
@@ -157,7 +158,9 @@
         "delete": "Delete"
       },
       "tooltips": {
-        "uploadedOn": "Uploaded on {date}"
+        "uploadedOn": "Uploaded on {date}",
+        "limitReached": "File limit reached ({limit})",
+        "subscriptionRequired": "Active subscription required to upload files"
       },
       "errors": {
         "noVectorStore": "No vector store found. Upload your first file to create one.",

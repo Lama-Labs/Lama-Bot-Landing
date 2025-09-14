@@ -17,9 +17,6 @@ import { useCallback, useEffect, useState } from 'react'
 interface ApiKeyResponse {
   message: string
   apiKey: string | null
-  createdAt?: string
-  subscriptionPlan?: string
-  subscriptionStatus?: string
 }
 
 interface ApiKeySectionProps {
