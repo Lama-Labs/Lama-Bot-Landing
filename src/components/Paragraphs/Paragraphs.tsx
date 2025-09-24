@@ -27,6 +27,7 @@ const Paragraphs = () => {
             image={paragraph.image}
             icon={paragraph.icon}
             messages={paragraph.messages}
+            reverse={index % 2 === 1}
           />
         ))}
       </Box>

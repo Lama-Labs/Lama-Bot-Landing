@@ -1,4 +1,4 @@
-import { CssBaseline } from '@mui/material'
+import { Box, CssBaseline } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter'
 import type { Metadata } from 'next'
@@ -49,7 +49,9 @@ export default async function RootLayout({
                 <Navbar />
                 <AnimateOnScroll />
                 {children}
-                <FloatingActionButton />
+                <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+                  <FloatingActionButton />
+                </Box>
                 <Footer />
                 <AnalyticsConsentProvider />
               </ChatProvider>

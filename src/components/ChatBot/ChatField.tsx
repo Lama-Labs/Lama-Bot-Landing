@@ -1,15 +1,17 @@
 'use client'
 
 import { readStreamableValue } from '@ai-sdk/rsc'
-import { Box, IconButton } from '@mui/material'
-import { Trash } from 'lucide-react'
+import { Box } from '@mui/material'
 import { useLocale, useTranslations } from 'next-intl'
-import React, { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 
 import { submitChatMessage } from '@/app/actions/chat'
+import ChatHeader from '@/components/ChatBot/ChatHeader'
 import ChatInput from '@/components/ChatBot/ChatInput'
 import ExampleAssistantMessageBubble from '@/components/ChatBot/ExampleAssistantMessageBubble'
 import MessageBubble from '@/components/ChatBot/MessageBubble'
+import SuggestionChips from '@/components/ChatBot/SuggestionChips'
+import { useChat } from '@/context/ChatContext'
 import {
   appendConversationTurn,
   clearAssistantId as clearAssistantIdCookie,
@@ -22,14 +24,20 @@ import {
   setAssistantId as setAssistantIdCookie,
   setConversation,
 } from '@/utils/CookieHelpers'
+import type { ChatTurn } from '@/utils/CookieHelpers'
 
 // Define the message type
 interface Message {
   text: string
   isUser: boolean
+  suggestions?: string[]
 }
 
-const ChatField: React.FC = () => {
+interface ChatFieldProps {
+  embedded?: boolean
+}
+
+const ChatField: React.FC<ChatFieldProps> = ({ embedded = false }) => {
   const t = useTranslations('chat')
   const lang = useLocale()
 
@@ -37,16 +45,19 @@ const ChatField: React.FC = () => {
   const [question, setQuestion] = useState<string>('')
   const [isBusy, setIsBusy] = useState<boolean>(false)
   const [assistantId, setAssistantId] = useState<string | null>(null)
+  const { assistantName, setAssistantName } = useChat()
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null)
 
-  const handleSend = async () => {
-    if (!question.trim()) return
+  const handleSend = async (override?: string) => {
+    const toSend = (override ?? question).trim()
+    if (!toSend) return
 
     setIsBusy(true)
 
     // push the user message
-    setResponses((prev) => [...prev, { text: question, isUser: true }])
-    const sent = question
+    setResponses((prev) => [...prev, { text: toSend, isUser: true }])
+    const sent = toSend
     setQuestion('')
 
     try {
@@ -105,8 +116,15 @@ const ChatField: React.FC = () => {
 
   // Auto-scroll to the latest message
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [responses])
+    if (embedded) {
+      const container = messagesContainerRef.current
+      if (container) {
+        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+      }
+    } else {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [responses, embedded])
 
   useEffect(() => {
     const init = async () => {
@@ -116,27 +134,59 @@ const ChatField: React.FC = () => {
 
         // Always restore existing conversation, regardless of assistant selection
         const conv = getConversation()
-        for (const turn of conv) {
-          responsesToSet.push({
-            text: turn.content,
-            isUser: turn.role === 'user',
-          })
-        }
 
-        if (assistantIdCookie) {
-          setAssistantId(assistantIdCookie)
-          // Show initial assistant message only if starting fresh
-          if (!hasActiveThread() && conv.length === 0) {
-            const initialText = t
+        // Get selected assistant info for attaching suggestions
+        const selectedAssistant = assistantIdCookie
+          ? (t
               .raw('initialAssistants')
               .find(
                 (assistant: { id: string }) =>
                   assistant.id === assistantIdCookie
-              )?.initialMessage
-            if (initialText) {
-              responsesToSet.push({ text: initialText, isUser: false })
-            }
+              ) as
+              | {
+                  initialMessage?: string
+                  suggestions?: string[]
+                  name?: string
+                }
+              | undefined)
+          : undefined
+
+        for (const turn of conv) {
+          const message: Message = {
+            text: turn.content,
+            isUser: turn.role === 'user',
           }
+
+          // Attach suggestions to the initial assistant message if it matches
+          if (
+            !message.isUser &&
+            selectedAssistant?.initialMessage === turn.content &&
+            selectedAssistant.suggestions
+          ) {
+            message.suggestions = selectedAssistant.suggestions
+          }
+
+          responsesToSet.push(message)
+        }
+
+        if (assistantIdCookie) {
+          setAssistantId(assistantIdCookie)
+
+          // Show initial assistant message only if starting fresh
+          if (
+            !hasActiveThread() &&
+            conv.length === 0 &&
+            selectedAssistant?.initialMessage
+          ) {
+            responsesToSet.push({
+              text: selectedAssistant.initialMessage,
+              isUser: false,
+              suggestions: selectedAssistant.suggestions,
+            })
+          }
+
+          // Set header title based on restored assistant
+          if (selectedAssistant?.name) setAssistantName(selectedAssistant.name)
         }
 
         setResponses(responsesToSet)
@@ -147,51 +197,46 @@ const ChatField: React.FC = () => {
     // run once
     // eslint-disable-next-line react-hooks/exhaustive-deps
     init()
-  }, [t])
+  }, [t, setAssistantName])
 
   return (
     <Box
       sx={{
-        position: 'fixed',
-        bottom: 90,
-        right: 16,
-        width: '22em',
-        height: '30em',
+        position: embedded ? 'relative' : 'fixed',
+        bottom: embedded ? undefined : 90,
+        right: embedded ? undefined : 16,
+        width: embedded ? '100%' : '22em',
+        height: embedded ? '100%' : '30em',
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: 3,
-        borderRadius: 2,
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15), 0 2px 6px rgba(0,0,0,0.1)',
+        borderRadius: 4,
         overflow: 'hidden',
         bgcolor: 'chat.background',
+        zIndex: 999,
       }}
     >
-      {/* Clear button */}
-      <Box sx={{ position: 'absolute', top: 4, right: 4 }}>
-        <IconButton
-          onClick={() => {
-            clearThreadId()
-            clearAssistantIdCookie()
-            clearConversation()
-            setResponses([])
-            setAssistantId(null)
-          }}
-          sx={{
-            color: 'chat.scrollbarThumb',
-            '&:hover': {
-              color: 'primary.main',
-            },
-          }}
-        >
-          <Trash size={20} />
-        </IconButton>
-      </Box>
+      {/* Header */}
+      <ChatHeader
+        onReset={() => {
+          clearThreadId()
+          clearAssistantIdCookie()
+          clearConversation()
+          setResponses([])
+          setAssistantId(null)
+          setAssistantName('Lama Bot')
+        }}
+        title={assistantName}
+        icon='🦙'
+      />
 
       {/* Messages */}
       <Box
+        ref={messagesContainerRef}
         sx={{
           flex: 1,
           overflowY: 'auto',
-          padding: 2,
+          padding: 2.5,
           display: 'flex',
           flexDirection: 'column',
           gap: 1,
@@ -225,7 +270,15 @@ const ChatField: React.FC = () => {
 
         {/* show assistant messages */}
         {responses.map((msg, index) => (
-          <MessageBubble key={index} message={msg.text} isUser={msg.isUser} />
+          <Fragment key={index}>
+            <MessageBubble message={msg.text} isUser={msg.isUser} />
+            {!msg.isUser && msg.suggestions && msg.suggestions.length > 0 && (
+              <SuggestionChips
+                suggestions={msg.suggestions}
+                onSelect={(text) => handleSend(text)}
+              />
+            )}
+          </Fragment>
         ))}
         <div ref={messagesEndRef} />
       </Box>

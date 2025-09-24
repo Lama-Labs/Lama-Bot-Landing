@@ -1,6 +1,5 @@
 import { Avatar, Box, Card, Typography } from '@mui/material'
 import { User } from 'lucide-react'
-import React from 'react'
 
 import MessageBubble from '@/components/ChatBot/MessageBubble'
 import MapIcon from '@/utils/MapIcon'
@@ -17,6 +16,7 @@ interface ParagraphProps {
   image: string
   icon: string
   messages: [Message]
+  reverse?: boolean
 }
 
 const Paragraph: React.FC<ParagraphProps> = ({
@@ -25,25 +25,27 @@ const Paragraph: React.FC<ParagraphProps> = ({
   description,
   icon,
   messages = [],
+  reverse = false,
 }) => {
   return (
     <Box
       sx={{
         display: 'flex',
-        flexDirection: { xs: 'column', md: 'row' },
+        flexDirection: { xs: 'column', md: reverse ? 'row-reverse' : 'row' },
         gap: 4,
         alignItems: 'center',
       }}
     >
       <Box
-        className='animate animate-left'
+        className={`animate ${reverse ? 'animate-right' : 'animate-left'}`}
         sx={{
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'start',
           gap: 2,
           width: { xs: '100%', md: '50%' },
-          pr: { xs: 2, md: 10 },
+          pr: { xs: 2, md: reverse ? 0 : 10 },
+          pl: { xs: 2, md: reverse ? 10 : 0 },
         }}
       >
         <Box display='flex' gap={1} alignItems='center'>
@@ -58,7 +60,7 @@ const Paragraph: React.FC<ParagraphProps> = ({
         <Typography variant='body1'>{description}</Typography>
       </Box>
       <Box
-        className='animate animate-right delay-250'
+        className={`animate ${reverse ? 'animate-left' : 'animate-right'} delay-250`}
         sx={{
           flex: 1,
           display: 'flex',

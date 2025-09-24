@@ -12,7 +12,7 @@
     "hero": {
       "title": "[BOLD]Lama Bot[/BOLD][BREAK]Revolutionize Your Website",
       "subtitle": "Provide continuous customer support with tailor-made AI in minutes — no coding required",
-      "cta": "Get Started Now"
+      "cta": "Join the Waitlist"
     },
     "features": {
       "title": "What Lama Bot Offers",
@@ -102,6 +102,9 @@
       "title": "Simple Pricing"
     }
   },
+  "arrowHint": {
+    "label": "Try it out"
+  },
   "cookies": {
     "title": "We Value Your Privacy",
     "message": "We use cookies to enhance your experience and analyze our website’s performance. Please choose whether to accept or reject non-essential cookies.",
@@ -184,18 +187,23 @@
     "initialAssistants": [
       {
         "name": "Fitness Assistant",
-        "initialMessage": "Hello! Need details on our workout programs, membership options, or opening hours? I’m here to help!",
-        "id": "asst_EFxvhDNtArBx9phA28fJpO8X"
+        "initialMessage": "Hello! I am an assistant for a fictional fitness studio. Need details on our workout programs, membership options, or opening hours? I'm here to help!",
+        "id": "asst_EFxvhDNtArBx9phA28fJpO8X",
+        "suggestions": [
+          "What membership plans do you offer?",
+          "Which program is best for beginners?",
+          "What are your opening hours this week?"
+        ]
       },
       {
         "name": "Wristway Ergonomic Assistant",
-        "initialMessage": "Hello! I am the assistant for Wristway, a unique ergonomic wrist rest designed to enhance comfort and productivity. Do you need information about Wristway's features, usage, or benefits? I'm here to help!",
-        "id": "asst_wTLWhkdxcyy7vgy7FpfZFVB3"
-      },
-      {
-        "name": "Shopify Snowboard Assistant",
-        "initialMessage": "I'm a shopify assistant, who can get live data from a snowboard store. I can help you with the latest snowboard products, their prices, and availability.",
-        "id": "asst_LkSPCqE7g1TcRayQGkoCMSyS"
+        "initialMessage": "Hello! I am the assistant for Wristway, a fictional ergonomic wrist rest designed to enhance comfort and productivity. Do you need information about Wristway's features, usage, or benefits? I'm here to help!",
+        "id": "asst_wTLWhkdxcyy7vgy7FpfZFVB3",
+        "suggestions": [
+          "What makes Wristway ergonomic?",
+          "How do I clean and maintain it?",
+          "Is Wristway compatible with my keyboard?"
+        ]
       }
     ],
     "errorMessage": "I'm experiencing some technical difficulties. Please try again later."

@@ -1,7 +1,7 @@
 import { Chip, Paper, Typography } from '@mui/material'
 import { useTranslations } from 'next-intl'
-import React from 'react'
 
+import { useChat } from '@/context/ChatContext'
 import {
   appendConversationTurn,
   clearConversation,
@@ -13,12 +13,15 @@ type Assistant = {
   name: string
   initialMessage: string
   id: string
+  suggestions?: string[]
 }
 
 interface InputProps {
   setAssistantId: React.Dispatch<React.SetStateAction<string | null>>
   setResponses: React.Dispatch<
-    React.SetStateAction<{ text: string; isUser: boolean }[]>
+    React.SetStateAction<
+      { text: string; isUser: boolean; suggestions?: string[] }[]
+    >
   >
 }
 
@@ -27,6 +30,7 @@ const MessageBubble: React.FC<InputProps> = ({
   setResponses,
 }) => {
   const t = useTranslations('chat')
+  const { setAssistantName } = useChat()
 
   return (
     <Paper
@@ -59,10 +63,18 @@ const MessageBubble: React.FC<InputProps> = ({
             onClick={() => {
               // set assistantId to the selected assistant
               setAssistantId(assistant.id)
-              setResponses([{ text: assistant.initialMessage, isUser: false }])
+              setResponses([
+                {
+                  text: assistant.initialMessage,
+                  isUser: false,
+                  suggestions: assistant.suggestions,
+                },
+              ])
               setAssistantIdCookie(assistant.id)
               clearThreadId()
               clearConversation()
+              // update header title via context
+              setAssistantName(assistant.name)
               // Persist the assistant's initial message so it survives reload
               appendConversationTurn({
                 role: 'assistant',
