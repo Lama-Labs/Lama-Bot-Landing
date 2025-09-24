@@ -10,51 +10,34 @@
   },
   "home": {
     "hero": {
-      "title": "[BOLD]Lama Bot[/BOLD][BREAK]Revolucija vašega spletnega mesta",
-      "subtitle": "Zagotovite neprekinjeno podporo strankam z umetno inteligenco po meri v nekaj minutah - brez znanja programiranja!",
+      "title": "[BOLD]Llama Chat[/BOLD][BREAK]Umetna inteligenca za vaše spletno mesto",
+      "subtitle": "Dodajte pomočnika z umetno inteligenco, ki odgovori takoj in uporablja vaše znanje.",
       "cta": "Pridružite se čakalni listi"
     },
     "features": {
-      "title": "Kaj omogoča Lama Bot",
-      "subtitle": "Razbremenite ekipo, a hkrati poskrbite za odlično uporabniško izkušnjo ves čas.",
+      "title": "Kaj omogoča Llama Chat",
+      "subtitle": "Zagotovite obiskovalcem takojšnje, prilagojene odgovore, ki podpirajo hitrejše odločitve in razbremenijo vašo ekipo.",
       "items": [
         {
-          "title": "Virtualni asistent za pomoč strankam",
-          "description": "Lama Bot prepozna, kaj si obiskovalec ogleduje, in to združi z znanjem o vaših izdelkih in storitvah ter tako zagotavlja natančne, prilagojene odgovore.",
+          "title": "Ustrezni odgovori",
+          "description": "Llama Chat prebere stran, ki si jo obiskovalec ogleduje, in odgovarja v kontekstu.",
           "icon": "botMessageSquare"
         },
         {
-          "title": "Enostavna namestitev",
-          "description": "Stranke se z Lama Botom pogovarjajo preko pogovornega okna, ki se odpre z gumbom v kotu strani. Vgradimo ga hitro, brez posegov v trenutno stran.",
-          "icon": "unplug"
+          "title": "Vaše znanje vključeno",
+          "description": "Naložite svoje priročnike, pravilnike, informacije o izdelkih in Llama Chat jih brezhibno združi za natančnejše odgovore.",
+          "icon": "bookOpenCheck"
         },
         {
-          "title": "Podpora strankam 24/7",
-          "description": "Lama Bot na vprašanja odgovarja tudi izven vašega delovnega časa. Stranke lahko kadarkoli dobijo odgovore na svoja vprašanja.",
-          "icon": "refresh"
+          "title": "Namestitev v hipu",
+          "description": "Namestite vtičnik WordPress in prilagodite slog svoji blagovni znamki, brez programiranja.",
+          "icon": "unplug"
         }
       ]
     },
     "paragraphs": {
       "title": "Odstavki",
       "items": [
-        {
-          "pretitle": "Podpora z umetno inteligenco 24/7",
-          "title": "Izboljšajte uporabniško izkušnjo",
-          "content": "Zagotovite takojšnjo podporo, odgovarjajte na vprašanja in pritegnite obiskovalce kot še nikoli prej z našim inteligentnim pomočnikom.",
-          "image": "/matte-background.png",
-          "icon": "sparkles",
-          "messages": [
-            {
-              "text": "Kako deluje storitev hitre dostave?",
-              "isUser": true
-            },
-            {
-              "text": "Naša storitev hitre dostave zagotavlja, da bo Vaše naročilo dostavljeno v 1-2 delovnih dneh. Na voljo je za vse izdelke, cena pa znaša 9,99 €. Če naročilo oddate pred 15. uro, ga bomo obdelali še isti dan. Želite, da Vas vodim skozi postopek oddaje naročila?",
-              "isUser": false
-            }
-          ]
-        },
         {
           "pretitle": "Ustrezen kontekst",
           "title": "Prilagojeni odgovori",
@@ -73,11 +56,11 @@
           ]
         },
         {
-          "pretitle": "Razširljivo in zanesljivo",
-          "title": "Najsodobnejša tehnologija",
-          "content": "Z uporabo najnovejše tehnologije umetne inteligence in robustne infrastrukture zagotavljamo hitro in zanesljivo delovanje ter tako vašim obiskovalcem zagotavljamo brezhibno izkušnjo.",
+          "pretitle": "Podpora z umetno inteligenco 24/7",
+          "title": "Izboljšajte uporabniško izkušnjo",
+          "content": "Zagotovite takojšnjo podporo, odgovarjajte na vprašanja in pritegnite obiskovalce kot še nikoli prej z našim inteligentnim pomočnikom.",
           "image": "/matte-background.png",
-          "icon": "trophy",
+          "icon": "headset",
           "messages": [
             {
               "text": "Ali je Alpska avantura primerna za družine?",
@@ -88,12 +71,29 @@
               "isUser": false
             }
           ]
+        },
+        {
+          "pretitle": "Prodajajte več",
+          "title": "Spremenite obiskovalce v stranke",
+          "content": "Vodite obiskovalce skozi njihovo nakupovalno pot s prilagojenimi priporočili in odgovori. Pomagajte jim sprejeti zaupanja vredne odločitve, ki spremenijo brskanje v prodajo.",
+          "image": "/matte-background.png",
+          "icon": "chartNoAxesCombined",
+          "messages": [
+            {
+              "text": "Kako deluje storitev hitre dostave?",
+              "isUser": true
+            },
+            {
+              "text": "Naša storitev hitre dostave zagotavlja, da bo Vaše naročilo dostavljeno v 1-2 delovnih dneh. Na voljo je za vse izdelke, cena pa znaša 9,99 €. Če naročilo oddate pred 15. uro, ga bomo obdelali še isti dan. Želite, da Vas vodim skozi postopek oddaje naročila?",
+              "isUser": false
+            }
+          ]
         }
       ]
     },
     "cta": {
       "title": "Ste pripravljeni izboljšati izkušnjo svojega spletnega mesta?",
-      "subtitle": "Vpišite svoj e-poštni naslov in se prijavite na naše e-novice, da boste obveščeni o novostih in posodobitvah.",
+      "subtitle": "Vnesite svoj e-poštni naslov, da boste obveščeni o novostih in da boste med prvimi, ki preizkusijo Llama Chat ter pomagajo oblikovati načrt razvoja.",
       "errors": {
         "email": "Prosimo, vnesite veljaven e-poštni naslov."
       }
@@ -131,7 +131,7 @@
     },
     "apiKey": {
       "title": "Vaš API ključ",
-      "tooltip": "Ta API ključ uporabite za overjanje svojih zahtevkov do Lama Bot API-ja. Hranite ga varno in ga ne delite javno.",
+      "tooltip": "Ta API ključ uporabite za overjanje svojih zahtevkov do Llama Chat API-ja. Hranite ga varno in ga ne delite javno.",
       "messages": {
         "noSubscription": "Ni aktivne naročnine. Izberite paket, da pridobite API ključ.",
         "noKey": "API ključa ni mogoče najti",
@@ -182,7 +182,7 @@
     }
   },
   "chat": {
-    "initialMessage": "Kako vam lahko danes pomagam? Vprašate me lahko karkoli o Lama Labs storitvah ali pa kliknite na eno od vnaprej prednastavljenih osebnosti.",
+    "initialMessage": "Kako vam lahko danes pomagam? Vprašate me lahko karkoli o strani ali pa izberete eno od vnaprej določenih osebnosti.",
     "inputPlaceholder": "Vnesite svoje vprašanje tukaj...",
     "initialAssistants": [
       {

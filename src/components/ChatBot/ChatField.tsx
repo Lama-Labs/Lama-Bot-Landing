@@ -224,7 +224,7 @@ const ChatField: React.FC<ChatFieldProps> = ({ embedded = false }) => {
           clearConversation()
           setResponses([])
           setAssistantId(null)
-          setAssistantName('Lama Bot')
+          setAssistantName('Llama Chat')
         }}
         title={assistantName}
         icon='🦙'

@@ -19,7 +19,7 @@ const DashboardNavbar = () => {
             <Box>
               <Image
                 src='/lamashop logo.png'
-                alt='Lama Logo'
+                alt='Llama Logo'
                 width={30}
                 height={30}
               />
