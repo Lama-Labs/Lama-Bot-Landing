@@ -4,7 +4,7 @@ import { Alert, Snackbar } from '@mui/material'
 import type { AlertColor } from '@mui/material/Alert/Alert'
 import type { SnackbarCloseReason } from '@mui/material/Snackbar/Snackbar'
 import { useTranslations } from 'next-intl'
-import React, { forwardRef, useImperativeHandle, useState } from 'react'
+import { forwardRef, useImperativeHandle, useState } from 'react'
 
 export interface SnackbarHandle {
   snackbarOpenError: () => void

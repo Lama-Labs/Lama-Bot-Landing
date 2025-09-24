@@ -1,30 +1,10 @@
 'use client'
 
-import { LoadingButton } from '@mui/lab'
-import {
-  Box,
-  Card,
-  Container,
-  Divider,
-  Link,
-  TextField,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material'
-import { sendGAEvent } from '@next/third-parties/google'
-import Cookies from 'js-cookie'
-import { Send } from 'lucide-react'
+import { Box, Card, Container, Typography } from '@mui/material'
 import { useTranslations } from 'next-intl'
-import React, { RefObject, useRef, useState } from 'react'
-import ReCAPTCHA from 'react-google-recaptcha'
 
-import { sendToPushBullet } from '@/app/api/PushBulletSend'
-import { validateRecaptchaToken } from '@/app/api/validateRecaptcha'
-import PricingSection from '@/components/Pricing/PricingSection'
-import SnackbarComponent, {
-  SnackbarHandle,
-} from '@/components/Snackbar/SnackbarComponent'
+import EmailSubscription from '@/components/EmailSubscription/EmailSubscription'
+//import PricingSection from '@/components/Pricing/PricingSection'
 
 interface FormProps {
   type?: 'contact' | 'unsubscribe'
@@ -33,91 +13,8 @@ interface FormProps {
 const ContactForm = ({ type = 'contact' }: FormProps) => {
   const t = useTranslations(type === 'contact' ? 'home.cta' : 'unsubscribe')
 
-  const [email, setEmail] = useState<string>('')
-  const [isValidEmail, setIsValidEmail] = useState<boolean>(true)
-  const [sending, setSending] = useState<boolean>(false)
-
-  const recaptchaRef = useRef<ReCAPTCHA>()
-  const snackbarRef = useRef<SnackbarHandle>(null)
-
-  const validateEmail = (value: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(value)
-  }
-
-  // Handler for TextField input change
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value
-    setEmail(value)
-  }
-
-  // Show an alert with the email when the button is clicked
-  const handleClick = async (
-    event:
-      | React.FormEvent<HTMLFormElement>
-      | React.MouseEvent<HTMLButtonElement>
-  ) => {
-    event.preventDefault()
-    try {
-      setSending(true)
-
-      if (!recaptchaRef.current) {
-        throw new Error('reCAPTCHA ref error')
-      }
-
-      const validEmail = validateEmail(email)
-      setIsValidEmail(validEmail) // Update validity based on email format
-      if (!validEmail) {
-        return
-      }
-
-      const token = await recaptchaRef.current.executeAsync()
-
-      // if no token, don't submit
-      if (!token) {
-        throw new Error('reCAPTCHA token error')
-      }
-      // validate token
-      const isCaptchaValid = await validateRecaptchaToken(token!)
-
-      if (!isCaptchaValid) {
-        throw new Error('reCAPTCHA validation error')
-      }
-
-      if (Cookies.get('analytics-consent') === 'true') {
-        sendGAEvent({
-          action: 'click',
-          category: 'Button',
-          label:
-            type === 'contact' ? 'Send email clicked' : 'Unsubscribe clicked',
-          value: email,
-        })
-      }
-
-      await sendToPushBullet(
-        type === 'contact' ? 'email' : 'Unsubscribe',
-        email
-      )
-
-      // clear captcha
-      recaptchaRef.current.reset()
-      setEmail('')
-      setIsValidEmail(true)
-      snackbarRef?.current?.snackbarOpenSuccess()
-    } catch (error) {
-      console.error('An error occurred while sending to PushBullet:', error)
-      snackbarRef?.current?.snackbarOpenError()
-    } finally {
-      setSending(false)
-    }
-  }
-
-  const theme = useTheme()
-  const isMdUp = useMediaQuery(theme.breakpoints.up('md'))
-
   return (
     <Container maxWidth='xl' id='contact'>
-      <SnackbarComponent ref={snackbarRef} />
       <Box
         className={type === 'contact' ? 'animate animate-bottom' : undefined}
         sx={{
@@ -148,13 +45,13 @@ const ContactForm = ({ type = 'contact' }: FormProps) => {
             gap={6}
             sx={{ pt: 4, pb: 16 }}
           >
-            <Box flex={1} minWidth={0} sx={{ alignContent: 'center', my: 4 }}>
+            {/*<Box flex={1} minWidth={0} sx={{ alignContent: 'center', my: 4 }}>
               <PricingSection />
             </Box>
             <Divider
               orientation={isMdUp ? 'vertical' : 'horizontal'}
               flexItem
-            />
+            />*/}
             <Box
               display='flex'
               flexDirection='column'
@@ -164,83 +61,15 @@ const ContactForm = ({ type = 'contact' }: FormProps) => {
               maxWidth='sm'
             >
               <Box
-                component='form'
-                sx={{
-                  display: 'flex',
-                  alignItems: 'start',
-                  width: '100%',
-                  gap: 2,
-                  pt: 0,
-                }}
+                display='flex'
+                flexDirection='column'
+                gap={0.5}
+                sx={{ width: '100%' }}
               >
-                <Box
-                  display='flex'
-                  flexDirection='column'
-                  gap={0.5}
-                  sx={{ width: '100%' }}
-                >
-                  <Typography variant='body1' align='left' sx={{ mb: 3 }}>
-                    {t('subtitle')}
-                  </Typography>
-                  <Box display='flex' gap={2}>
-                    <TextField
-                      label='Email'
-                      type='email'
-                      variant='outlined'
-                      fullWidth
-                      size='small'
-                      value={email}
-                      onChange={handleChange}
-                      error={!isValidEmail}
-                      helperText={!isValidEmail ? t('errors.email') : ' '}
-                      sx={{
-                        '& .MuiFormHelperText-root': {
-                          visibility: !isValidEmail ? 'visible' : 'hidden',
-                          minHeight: '1.5em',
-                        },
-                      }}
-                    />
-                    <LoadingButton
-                      type='submit'
-                      variant='contained'
-                      color='primary'
-                      loading={sending}
-                      onClick={handleClick}
-                      sx={{ height: '40px' }}
-                    >
-                      <Send />
-                    </LoadingButton>
-                  </Box>
-                  <Typography
-                    sx={{ px: 1, py: 0.5 }}
-                    variant='caption'
-                    textAlign='start'
-                    fontSize={10}
-                  >
-                    This site is protected by reCAPTCHA and the Google{' '}
-                    <Link
-                      href='https://policies.google.com/privacy'
-                      target='_blank'
-                      underline='none'
-                    >
-                      Privacy Policy
-                    </Link>{' '}
-                    and{' '}
-                    <Link
-                      href='https://policies.google.com/terms'
-                      target='_blank'
-                      underline='none'
-                    >
-                      Terms of Service
-                    </Link>{' '}
-                    apply.
-                  </Typography>
-                </Box>
-                <ReCAPTCHA
-                  ref={recaptchaRef as RefObject<ReCAPTCHA>}
-                  size='invisible'
-                  sitekey={process.env.NEXT_PUBLIC_CAPTCHA_SITEKEY || 'aaa'}
-                />
+                <Typography variant='body1' align='left' sx={{ mb: 3 }}>
+                  {t('subtitle')}
+                </Typography>
+                <EmailSubscription displayMode='icon' />
               </Box>
             </Box>
           </Box>

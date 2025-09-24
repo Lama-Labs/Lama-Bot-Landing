@@ -118,7 +118,7 @@ body {
     var(--_g) 100% 50%;
   background-size: calc(100% / 3) 50%;
   animation: l3 1s infinite linear;
-  scale: 0.35;
+  scale: 0.5;
 }
 @keyframes l3 {
   20% {

@@ -1,5 +1,4 @@
 import { Box, Paper, Typography } from '@mui/material'
-import React from 'react'
 
 import MarkdownParser from '@/utils/MarkdownParser'
 
@@ -10,31 +9,42 @@ interface MessageBubbleProps {
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isUser }) => {
   return (
-    <Paper
-      elevation={2}
+    <Box
       sx={{
-        padding: '8px 12px',
-        maxWidth: '80%',
-        alignSelf: isUser ? 'flex-end' : 'flex-start',
-        bgcolor: isUser ? 'chat.bubble' : 'primary.main', // Use primary color from theme
-        color: isUser ? 'chat.userText' : 'chat.botText', // Adjust text color for contrast
-        borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-        margin: '4px 0',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: isUser ? 'flex-end' : 'flex-start',
+        mb: 1,
       }}
     >
-      {!message && <Box className='loader' />}
-      <Typography
-        variant='body1'
-        sx={{ whiteSpace: 'pre-wrap', color: 'inherit' }}
+      <Paper
+        elevation={1}
+        sx={{
+          px: 2,
+          py: 1.5,
+          maxWidth: '80%',
+          alignSelf: isUser ? 'flex-end' : 'flex-start',
+          bgcolor: isUser ? 'chat.bubble' : 'primary.main', // Use primary color from theme
+          color: isUser ? 'chat.userText' : 'chat.botText', // Adjust text color for contrast
+          borderRadius: isUser ? '18px 18px 6px 18px' : '18px 18px 18px 6px',
+          fontSize: 24,
+          wordBreak: 'break-word',
+        }}
       >
-        {/* regex to hide locale and source in message */}
-        <MarkdownParser
-          text={message
-            .replace(/^\[\w+]\s*/, '')
-            .replace(/【\d+:\d+†.+】/g, '')}
-        />
-      </Typography>
-    </Paper>
+        {!message && <Box className='loader' />}
+        <Typography
+          variant='body1'
+          textAlign={isUser ? 'right' : 'left'}
+          sx={{ whiteSpace: 'pre-wrap', color: 'inherit' }}
+        >
+          <MarkdownParser
+            text={message
+              .replace(/^\[\w+]\s*/, '')
+              .replace(/【\d+:\d+†.+】/g, '')}
+          />
+        </Typography>
+      </Paper>
+    </Box>
   )
 }
 

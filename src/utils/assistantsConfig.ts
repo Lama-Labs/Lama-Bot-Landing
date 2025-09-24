@@ -23,28 +23,14 @@ const ASSISTANTS: AssistantConfig[] = [
     name: 'Fitness Assistant',
     instructions:
       'You are a fitness assistant. Answer questions about workout programs, membership options, and opening hours based on the knowledge base.',
-    vectorStoreIds: [],
+    vectorStoreIds: ['vs_FyHYZ4MCvmlYV761G73hK4vA'],
   },
   {
     id: 'asst_wTLWhkdxcyy7vgy7FpfZFVB3',
     name: 'Wristway Ergonomic Assistant',
     instructions:
       'You help with Wristway, an ergonomic wrist rest. Use the knowledge base to answer product features, usage, and benefits.',
-    vectorStoreIds: [],
-  },
-  {
-    id: 'asst_PN6Oyk3VjTtt0tAsMWt2bVOM',
-    name: 'Seedbox Assistant',
-    instructions:
-      'You help with Seedbox, an AI-powered at-home sperm health tracker. Answer about features and usage using the knowledge base.',
-    vectorStoreIds: [],
-  },
-  {
-    id: 'asst_LkSPCqE7g1TcRayQGkoCMSyS',
-    name: 'Shopify Snowboard Assistant',
-    instructions:
-      'You can answer questions about the latest snowboard products, their prices, and availability using the knowledge base. Prefer up-to-date information when available.',
-    vectorStoreIds: [],
+    vectorStoreIds: ['vs_yMRChIljXKBsMw3TP8m20r9D'],
   },
 ]
 

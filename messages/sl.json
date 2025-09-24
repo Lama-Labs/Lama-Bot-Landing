@@ -12,7 +12,7 @@
     "hero": {
       "title": "[BOLD]Lama Bot[/BOLD][BREAK]Revolucija vašega spletnega mesta",
       "subtitle": "Zagotovite neprekinjeno podporo strankam z umetno inteligenco po meri v nekaj minutah - brez znanja programiranja!",
-      "cta": "Začnite zdaj"
+      "cta": "Pridružite se čakalni listi"
     },
     "features": {
       "title": "Kaj omogoča Lama Bot",
@@ -102,6 +102,9 @@
       "title": "Preprost cenik"
     }
   },
+  "arrowHint": {
+    "label": "Preizkusite"
+  },
   "cookies": {
     "title": "Cenimo vašo zasebnost",
     "message": "Piškotke uporabljamo za izboljšanje vaše uporabniške izkušnje in analizo delovanja naše spletne strani. Izberite, ali želite sprejeti ali zavrniti neobvezne piškotke.",
@@ -185,12 +188,22 @@
       {
         "name": "Fitnes asistent",
         "initialMessage": "Pozdravljeni! Sem asistent namišljenega fitnes studia. Potrebujete informacije o vadbenih programih, možnostih članstva ali delovnem času? Tu sem, da pomagam!",
-        "id": "asst_EFxvhDNtArBx9phA28fJpO8X"
+        "id": "asst_EFxvhDNtArBx9phA28fJpO8X",
+        "suggestions": [
+          "Katere članarine ponujate?",
+          "Kateri program je najboljši za začetnike?",
+          "Kakšen je delovni čas ta teden?"
+        ]
       },
       {
         "name": "Wristway ergonomski asistent",
         "initialMessage": "Pozdravljeni! Sem asistent za Wristway, edinstven ergonomski pripomoček za zapestje, ki izboljšuje udobje in produktivnost. Potrebujete informacije o lastnostih, uporabi ali prednostih Wristway izdelkov? Tu sem, da vam pomagam!",
-        "id": "asst_wTLWhkdxcyy7vgy7FpfZFVB3"
+        "id": "asst_wTLWhkdxcyy7vgy7FpfZFVB3",
+        "suggestions": [
+          "Kaj naredi Wristway ergonomskega?",
+          "Kako ga čistim in vzdržujem?",
+          "Ali je Wristway združljiv z mojo tipkovnico?"
+        ]
       }
     ],
     "errorMessage": "Imam nekaj tehničnih težav. Prosim, poskusite znova pozneje."

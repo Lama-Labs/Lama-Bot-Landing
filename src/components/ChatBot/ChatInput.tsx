@@ -1,12 +1,11 @@
 import { IconButton, Stack, TextField } from '@mui/material'
 import { Send } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import React from 'react'
 
 interface ChatInputProps {
   newQuestion: string
   setNewQuestion: React.Dispatch<React.SetStateAction<string>>
-  handleSend: () => void
+  handleSend: (override?: string) => void
   disabled: boolean
 }
 
@@ -19,8 +18,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const t = useTranslations('chat')
 
   const onSend = () => {
-    setNewQuestion(newQuestion.trim())
-    handleSend()
+    const trimmed = newQuestion.trim()
+    setNewQuestion(trimmed)
+    handleSend(trimmed)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -33,30 +33,49 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <Stack
-      direction='row'
-      spacing={1}
       sx={{
-        padding: 1,
+        px: 2.5,
+        py: 1.5,
+        bgcolor: 'chat.background',
         borderTop: '1px solid',
-        borderColor: 'chat.bubble',
-        display: 'flex',
-        alignItems: 'center',
+        borderColor: 'divider',
       }}
     >
-      <TextField
-        fullWidth
-        variant='outlined'
-        placeholder={t('inputPlaceholder')}
-        size='small'
-        value={newQuestion}
-        multiline
-        onChange={(e) => setNewQuestion(e.target.value)}
-        onKeyDown={handleKeyDown}
-        minRows={1}
-        maxRows={8}
+      <Stack
+        direction='row'
+        spacing={1.5}
         sx={{
-          '& .MuiOutlinedInput-root': {
+          alignItems: 'center',
+          bgcolor: 'grey.700',
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: '24px',
+          px: 2,
+          py: 0.5,
+        }}
+      >
+        <TextField
+          fullWidth
+          variant='standard'
+          placeholder={t('inputPlaceholder')}
+          value={newQuestion}
+          multiline
+          onChange={(e) => setNewQuestion(e.target.value)}
+          onKeyDown={handleKeyDown}
+          minRows={1}
+          maxRows={6}
+          slotProps={{
+            input: {
+              disableUnderline: true,
+            },
+          }}
+          sx={{
+            '& .MuiInputBase-root': {
+              py: 1.5,
+            },
             '& textarea': {
+              color: 'white',
+              fontSize: 14,
               /* Custom Scrollbar Styles */
               '&::-webkit-scrollbar': {
                 width: '6px', // Width of the scrollbar,
@@ -75,17 +94,24 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 cursor: 'default',
               },
             },
-          },
-        }}
-      />
-      <IconButton
-        color='primary'
-        onClick={onSend}
-        disabled={newQuestion === '' || disabled}
-        size='large'
-      >
-        <Send />
-      </IconButton>
+          }}
+        />
+        <IconButton
+          onClick={onSend}
+          disabled={newQuestion.trim() === '' || disabled}
+          sx={{
+            width: 36,
+            height: 36,
+            borderRadius: '50%',
+            bgcolor: 'primary.main',
+            color: 'primary.contrastText',
+            '&:hover': { filter: 'brightness(0.95)' },
+          }}
+          aria-label='Send message'
+        >
+          <Send />
+        </IconButton>
+      </Stack>
     </Stack>
   )
 }

@@ -1,10 +1,11 @@
 'use client'
 
 import { Box, Fab, Fade } from '@mui/material'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import ChatBotAnimation from '@/components/ChatBot/ChatBotAnimation'
 import ChatField from '@/components/ChatBot/ChatField'
+import ArrowHint from '@/components/Hero/ArrowHint/ArrowHint'
 import { useChat } from '@/context/ChatContext'
 
 const FloatingActionButton: React.FC = () => {
@@ -47,6 +48,7 @@ const FloatingActionButton: React.FC = () => {
           </Box>
         </Fade>
       </Box>
+      <ArrowHint />
       <Fab
         color='primary'
         aria-label='open chat'
