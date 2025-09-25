@@ -34,7 +34,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isUser }) => {
         {!message && <Box className='loader' />}
         <Typography
           variant='body1'
-          textAlign={isUser ? 'right' : 'left'}
+          textAlign='left'
           sx={{ whiteSpace: 'pre-wrap', color: 'inherit' }}
         >
           <MarkdownParser

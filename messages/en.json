@@ -10,51 +10,34 @@
   },
   "home": {
     "hero": {
-      "title": "[BOLD]Lama Bot[/BOLD][BREAK]Revolutionize Your Website",
-      "subtitle": "Provide continuous customer support with tailor-made AI in minutes — no coding required",
+      "title": "[BOLD]LLAMA Chat[/BOLD][BREAK]AI chat for your site",
+      "subtitle": "Add an AI assistant that answers instantly using your own knowledge.",
       "cta": "Join the Waitlist"
     },
     "features": {
-      "title": "What Lama Bot Offers",
-      "subtitle": "Reduce your team's workload while ensuring an excellent user experience at all times.",
+      "title": "What LLAMA Chat Offers",
+      "subtitle": "Give visitors instant, tailored answers that support faster decisions and free up your team.",
       "items": [
         {
-          "title": "Virtual Assistant for Customer Support",
-          "description": "Lama Bot recognizes what visitors are viewing and combines that knowledge with information about your products and services to provide accurate, personalized answers.",
+          "title": "On-Page Answers",
+          "description": "Llama Chat reads the page your visitor is viewing and responds in context.",
           "icon": "botMessageSquare"
         },
         {
-          "title": "Easy Installation",
-          "description": "Customers interact with Lama Bot through a chat window that opens with a button in the corner of the page. It can be integrated quickly without modifying the existing website.",
-          "icon": "unplug"
+          "title": "Your Knowledge Included",
+          "description": "Upload your guides, policies, product info and Llama Chat blends them seamlessly for more accurate replies.",
+          "icon": "bookOpenCheck"
         },
         {
-          "title": "24/7 Customer Support",
-          "description": "Lama Bot answers inquiries even outside of your working hours. Customers can get answers to their questions anytime.",
-          "icon": "refresh"
+          "title": "Setup in minutes",
+          "description": "Install the WordPress plugin and style to match your branding, no coding required.",
+          "icon": "unplug"
         }
       ]
     },
     "paragraphs": {
       "title": "Paragraphs",
       "items": [
-        {
-          "pretitle": "AI-Powered Support 24/7",
-          "title": "Enhance the User Experience",
-          "content": "Provide instant support, answer queries, and engage your visitors like never before with our intelligent AI assistant.",
-          "image": "/matte-background.png",
-          "icon": "sparkles",
-          "messages": [
-            {
-              "text": "Can you tell me more about your express shipping service?",
-              "isUser": true
-            },
-            {
-              "text": "Absolutely! Our express shipping service ensures your order is delivered within 1-2 business days. It’s available for all products and costs an additional $9.99. If you place your order before 3 PM, we’ll process it the same day. Would you like me to guide you through the checkout process?",
-              "isUser": false
-            }
-          ]
-        },
         {
           "pretitle": "Relevant Context",
           "title": "Personalized Responses",
@@ -73,18 +56,35 @@
           ]
         },
         {
-          "pretitle": "Scalable and Reliable",
-          "title": "Cutting-Edge Technology",
-          "content": "By leveraging the latest AI technology and a robust infrastructure, we ensure fast and reliable performance, providing your visitors with a seamless experience.",
+          "pretitle": "Custom knowledge base",
+          "title": "Instant Customer Support",
+          "content": "Provide blazingly fast support, answer queries, and engage your visitors like never before with our intelligent AI assistant.",
           "image": "/matte-background.png",
-          "icon": "trophy",
+          "icon": "headset",
           "messages": [
             {
-              "text": "Does the Alpine Adventure trip include any activities for families?\"\nLama Bot:",
+              "text": "Does the Alpine Adventure trip include any activities for families?",
               "isUser": true
             },
             {
               "text": "Yes, the trip includes family-friendly activities like easy hiking trails, a family picnic by a mountain lake, and a guided nature walk tailored for all ages. There’s also a kid-friendly treasure hunt on one of the stops. Would you like more details on these activities?",
+              "isUser": false
+            }
+          ]
+        },
+        {
+          "pretitle": "Sell More",
+          "title": "Turn Visitors Into Customers",
+          "content": "Guide hesitant visitors through their buying journey with personalized recommendations and answers to their concerns. Help them make confident decisions that turn browsing into sales.",
+          "image": "/matte-background.png",
+          "icon": "chartNoAxesCombined",
+          "messages": [
+            {
+              "text": "Can you tell me more about your express shipping service?",
+              "isUser": true
+            },
+            {
+              "text": "Absolutely! Our express shipping service ensures your order is delivered within 1-2 business days. It’s available for all products and costs an additional $9.99. If you place your order before 3 PM, we’ll process it the same day. Would you like me to guide you through the checkout process?",
               "isUser": false
             }
           ]
@@ -93,7 +93,7 @@
     },
     "cta": {
       "title": "Ready to Elevate Your Website Experience?",
-      "subtitle": "Enter your email address to subscribe to our newsletter and get the latest updates and news.",
+      "subtitle": "Enter your email address to get the latest updates and be among the first to try Llama Chat and help shape the roadmap.",
       "errors": {
         "email": "Please enter a valid email address."
       }
@@ -131,7 +131,7 @@
     },
     "apiKey": {
       "title": "Your API Key",
-      "tooltip": "Use this API key to authenticate your requests to the Lama Bot API. Keep it secure and don't share it publicly.",
+      "tooltip": "Use this API key to authenticate your requests to the Llama Chat API. Keep it secure and don't share it publicly.",
       "messages": {
         "noSubscription": "No active subscription. Select a plan to get the API key.",
         "noKey": "No API key found",

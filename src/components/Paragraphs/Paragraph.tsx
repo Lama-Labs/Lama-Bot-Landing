@@ -103,7 +103,7 @@ const Paragraph: React.FC<ParagraphProps> = ({
                         bgcolor: 'chat.bubble',
                         p: 0.7,
                       }}
-                      alt='LamaBot logo'
+                      alt='Llama Chat logo'
                       src='./lamashop logo.png'
                     />
                   )}
@@ -114,7 +114,7 @@ const Paragraph: React.FC<ParagraphProps> = ({
                         bgcolor: 'chat.bubble',
                         color: 'chat.userText',
                       }}
-                      alt='LamaBot user'
+                      alt='Llama Chat user'
                     >
                       <User opacity={0.8} />
                     </Avatar>

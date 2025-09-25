@@ -1,8 +1,8 @@
 import {
+  BookOpenCheck,
   BotMessageSquare,
-  RefreshCcw,
-  Sparkles,
-  Trophy,
+  ChartNoAxesCombined,
+  Headset,
   Unplug,
   UserRoundSearch,
 } from 'lucide-react'
@@ -14,12 +14,12 @@ type IconMap = {
 
 // Define the mapping between strings and icons
 const iconMap: IconMap = {
-  refresh: RefreshCcw,
   botMessageSquare: BotMessageSquare,
-  sparkles: Sparkles,
-  trophy: Trophy,
   unplug: Unplug,
   userRoundSearch: UserRoundSearch,
+  chartNoAxesCombined: ChartNoAxesCombined,
+  bookOpenCheck: BookOpenCheck,
+  headset: Headset,
 }
 
 type IconProps = {

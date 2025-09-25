@@ -15,7 +15,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const [assistantName, setAssistantName] = useState('Lama Bot')
+  const [assistantName, setAssistantName] = useState('Llama Chat')
 
   return (
     <ChatContext.Provider

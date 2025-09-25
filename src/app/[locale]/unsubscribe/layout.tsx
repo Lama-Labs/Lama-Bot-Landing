@@ -11,8 +11,8 @@ import theme from '@/theme/theme'
 import '@/globals.css'
 
 export const metadata: Metadata = {
-  title: 'LamaBot - Unsubscribe',
-  description: 'Unsubscribe from LamaBot email notifications',
+  title: 'Llama Chat - Unsubscribe',
+  description: 'Unsubscribe from Llama Chat email notifications',
 }
 
 export default async function UnsubscribeLayout({

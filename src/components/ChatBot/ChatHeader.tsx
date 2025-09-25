@@ -9,7 +9,7 @@ interface ChatHeaderProps {
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({
   onReset,
-  title = 'Lama Bot',
+  title = 'Llama Chat',
   icon = '🦙',
 }) => {
   return (
