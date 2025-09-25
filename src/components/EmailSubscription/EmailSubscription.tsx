@@ -10,8 +10,7 @@ import { useTranslations } from 'next-intl'
 import { RefObject, useRef, useState } from 'react'
 import ReCAPTCHA from 'react-google-recaptcha'
 
-import { sendToPushBullet } from '@/app/api/PushBulletSend'
-import { validateRecaptchaToken } from '@/app/api/validateRecaptcha'
+//import { validateRecaptchaToken } from '@/app/api/validateRecaptcha'
 import SnackbarComponent, {
   SnackbarHandle,
 } from '@/components/Snackbar/SnackbarComponent'
@@ -37,6 +36,7 @@ const EmailSubscription = ({
   const tCTA = useTranslations('home.cta')
 
   const [email, setEmail] = useState<string>('')
+  const [website, setWebsite] = useState<string>('') // Honeypot field
   const [isValidEmail, setIsValidEmail] = useState<boolean>(true)
   const [sending, setSending] = useState<boolean>(false)
 
@@ -78,10 +78,10 @@ const EmailSubscription = ({
         throw new Error('reCAPTCHA token error')
       }
 
-      const isCaptchaValid = await validateRecaptchaToken(token!)
+      /*const isCaptchaValid = await validateRecaptchaToken(token!)
       if (!isCaptchaValid) {
         throw new Error('reCAPTCHA validation error')
-      }
+      }*/
 
       if (Cookies.get('analytics-consent') === 'true') {
         sendGAEvent({
@@ -92,14 +92,30 @@ const EmailSubscription = ({
         })
       }
 
-      await sendToPushBullet('email', email)
+      // Send to contact API
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          website, // Honeypot field
+          recaptchaToken: token,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to submit')
+      }
 
       recaptchaRef.current.reset()
       setEmail('')
       setIsValidEmail(true)
       snackbarRef?.current?.snackbarOpenSuccess()
     } catch (error) {
-      console.error('An error occurred while sending to PushBullet:', error)
+      console.error('An error occurred while submitting:', error)
       snackbarRef?.current?.snackbarOpenError()
     } finally {
       setSending(false)
@@ -131,6 +147,15 @@ const EmailSubscription = ({
           gap={0.5}
           sx={{ width: '100%' }}
         >
+          {/* Honeypot field - hidden from users but visible to bots */}
+          <TextField
+            name='website'
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            sx={{ display: 'none' }}
+            tabIndex={-1}
+            autoComplete='off'
+          />
           <Box display='flex' gap={2}>
             <TextField
               label='Email'
