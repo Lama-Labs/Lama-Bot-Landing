@@ -224,10 +224,10 @@ const ChatField: React.FC<ChatFieldProps> = ({ embedded = false }) => {
           clearConversation()
           setResponses([])
           setAssistantId(null)
-          setAssistantName('Llama Chat')
+          setAssistantName('Alpaca Chat')
         }}
         title={assistantName}
-        icon='🦙'
+        icon='/alpaca logo.svg'
       />
 
       {/* Messages */}

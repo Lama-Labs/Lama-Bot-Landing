@@ -17,7 +17,7 @@ import theme from '@/theme/theme'
 import '@/globals.css'
 
 export const metadata: Metadata = {
-  title: 'Llama Chat',
+  title: 'Alpaca Chat',
   description:
     'Seamless custom AI chatbot integration in minutes — no coding skills required',
 }

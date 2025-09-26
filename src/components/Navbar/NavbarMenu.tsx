@@ -44,12 +44,16 @@ const NavbarMenu = () => {
           width: '100%',
         }}
       >
-        <Box>
+        <Box
+          sx={{
+            py: 1,
+          }}
+        >
           <Image
-            src='/lamashop logo.png'
-            alt='Llama Logo'
-            width={30}
-            height={30}
+            src='/alpaca logo.svg'
+            alt='Alpaca Chat Logo'
+            width={60}
+            height={60}
           />
         </Box>
         <IconButton

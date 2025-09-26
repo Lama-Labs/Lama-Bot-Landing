@@ -1,16 +1,17 @@
 import { Box, IconButton } from '@mui/material'
 import { Trash } from 'lucide-react'
+import Image from 'next/image'
 
 interface ChatHeaderProps {
   onReset: () => void
   title?: string
-  icon?: React.ReactNode
+  icon?: string
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({
   onReset,
-  title = 'Llama Chat',
-  icon = '🦙',
+  title = 'Alpaca Chat',
+  icon = '/alpaca logo.svg',
 }) => {
   return (
     <Box
@@ -37,7 +38,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
             fontWeight: 600,
           }}
         >
-          {icon}
+          <Image src={icon} alt={'Chat Icon'} width={30} height={30} />
         </Box>
         <Box
           sx={{

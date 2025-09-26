@@ -103,8 +103,8 @@ const Paragraph: React.FC<ParagraphProps> = ({
                         bgcolor: 'chat.bubble',
                         p: 0.7,
                       }}
-                      alt='Llama Chat logo'
-                      src='./lamashop logo.png'
+                      alt='Alpaca Chat logo'
+                      src='./alpaca logo.svg'
                     />
                   )}
                   <MessageBubble message={msg.text} isUser={msg.isUser} />
@@ -114,7 +114,7 @@ const Paragraph: React.FC<ParagraphProps> = ({
                         bgcolor: 'chat.bubble',
                         color: 'chat.userText',
                       }}
-                      alt='Llama Chat user'
+                      alt='Alpaca Chat user'
                     >
                       <User opacity={0.8} />
                     </Avatar>
