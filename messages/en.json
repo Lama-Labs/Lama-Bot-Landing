@@ -10,22 +10,22 @@
   },
   "home": {
     "hero": {
-      "title": "[BOLD]LLAMA Chat[/BOLD][BREAK]AI chat for your site",
+      "title": "[BOLD]Alpaca Chat[/BOLD][BREAK]AI chat for your site",
       "subtitle": "Add an AI assistant that answers instantly using your own knowledge.",
       "cta": "Join the Waitlist"
     },
     "features": {
-      "title": "What LLAMA Chat Offers",
+      "title": "What Alpaca Chat Offers",
       "subtitle": "Give visitors instant, tailored answers that support faster decisions and free up your team.",
       "items": [
         {
           "title": "On-Page Answers",
-          "description": "Llama Chat reads the page your visitor is viewing and responds in context.",
+          "description": "Alpaca Chat reads the page your visitor is viewing and responds in context.",
           "icon": "botMessageSquare"
         },
         {
           "title": "Your Knowledge Included",
-          "description": "Upload your guides, policies, product info and Llama Chat blends them seamlessly for more accurate replies.",
+          "description": "Upload your guides, policies, product info and Alpaca Chat blends them seamlessly for more accurate replies.",
           "icon": "bookOpenCheck"
         },
         {
@@ -93,7 +93,7 @@
     },
     "cta": {
       "title": "Ready to Elevate Your Website Experience?",
-      "subtitle": "Enter your email address to get the latest updates and be among the first to try Llama Chat and help shape the roadmap.",
+      "subtitle": "Enter your email address to get the latest updates and be among the first to try Alpaca Chat and help shape the roadmap.",
       "errors": {
         "email": "Please enter a valid email address."
       }
@@ -131,7 +131,7 @@
     },
     "apiKey": {
       "title": "Your API Key",
-      "tooltip": "Use this API key to authenticate your requests to the Llama Chat API. Keep it secure and don't share it publicly.",
+      "tooltip": "Use this API key to authenticate your requests to the Alpaca Chat API. Keep it secure and don't share it publicly.",
       "messages": {
         "noSubscription": "No active subscription. Select a plan to get the API key.",
         "noKey": "No API key found",

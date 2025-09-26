@@ -5,13 +5,13 @@ export type AssistantConfig = {
   vectorStoreIds?: string[]
 }
 
-// Default/fallback assistant for Llama Chat website
+// Default/fallback assistant for Alpaca Chat website
 const DEFAULT_ASSISTANT_ID = 'default'
 const DEFAULT_ASSISTANT: AssistantConfig = {
   id: DEFAULT_ASSISTANT_ID,
   name: 'Default Assistant',
   instructions:
-    'You are the default assistant for the Llama Chat website. Answer questions about the site, its product (Llama Chat), features, pricing, setup, and usage. Be concise, accurate, and helpful. If something is unclear or unknown, ask a clarifying question or say that you do not know.',
+    'You are the default assistant for the Alpaca Chat website. Answer questions about the site, its product (Alpaca Chat), features, pricing, setup, and usage. Be concise, accurate, and helpful. If something is unclear or unknown, ask a clarifying question or say that you do not know.',
   vectorStoreIds: [],
 }
 

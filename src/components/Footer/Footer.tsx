@@ -8,7 +8,7 @@ const Footer = () => {
       <Container maxWidth='xl'>
         <Divider variant='middle' />
         <Typography variant='body1' align='center' sx={{ py: 3 }}>
-          © {currentYear} Lama Labs
+          © {currentYear} Alpaca Chat
         </Typography>
       </Container>
     </footer>

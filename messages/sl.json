@@ -10,22 +10,22 @@
   },
   "home": {
     "hero": {
-      "title": "[BOLD]Llama Chat[/BOLD][BREAK]Umetna inteligenca za vaše spletno mesto",
+      "title": "[BOLD]Alpaca Chat[/BOLD][BREAK]Umetna inteligenca za vaše spletno mesto",
       "subtitle": "Dodajte pomočnika z umetno inteligenco, ki odgovori takoj in uporablja vaše znanje.",
       "cta": "Pridružite se čakalni listi"
     },
     "features": {
-      "title": "Kaj omogoča Llama Chat",
+      "title": "Kaj omogoča Alpaca Chat",
       "subtitle": "Zagotovite obiskovalcem takojšnje, prilagojene odgovore, ki podpirajo hitrejše odločitve in razbremenijo vašo ekipo.",
       "items": [
         {
           "title": "Ustrezni odgovori",
-          "description": "Llama Chat prebere stran, ki si jo obiskovalec ogleduje, in odgovarja v kontekstu.",
+          "description": "Alpaca Chat prebere stran, ki si jo obiskovalec ogleduje, in odgovarja v kontekstu.",
           "icon": "botMessageSquare"
         },
         {
           "title": "Vaše znanje vključeno",
-          "description": "Naložite svoje priročnike, pravilnike, informacije o izdelkih in Llama Chat jih brezhibno združi za natančnejše odgovore.",
+          "description": "Naložite svoje priročnike, pravilnike, informacije o izdelkih in Alpaca Chat jih brezhibno združi za natančnejše odgovore.",
           "icon": "bookOpenCheck"
         },
         {
@@ -93,7 +93,7 @@
     },
     "cta": {
       "title": "Ste pripravljeni izboljšati izkušnjo svojega spletnega mesta?",
-      "subtitle": "Vnesite svoj e-poštni naslov, da boste obveščeni o novostih in da boste med prvimi, ki preizkusijo Llama Chat ter pomagajo oblikovati načrt razvoja.",
+      "subtitle": "Vnesite svoj e-poštni naslov, da boste obveščeni o novostih in da boste med prvimi, ki preizkusijo Alpaca Chat ter pomagajo oblikovati načrt razvoja.",
       "errors": {
         "email": "Prosimo, vnesite veljaven e-poštni naslov."
       }
@@ -131,7 +131,7 @@
     },
     "apiKey": {
       "title": "Vaš API ključ",
-      "tooltip": "Ta API ključ uporabite za overjanje svojih zahtevkov do Llama Chat API-ja. Hranite ga varno in ga ne delite javno.",
+      "tooltip": "Ta API ključ uporabite za overjanje svojih zahtevkov do Alpaca Chat API-ja. Hranite ga varno in ga ne delite javno.",
       "messages": {
         "noSubscription": "Ni aktivne naročnine. Izberite paket, da pridobite API ključ.",
         "noKey": "API ključa ni mogoče najti",
