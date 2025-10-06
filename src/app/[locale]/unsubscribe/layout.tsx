@@ -1,6 +1,7 @@
 import { CssBaseline } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter'
+import { Analytics } from '@vercel/analytics/next'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { NextIntlClientProvider } from 'next-intl'
@@ -39,6 +40,7 @@ export default async function UnsubscribeLayout({
             <CssBaseline />
             <NextIntlClientProvider messages={messages}>
               {children}
+              <Analytics />
             </NextIntlClientProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>
