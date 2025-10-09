@@ -186,7 +186,7 @@
     "inputPlaceholder": "Type your question here...",
     "initialAssistants": [
       {
-        "name": "Fitness Assistant",
+        "name": "Gym Assistant",
         "initialMessage": "Hello! I am an assistant for a fictional fitness studio. Need details on our workout programs, membership options, or opening hours? I'm here to help!",
         "id": "asst_EFxvhDNtArBx9phA28fJpO8X",
         "suggestions": [
