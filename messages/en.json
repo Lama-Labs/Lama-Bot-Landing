@@ -188,7 +188,7 @@
       {
         "name": "Fitness Assistant",
         "initialMessage": "Hello! I am an assistant for a fictional fitness studio. Need details on our workout programs, membership options, or opening hours? I'm here to help!",
-        "id": "asst_EFxvhDNtArBx9phA28fJpO8X",
+        "id": "gym",
         "suggestions": [
           "What membership plans do you offer?",
           "Which program is best for beginners?",
@@ -198,7 +198,7 @@
       {
         "name": "Wristway Ergonomic Assistant",
         "initialMessage": "Hello! I am the assistant for Wristway, a fictional ergonomic wrist rest designed to enhance comfort and productivity. Do you need information about Wristway's features, usage, or benefits? I'm here to help!",
-        "id": "asst_wTLWhkdxcyy7vgy7FpfZFVB3",
+        "id": "wristway",
         "suggestions": [
           "What makes Wristway ergonomic?",
           "How do I clean and maintain it?",
@@ -206,6 +206,6 @@
         ]
       }
     ],
-    "errorMessage": "I'm experiencing some technical difficulties. Please try again later."
+    "errorMessage": "I'm experiencing some technical difficulties. Please try again later. 🐑"
   }
 }

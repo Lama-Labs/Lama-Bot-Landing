@@ -188,7 +188,7 @@
       {
         "name": "Fitnes asistent",
         "initialMessage": "Pozdravljeni! Sem asistent namišljenega fitnes studia. Potrebujete informacije o vadbenih programih, možnostih članstva ali delovnem času? Tu sem, da pomagam!",
-        "id": "asst_EFxvhDNtArBx9phA28fJpO8X",
+        "id": "gym",
         "suggestions": [
           "Katere članarine ponujate?",
           "Kateri program je najboljši za začetnike?",
@@ -198,7 +198,7 @@
       {
         "name": "Wristway ergonomski asistent",
         "initialMessage": "Pozdravljeni! Sem asistent za Wristway, edinstven ergonomski pripomoček za zapestje, ki izboljšuje udobje in produktivnost. Potrebujete informacije o lastnostih, uporabi ali prednostih Wristway izdelkov? Tu sem, da vam pomagam!",
-        "id": "asst_wTLWhkdxcyy7vgy7FpfZFVB3",
+        "id": "wristway",
         "suggestions": [
           "Kaj naredi Wristway ergonomskega?",
           "Kako ga čistim in vzdržujem?",
@@ -206,6 +206,6 @@
         ]
       }
     ],
-    "errorMessage": "Imam nekaj tehničnih težav. Prosim, poskusite znova pozneje."
+    "errorMessage": "Imam nekaj tehničnih težav. Prosim, poskusite znova pozneje. 🐑"
   }
 }
