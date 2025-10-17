@@ -2,10 +2,8 @@
 
 // eslint-disable-next-line import/named
 import { createStreamableValue } from '@ai-sdk/rsc'
-import { streamText } from 'ai'
 
-import { getAssistantConfigById } from '@/utils/assistantsConfig'
-import { openaiVercelClient } from '@/utils/openai-client'
+import type { ChatRequestBody } from '@/app/api/chat/types'
 
 type SubmitChatArgs = {
   threadId: string
@@ -13,6 +11,43 @@ type SubmitChatArgs = {
   assistantId: string | null
   lang: string
   conversation?: { role: 'user' | 'assistant'; content: string }[]
+}
+
+function getDemoApiKey(assistantId: string | null): string {
+  const normalizedId = assistantId || 'alpacachat'
+
+  const apiKeysJson = process.env.DEMO_API_KEYS
+  if (!apiKeysJson) {
+    throw new Error('DEMO_API_KEYS environment variable is not configured')
+  }
+
+  let apiKeys: Record<string, string>
+  try {
+    apiKeys = JSON.parse(apiKeysJson)
+  } catch (_error) {
+    throw new Error('DEMO_API_KEYS is not valid JSON')
+  }
+
+  const key = apiKeys[normalizedId]
+  if (!key) {
+    throw new Error(`No API key found for assistant: ${normalizedId}`)
+  }
+
+  return key
+}
+
+function getAssistantInstructions(assistantId: string | null): string {
+  const normalizedId = assistantId || 'alpacachat'
+
+  const instructions: Record<string, string> = {
+    alpacachat:
+      'You are the assistant for the Alpaca Chat website. Answer questions about the site, its product (Alpaca Chat), features, pricing, setup, and usage. Be concise, accurate, and helpful. If something is unclear or unknown, ask a clarifying question or say that you do not know.',
+    gym: 'You are a fitness assistant. Answer questions about workout programs, membership options, and opening hours based on the vector store information.',
+    wristway:
+      'You help with Wristway, an ergonomic wrist rest. Use the vector store information to answer product features, usage, and benefits.',
+  }
+
+  return instructions[normalizedId] || instructions['alpacachat']
 }
 
 export async function submitChatMessage(args: SubmitChatArgs): Promise<{
@@ -25,66 +60,72 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
     throw new Error('Missing required fields: threadId or message')
   }
 
-  const baseInstructions =
-    'You are a helpful assistant whose role is defined below. Always answer in the language of the user (specified in the square brackets at the beginning of the message, like "[lang]").'
-  const assistantConfig = getAssistantConfigById(assistantId)
+  // Get the appropriate demo API key for this assistant
+  const apiKey = getDemoApiKey(assistantId)
 
-  const instructions = assistantConfig.instructions
-    ? `${baseInstructions}\n\n${assistantConfig.instructions}`
-    : baseInstructions
+  console.log(`[Demo Chat] Selected assistant: ${assistantId}`)
 
-  const vectorStoreIds = assistantConfig.vectorStoreIds
-
-  // Prefix user message with locale (preserving your current behavior)
-  const userMessage = `[${lang}] ${message}`
-
-  // Build OpenAI Responses API "tools" (file_search) if provided
-  const openAiTools =
-    vectorStoreIds && vectorStoreIds.length > 0
-      ? [
-          {
-            type: 'file_search',
-            vector_store_ids: vectorStoreIds,
-            max_num_results: 20,
-          },
-        ]
-      : undefined
+  // Build request body matching the /api/chat endpoint
+  const requestBody: ChatRequestBody = {
+    sessionId: threadId,
+    websiteContent: getAssistantInstructions(assistantId), // Assistant-specific instructions/context
+    userMessage: message, // No [lang] prefix - handled by language field
+    conversation: conversation || [],
+    language: lang,
+  }
 
   // Create streamable value for text
   const stream = createStreamableValue<string>('')
 
   ;(async () => {
-    const { textStream } = await streamText({
-      model: openaiVercelClient.responses('gpt-4o-mini'),
-      system: instructions,
-      // Provide full conversation if present; otherwise send only the current user message
-      ...(Array.isArray(conversation) && conversation.length > 0
-        ? { messages: conversation }
-        : { prompt: userMessage }),
+    try {
+      // Determine the base URL for the API call
+      const baseUrl = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : 'http://localhost:3000'
+      const apiUrl = `${baseUrl}/api/chat`
 
-      // Pass-through OpenAI Responses API fields here:
-      providerOptions: {
-        openai: {
-          store: true,
-          // vector store id is used as a cache key for the prompt because each tenant has a different vector store
-          ...(vectorStoreIds && vectorStoreIds.length > 0
-            ? { prompt_cache_key: vectorStoreIds[0] }
-            : {}),
-          text: { format: { type: 'text' } },
-          ...(openAiTools
-            ? { tools: openAiTools, tool_choice: 'auto' as const }
-            : {}),
+      // Call the /api/chat endpoint
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
         },
-      },
-    })
+        body: JSON.stringify(requestBody),
+      })
 
-    // Accumulate full text so the client can just render “what we have so far”
-    let acc = ''
-    for await (const chunk of textStream) {
-      acc += chunk
-      stream.update(acc)
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(
+          errorData.error || `API request failed with status ${response.status}`
+        )
+      }
+
+      if (!response.body) {
+        throw new Error('Response body is null')
+      }
+
+      // Stream the plain text response
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let acc = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value, { stream: true })
+        acc += chunk
+        stream.update(acc)
+      }
+
+      stream.done()
+    } catch (error) {
+      console.error('Error calling /api/chat:', error)
+      // Signal error so frontend catch block displays translated error message
+      stream.error(error instanceof Error ? error.message : 'Unknown error')
     }
-    stream.done()
   })()
 
   // Return the text stream handle; the client will read it progressively

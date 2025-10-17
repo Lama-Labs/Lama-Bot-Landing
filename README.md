@@ -2,6 +2,34 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```bash
+# OpenAI API Key
+OPENAI_API_KEY=your_openai_api_key
+
+# Demo API Keys (JSON object mapping assistant IDs to their API keys)
+# Each key should be from a Clerk user account with appropriate vectorStoreId in privateMetadata
+DEMO_API_KEYS={"alpacachat":"key_for_alpacachat_assistant","gym":"key_for_gym_assistant","wristway":"key_for_wristway_assistant"}
+```
+
+**Note:** The app automatically detects the deployment URL. On Vercel, `VERCEL_URL` is automatically provided. Locally, it defaults to `http://localhost:3000`.
+
+**Demo Assistant Configuration:**
+
+- `alpacachat`: Alpaca Chat website assistant (default)
+- `gym`: Fitness/Gym Assistant (requires vectorStore `vs_FyHYZ4MCvmlYV761G73hK4vA`)
+- `wristway`: Wristway Ergonomic Assistant (requires vectorStore `vs_yMRChIljXKBsMw3TP8m20r9D`)
+
+Each API key must correspond to a Clerk user account with:
+
+- The appropriate `vectorStoreId` in their `privateMetadata`
+- An active subscription
+
+### Running the Development Server
+
 First, run the development server:
 
 ```bash
