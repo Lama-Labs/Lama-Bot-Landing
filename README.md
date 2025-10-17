@@ -15,7 +15,7 @@ OPENAI_API_KEY=your_openai_api_key
 DEMO_API_KEYS={"alpacachat":"key_for_alpacachat_assistant","gym":"key_for_gym_assistant","wristway":"key_for_wristway_assistant"}
 ```
 
-**Note:** The app automatically detects the deployment URL. On Vercel, `VERCEL_URL` is automatically provided. Locally, it defaults to `http://localhost:3000`.
+**Note:** The app automatically detects the deployment URL. On Vercel, `VERCEL_PROJECT_PRODUCTION_URL` is automatically provided. Locally, it defaults to `http://localhost:3000`.
 
 **Demo Assistant Configuration:**
 

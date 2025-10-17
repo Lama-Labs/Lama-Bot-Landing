@@ -80,8 +80,8 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
   ;(async () => {
     try {
       // Determine the base URL for the API call
-      const baseUrl = process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
+      const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
         : 'http://localhost:3000'
       const apiUrl = `${baseUrl}/api/chat`
 
