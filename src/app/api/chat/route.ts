@@ -18,8 +18,28 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
 
+function getCurrentDateTimeInfo(): string {
+  const now = new Date()
+  const dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long' })
+  const date = now.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+  const time = now.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  })
+
+  return `Current date and time: ${dayOfWeek}, ${date} at ${time}`
+}
+
 const instructions = `
 You are the on-site assistant for this website. Your sole job is to help visitors with information and tasks related to THIS SITE'S content, offerings, and services. You are not a general-purpose chatbot.
+
+${getCurrentDateTimeInfo()}
 
 SOURCES & PRIORITY
 1) Current page context ("Website context") — treat pronouns like "this/it/here" as referring to the page's subject (content/service/topic/article/product) the user is viewing.
