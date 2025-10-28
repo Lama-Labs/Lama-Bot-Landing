@@ -33,11 +33,11 @@ interface Message {
   suggestions?: string[]
 }
 
-interface ChatFieldProps {
+interface ChatWindowProps {
   embedded?: boolean
 }
 
-const ChatField: React.FC<ChatFieldProps> = ({ embedded = false }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ embedded = false }) => {
   const t = useTranslations('chat')
   const lang = useLocale()
 
@@ -138,17 +138,17 @@ const ChatField: React.FC<ChatFieldProps> = ({ embedded = false }) => {
         // Get selected assistant info for attaching suggestions
         const selectedAssistant = assistantIdCookie
           ? (t
-              .raw('initialAssistants')
-              .find(
-                (assistant: { id: string }) =>
-                  assistant.id === assistantIdCookie
-              ) as
-              | {
-                  initialMessage?: string
-                  suggestions?: string[]
-                  name?: string
-                }
-              | undefined)
+            .raw('initialAssistants')
+            .find(
+              (assistant: { id: string }) =>
+                assistant.id === assistantIdCookie
+            ) as
+            | {
+              initialMessage?: string
+              suggestions?: string[]
+              name?: string
+            }
+            | undefined)
           : undefined
 
         for (const turn of conv) {
@@ -294,4 +294,4 @@ const ChatField: React.FC<ChatFieldProps> = ({ embedded = false }) => {
   )
 }
 
-export default ChatField
+export default ChatWindow

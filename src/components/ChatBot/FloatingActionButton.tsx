@@ -4,7 +4,7 @@ import { Box, Fab, Fade } from '@mui/material'
 import { useState } from 'react'
 
 import ChatBotAnimation from '@/components/ChatBot/ChatBotAnimation'
-import ChatField from '@/components/ChatBot/ChatField'
+import ChatWindow from '@/components/ChatBot/ChatWindow'
 import ArrowHint from '@/components/Hero/ArrowHint/ArrowHint'
 import { useChat } from '@/context/ChatContext'
 
@@ -44,7 +44,7 @@ const FloatingActionButton: React.FC = () => {
       >
         <Fade in={isChatOpen}>
           <Box>
-            <ChatField />
+            <ChatWindow />
           </Box>
         </Fade>
       </Box>

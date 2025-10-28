@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
 // import { useChat } from '@/context/ChatContext'
-import ChatField from '@/components/ChatBot/ChatField'
+import ChatWindow from '@/components/ChatBot/ChatWindow'
 import EmailSubscription from '@/components/EmailSubscription/EmailSubscription'
 import TextParser from '@/utils/TextParser'
 
@@ -170,7 +170,7 @@ const Hero = () => {
                     zIndex: 2,
                   }}
                 >
-                  <ChatField embedded />
+                  <ChatWindow embedded />
                 </Box>
               </Grid2>
             )}
