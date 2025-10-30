@@ -6,19 +6,22 @@ type PublicMetadata = Record<string, unknown>
  * Pass the `has` function from `auth()` to avoid multiple auth lookups in a single request.
  */
 export function hasAnyPlan(
-  has: HasFunction,
+  has: HasFunction | undefined,
   plans: string | string[],
   publicMetadata?: PublicMetadata
 ): boolean {
+  // Return false if has function is not available (user not loaded yet)
+  if (!has) return false
+
   const planList = Array.isArray(plans) ? plans : [plans]
 
-  // Allow access if user is on a matching trial tier in public metadata
+  // Allow access if the user is on a matching trial tier in public metadata
   const trialValue = publicMetadata?.trial
   if (typeof trialValue === 'string' && planList.includes(trialValue)) {
     return true
   }
 
-  // Otherwise, require an active paid plan
+  // Check if user has any of the specified plans using Clerk's billing API
   for (const plan of planList) {
     if (has({ plan })) return true
   }

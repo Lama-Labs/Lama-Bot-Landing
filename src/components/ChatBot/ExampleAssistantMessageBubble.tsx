@@ -23,11 +23,13 @@ interface InputProps {
       { text: string; isUser: boolean; suggestions?: string[] }[]
     >
   >
+  namespace?: string
 }
 
 const MessageBubble: React.FC<InputProps> = ({
   setAssistantId,
   setResponses,
+  namespace = '',
 }) => {
   const t = useTranslations('chat')
   const { setAssistantName } = useChat()
@@ -70,16 +72,19 @@ const MessageBubble: React.FC<InputProps> = ({
                   suggestions: assistant.suggestions,
                 },
               ])
-              setAssistantIdCookie(assistant.id)
-              clearThreadId()
-              clearConversation()
+              setAssistantIdCookie(assistant.id, namespace)
+              clearThreadId(namespace)
+              clearConversation(namespace)
               // update header title via context
               setAssistantName(assistant.name)
               // Persist the assistant's initial message so it survives reload
-              appendConversationTurn({
-                role: 'assistant',
-                content: assistant.initialMessage,
-              })
+              appendConversationTurn(
+                {
+                  role: 'assistant',
+                  content: assistant.initialMessage,
+                },
+                namespace
+              )
             }}
           />
         )

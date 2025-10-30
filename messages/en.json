@@ -206,6 +206,10 @@
         ]
       }
     ],
-    "errorMessage": "I'm experiencing some technical difficulties. Please try again later. 🐑"
+    "errorMessage": "I'm experiencing some technical difficulties. Please try again later. 🐑",
+    "dashboard": {
+      "assistantName": "My Assistant",
+      "initialMessage": "Welcome to the testing environment! I'm ready to demonstrate my capabilities with your uploaded documents. Ask me anything to test how well I retrieve and present information from your knowledge base. What would you like to explore?"
+    }
   }
 }

@@ -2,48 +2,54 @@ import Cookies from 'js-cookie'
 
 export type ChatTurn = { role: 'user' | 'assistant'; content: string }
 
-const THREAD_COOKIE_KEY = 'thread_id'
-const ASSISTANT_COOKIE_KEY = 'assistant_id'
-const CONVERSATION_COOKIE_KEY = 'conversation'
-
 // Thread helpers
-export const getThreadId = async (): Promise<string> => {
-  let threadId = Cookies.get(THREAD_COOKIE_KEY)
+export const getThreadId = async (namespace: string = ''): Promise<string> => {
+  const cookieKey = `${namespace}thread_id`
+  let threadId = Cookies.get(cookieKey)
   if (!threadId) {
     threadId = `thread_${Math.random().toString(36).slice(2)}_${Date.now()}`
   }
-  Cookies.set(THREAD_COOKIE_KEY, threadId, { expires: 1 })
+  Cookies.set(cookieKey, threadId, { expires: 1 })
   return threadId
 }
 
-export const readThreadId = (): string | null => {
-  return Cookies.get(THREAD_COOKIE_KEY) ?? null
+export const readThreadId = (namespace: string = ''): string | null => {
+  const cookieKey = `${namespace}thread_id`
+  return Cookies.get(cookieKey) ?? null
 }
 
-export const hasActiveThread = (): boolean => {
-  return readThreadId() !== null
+export const hasActiveThread = (namespace: string = ''): boolean => {
+  return readThreadId(namespace) !== null
 }
 
-export const clearThreadId = (): void => {
-  Cookies.remove(THREAD_COOKIE_KEY)
+export const clearThreadId = (namespace: string = ''): void => {
+  const cookieKey = `${namespace}thread_id`
+  Cookies.remove(cookieKey)
 }
 
 // Assistant helpers
-export const getAssistantId = (): string | null => {
-  return Cookies.get(ASSISTANT_COOKIE_KEY) ?? null
+export const getAssistantId = (namespace: string = ''): string | null => {
+  const cookieKey = `${namespace}assistant_id`
+  return Cookies.get(cookieKey) ?? null
 }
 
-export const setAssistantId = (assistantId: string): void => {
-  Cookies.set(ASSISTANT_COOKIE_KEY, assistantId, { expires: 1 })
+export const setAssistantId = (
+  assistantId: string,
+  namespace: string = ''
+): void => {
+  const cookieKey = `${namespace}assistant_id`
+  Cookies.set(cookieKey, assistantId, { expires: 1 })
 }
 
-export const clearAssistantId = (): void => {
-  Cookies.remove(ASSISTANT_COOKIE_KEY)
+export const clearAssistantId = (namespace: string = ''): void => {
+  const cookieKey = `${namespace}assistant_id`
+  Cookies.remove(cookieKey)
 }
 
 // Conversation helpers
-export function getConversation(): ChatTurn[] {
-  const raw = Cookies.get(CONVERSATION_COOKIE_KEY)
+export function getConversation(namespace: string = ''): ChatTurn[] {
+  const cookieKey = `${namespace}conversation`
+  const raw = Cookies.get(cookieKey)
   if (!raw) return []
   try {
     const parsed = JSON.parse(raw)
@@ -58,17 +64,25 @@ export function getConversation(): ChatTurn[] {
   return []
 }
 
-export function setConversation(turns: ChatTurn[]): void {
-  Cookies.set(CONVERSATION_COOKIE_KEY, JSON.stringify(turns), { expires: 1 })
+export function setConversation(
+  turns: ChatTurn[],
+  namespace: string = ''
+): void {
+  const cookieKey = `${namespace}conversation`
+  Cookies.set(cookieKey, JSON.stringify(turns), { expires: 1 })
 }
 
-export function appendConversationTurn(turn: ChatTurn): ChatTurn[] {
-  const current = getConversation()
+export function appendConversationTurn(
+  turn: ChatTurn,
+  namespace: string = ''
+): ChatTurn[] {
+  const current = getConversation(namespace)
   const updated = [...current, turn]
-  setConversation(updated)
+  setConversation(updated, namespace)
   return updated
 }
 
-export function clearConversation(): void {
-  Cookies.remove(CONVERSATION_COOKIE_KEY)
+export function clearConversation(namespace: string = ''): void {
+  const cookieKey = `${namespace}conversation`
+  Cookies.remove(cookieKey)
 }

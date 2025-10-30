@@ -3,11 +3,13 @@ import { Chip, Stack } from '@mui/material'
 interface SuggestionChipsProps {
   suggestions: string[]
   onSelect: (text: string) => void
+  disabled?: boolean
 }
 
 const SuggestionChips: React.FC<SuggestionChipsProps> = ({
   suggestions,
   onSelect,
+  disabled = false,
 }) => {
   if (!suggestions || suggestions.length === 0) return null
 
@@ -17,7 +19,8 @@ const SuggestionChips: React.FC<SuggestionChipsProps> = ({
         <Chip
           key={`${idx}-${s}`}
           label={s}
-          clickable
+          clickable={!disabled}
+          disabled={disabled}
           variant='outlined'
           color='default'
           onClick={() => onSelect(s)}
