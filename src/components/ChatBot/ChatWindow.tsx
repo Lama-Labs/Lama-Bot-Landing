@@ -35,11 +35,18 @@ interface Message {
 
 interface ChatWindowProps {
   embedded?: boolean
+  mode?: 'demo' | 'dashboard'
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ embedded = false }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({
+  embedded = false,
+  mode = 'demo',
+}) => {
   const t = useTranslations('chat')
   const lang = useLocale()
+
+  // Derive cookie namespace from mode
+  const cookieNamespace = mode === 'dashboard' ? 'dashboard_' : ''
 
   const [responses, setResponses] = useState<Message[]>([])
   const [question, setQuestion] = useState<string>('')
@@ -60,22 +67,25 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ embedded = false }) => {
     const sent = toSend
     setQuestion('')
 
-    try {
-      const threadId = await getThreadId()
+    // Add a placeholder assistant message for loading state
+    const responseEntry: Message = { text: '', isUser: false }
+    setResponses((prev) => [...prev, responseEntry])
 
-      // add a placeholder assistant message
-      const responseEntry: Message = { text: '', isUser: false }
-      setResponses((prev) => [...prev, responseEntry])
+    try {
+      const threadId = await getThreadId(cookieNamespace)
 
       // Build and persist conversation with the new user turn
-      const conversation: ChatTurn[] = appendConversationTurn({
-        role: 'user',
-        content: `[${lang}] ${sent}`,
-      })
+      const conversation: ChatTurn[] = appendConversationTurn(
+        {
+          role: 'user',
+          content: `[${lang}] ${sent}`,
+        },
+        cookieNamespace
+      )
 
-      // Refresh assistant cookie TTL on interaction
-      if (assistantId) {
-        setAssistantIdCookie(assistantId)
+      // Refresh assistant cookie TTL on interaction (demo mode only)
+      if (assistantId && mode === 'demo') {
+        setAssistantIdCookie(assistantId, cookieNamespace)
       }
 
       // Call the streaming server action with full conversation
@@ -85,6 +95,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ embedded = false }) => {
         assistantId,
         lang,
         conversation,
+        useDashboardMode: mode === 'dashboard',
       })
 
       // Read the stream and progressively update the last assistant message
@@ -96,19 +107,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ embedded = false }) => {
 
       // Persist assistant turn when streaming finishes
       const updated: ChatTurn[] = [
-        ...getConversation(),
+        ...getConversation(cookieNamespace),
         {
           role: 'assistant',
           content: responseEntry.text,
         },
       ]
-      setConversation(updated)
+      setConversation(updated, cookieNamespace)
     } catch (error) {
       console.error('Error fetching from API:', error)
-      setResponses((prev) => [
-        ...prev,
-        { text: t('errorMessage'), isUser: false },
-      ])
+      // Update the placeholder message with error text instead of adding a new one
+      responseEntry.text = t('errorMessage')
+      setResponses((prev) => [...prev])
     } finally {
       setIsBusy(false)
     }
@@ -129,64 +139,89 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ embedded = false }) => {
   useEffect(() => {
     const init = async () => {
       try {
-        const assistantIdCookie = getAssistantId()
         const responsesToSet: Message[] = []
 
-        // Always restore existing conversation, regardless of assistant selection
-        const conv = getConversation()
+        // Always restore existing conversation
+        const conv = getConversation(cookieNamespace)
 
-        // Get selected assistant info for attaching suggestions
-        const selectedAssistant = assistantIdCookie
-          ? (t
-            .raw('initialAssistants')
-            .find(
-              (assistant: { id: string }) =>
-                assistant.id === assistantIdCookie
-            ) as
-            | {
-              initialMessage?: string
-              suggestions?: string[]
-              name?: string
-            }
-            | undefined)
-          : undefined
+        if (mode === 'dashboard') {
+          // Dashboard mode: no assistant selector, use user's assistant
+          setAssistantId('dashboard')
+          setAssistantName(t('dashboard.assistantName'))
 
-        for (const turn of conv) {
-          const message: Message = {
-            text: turn.content,
-            isUser: turn.role === 'user',
-          }
-
-          // Attach suggestions to the initial assistant message if it matches
-          if (
-            !message.isUser &&
-            selectedAssistant?.initialMessage === turn.content &&
-            selectedAssistant.suggestions
-          ) {
-            message.suggestions = selectedAssistant.suggestions
-          }
-
-          responsesToSet.push(message)
-        }
-
-        if (assistantIdCookie) {
-          setAssistantId(assistantIdCookie)
-
-          // Show initial assistant message only if starting fresh
-          if (
-            !hasActiveThread() &&
-            conv.length === 0 &&
-            selectedAssistant?.initialMessage
-          ) {
+          // Restore conversation
+          for (const turn of conv) {
             responsesToSet.push({
-              text: selectedAssistant.initialMessage,
-              isUser: false,
-              suggestions: selectedAssistant.suggestions,
+              text: turn.content,
+              isUser: turn.role === 'user',
             })
           }
 
-          // Set header title based on restored assistant
-          if (selectedAssistant?.name) setAssistantName(selectedAssistant.name)
+          // Show initial dashboard message only if starting fresh
+          if (!hasActiveThread(cookieNamespace) && conv.length === 0) {
+            responsesToSet.push({
+              text: t('dashboard.initialMessage'),
+              isUser: false,
+            })
+          }
+        } else {
+          // Demo mode: original logic with assistant selector
+          const assistantIdCookie = getAssistantId(cookieNamespace)
+
+          // Get selected assistant info for attaching suggestions
+          const selectedAssistant = assistantIdCookie
+            ? (t
+                .raw('initialAssistants')
+                .find(
+                  (assistant: { id: string }) =>
+                    assistant.id === assistantIdCookie
+                ) as
+                | {
+                    initialMessage?: string
+                    suggestions?: string[]
+                    name?: string
+                  }
+                | undefined)
+            : undefined
+
+          for (const turn of conv) {
+            const message: Message = {
+              text: turn.content,
+              isUser: turn.role === 'user',
+            }
+
+            // Attach suggestions to the initial assistant message if it matches
+            if (
+              !message.isUser &&
+              selectedAssistant?.initialMessage === turn.content &&
+              selectedAssistant.suggestions
+            ) {
+              message.suggestions = selectedAssistant.suggestions
+            }
+
+            responsesToSet.push(message)
+          }
+
+          if (assistantIdCookie) {
+            setAssistantId(assistantIdCookie)
+
+            // Show initial assistant message only if starting fresh
+            if (
+              !hasActiveThread(cookieNamespace) &&
+              conv.length === 0 &&
+              selectedAssistant?.initialMessage
+            ) {
+              responsesToSet.push({
+                text: selectedAssistant.initialMessage,
+                isUser: false,
+                suggestions: selectedAssistant.suggestions,
+              })
+            }
+
+            // Set header title based on restored assistant
+            if (selectedAssistant?.name)
+              setAssistantName(selectedAssistant.name)
+          }
         }
 
         setResponses(responsesToSet)
@@ -197,7 +232,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ embedded = false }) => {
     // run once
     // eslint-disable-next-line react-hooks/exhaustive-deps
     init()
-  }, [t, setAssistantName])
+  }, [t, setAssistantName, mode, cookieNamespace])
 
   return (
     <Box
@@ -219,12 +254,25 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ embedded = false }) => {
       {/* Header */}
       <ChatHeader
         onReset={() => {
-          clearThreadId()
-          clearAssistantIdCookie()
-          clearConversation()
-          setResponses([])
-          setAssistantId(null)
-          setAssistantName('Alpaca Chat')
+          clearThreadId(cookieNamespace)
+          clearAssistantIdCookie(cookieNamespace)
+          clearConversation(cookieNamespace)
+
+          if (mode === 'dashboard') {
+            setAssistantId('dashboard')
+            setAssistantName(t('dashboard.assistantName'))
+            // Show initial message after reset in dashboard mode
+            setResponses([
+              {
+                text: t('dashboard.initialMessage'),
+                isUser: false,
+              },
+            ])
+          } else {
+            setAssistantId(null)
+            setAssistantName('Alpaca Chat')
+            setResponses([])
+          }
         }}
         title={assistantName}
         icon='/alpaca logo.svg'
@@ -260,11 +308,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ embedded = false }) => {
           },
         }}
       >
-        {/* show initial assistant selector */}
-        {!assistantId && (
+        {/* show initial assistant selector (demo mode only) */}
+        {mode === 'demo' && !assistantId && (
           <ExampleAssistantMessageBubble
             setAssistantId={setAssistantId}
             setResponses={setResponses}
+            namespace=''
           />
         )}
 
@@ -276,6 +325,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ embedded = false }) => {
               <SuggestionChips
                 suggestions={msg.suggestions}
                 onSelect={(text) => handleSend(text)}
+                disabled={isBusy}
               />
             )}
           </Fragment>

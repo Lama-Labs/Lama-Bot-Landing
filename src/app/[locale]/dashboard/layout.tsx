@@ -11,6 +11,7 @@ import { getMessages } from 'next-intl/server'
 import AnalyticsConsentProvider from '@/components/Analytics/AnalyticsConsentProvider'
 import Footer from '@/components/Footer/Footer'
 import DashboardNavbar from '@/components/Navbar/DashboardNavbar'
+import { ChatProvider } from '@/context/ChatContext'
 import { routing } from '@/i18n/routing'
 import theme from '@/theme/theme'
 
@@ -54,13 +55,15 @@ export default async function DashboardLayout({
             <ThemeProvider theme={theme}>
               <CssBaseline />
               <NextIntlClientProvider messages={messages}>
-                <DashboardNavbar />
-                <Box component='main' sx={{ flexGrow: 1 }}>
-                  {children}
-                </Box>
-                <Analytics />
-                <Footer />
-                <AnalyticsConsentProvider />
+                <ChatProvider>
+                  <DashboardNavbar />
+                  <Box component='main' sx={{ flexGrow: 1 }}>
+                    {children}
+                  </Box>
+                  <Analytics />
+                  <Footer />
+                  <AnalyticsConsentProvider />
+                </ChatProvider>
               </NextIntlClientProvider>
             </ThemeProvider>
           </AppRouterCacheProvider>
