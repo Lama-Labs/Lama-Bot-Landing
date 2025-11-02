@@ -29,6 +29,7 @@ import { useState } from 'react'
 import ChatBotAnimation from '@/components/ChatBot/ChatBotAnimation'
 import ChatWindow from '@/components/ChatBot/ChatWindow'
 import ApiKeySection from '@/components/Dashboard/ApiKeySection'
+import CustomInstructions from '@/components/Dashboard/CustomInstructions'
 import ManageFiles from '@/components/Dashboard/ManageFiles'
 import { hasAnyPlan } from '@/utils/clerk/subscription'
 
@@ -87,6 +88,9 @@ const Dashboard = () => {
 
                     {/* File Management Section */}
                     <ManageFiles />
+
+                    {/* Custom Instructions Section */}
+                    <CustomInstructions user={user} isLoaded={isLoaded} />
 
                     {/* API Key Section */}
                     <ApiKeySection user={user} isLoaded={isLoaded} />

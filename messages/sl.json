@@ -139,6 +139,17 @@
         "subscribeToGetKey": "Aktivnega API ključa ni mogoče najti. Naročite se na plačljiv paket, da pridobite svoj API ključ."
       }
     },
+    "customInstructions": {
+      "title": "Navodila po meri",
+      "tooltip": "Določite, kako naj se vaš AI pomočnik obnaša, vključno z njegovo osebnostjo, tonom in načinom odzivanja na stranke.",
+      "placeholder": "Opišite osebnost, ton in način odzivanja vašega pomočnika...\n\nPrimer:\n- Bodi prijazen in profesionalen\n- Uporabljaj preprost jezik\n- Osredotoči se na hitro reševanje težav strank\n- Če ne poznate odgovora, to priznajte in ponudite pomoč pri iskanju informacij",
+      "characterCount": "{count}/{max} znakov",
+      "saveButton": "Shrani navodila",
+      "messages": {
+        "error": "Napaka pri shranjevanju navodil",
+        "fetchError": "Napaka pri nalaganju navodil"
+      }
+    },
     "files": {
       "title": "Vaše datoteke",
       "tooltip": "Upravljajte naložene datoteke, ki se uporabljajo za učenje vašega AI klepetalnega robota. Lahko nalagate dokumente, jih brišete in spremljate stanje obdelave.",

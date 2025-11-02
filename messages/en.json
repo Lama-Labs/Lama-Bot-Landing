@@ -139,6 +139,17 @@
         "subscribeToGetKey": "No active API key found. Subscribe to a paid plan to get your API key."
       }
     },
+    "customInstructions": {
+      "title": "Custom Instructions",
+      "tooltip": "Define how your AI assistant should behave, including its personality, tone, and how it should respond to customers.",
+      "placeholder": "Describe your assistant's personality, tone, and how it should respond to customers...\n\nExample:\n- Be friendly and professional\n- Use simple language\n- Focus on solving customer problems quickly\n- If you don't know the answer, admit it and offer to help find the information",
+      "characterCount": "{count}/{max} characters",
+      "saveButton": "Save Instructions",
+      "messages": {
+        "error": "Failed to save instructions",
+        "fetchError": "Error loading instructions"
+      }
+    },
     "files": {
       "title": "Your Files",
       "tooltip": "Manage your uploaded files that are used to train your AI chatbot. You can upload documents, delete them, and monitor their processing status.",
