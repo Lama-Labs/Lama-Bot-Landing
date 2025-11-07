@@ -1,8 +1,9 @@
 'use server'
 
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import { revalidateTag, unstable_cache } from 'next/cache'
 
+import { hasAnyPlan } from '@/utils/clerk/subscription'
 import { getCustomInstructions, saveCustomInstructions } from '@/utils/turso'
 
 const tagForUser = (userId: string) => `custom-instructions:${userId}`
@@ -64,10 +65,22 @@ export async function getCustomInstructionsAction(): Promise<string> {
 export async function saveCustomInstructionsAction(
   instructions: string
 ): Promise<{ success: boolean; message: string }> {
-  const { userId } = await auth()
+  const { userId, has } = await auth()
 
   if (!userId) {
     throw new Error('Unauthorized: User must be signed in')
+  }
+
+  const user = await currentUser()
+
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  // Ensure user has an eligible paid plan or matching trial tier (e.g., basic)
+  const isEligible = hasAnyPlan(has, 'basic', user.publicMetadata)
+  if (!isEligible) {
+    throw new Error('Requires an active paid plan')
   }
 
   // Trim only leading/trailing whitespace (preserves internal newlines and formatting)

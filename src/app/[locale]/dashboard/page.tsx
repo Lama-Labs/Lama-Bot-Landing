@@ -23,14 +23,16 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material'
+import { useSearchParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import ChatBotAnimation from '@/components/ChatBot/ChatBotAnimation'
 import ChatWindow from '@/components/ChatBot/ChatWindow'
 import ApiKeySection from '@/components/Dashboard/ApiKeySection'
 import CustomInstructions from '@/components/Dashboard/CustomInstructions'
 import ManageFiles from '@/components/Dashboard/ManageFiles'
+import { usePreventClerkCheckoutDismiss } from '@/hooks/usePreventClerkCheckoutDismiss'
 import { hasAnyPlan } from '@/utils/clerk/subscription'
 
 const Dashboard = () => {
@@ -42,9 +44,28 @@ const Dashboard = () => {
   const theme = useTheme()
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'))
   const [isChatOpen, setIsChatOpen] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
+  const searchParams = useSearchParams()
+
+  // Prevent closing the Clerk checkout drawer via outside click or Escape
+  usePreventClerkCheckoutDismiss(true)
 
   // Check if user has active subscription using Clerk's billing API
   const hasActiveSubscription = hasAnyPlan(has, 'basic', user?.publicMetadata)
+
+  // Handle subscription completion redirect
+  useEffect(() => {
+    const subscribed = searchParams.get('subscribed')
+    if (subscribed === 'true' && user) {
+      // Force Clerk to reload user data (including subscription metadata)
+      user.reload().then(() => {
+        // After user data is refreshed, force component refresh
+        setRefreshKey((prev) => prev + 1)
+        // Clean up URL
+        window.history.replaceState({}, '', `/${locale}/dashboard`)
+      })
+    }
+  }, [searchParams, locale, user])
 
   if (!isLoaded) {
     return (
@@ -93,10 +114,19 @@ const Dashboard = () => {
                     <CustomInstructions user={user} isLoaded={isLoaded} />
 
                     {/* API Key Section */}
-                    <ApiKeySection user={user} isLoaded={isLoaded} />
+                    <ApiKeySection
+                      key={refreshKey}
+                      user={user}
+                      isLoaded={isLoaded}
+                    />
 
                     <PricingTable
-                      newSubscriptionRedirectUrl={`/${locale}/dashboard`}
+                      newSubscriptionRedirectUrl={`/${locale}/dashboard?subscribed=true`}
+                      appearance={{
+                        variables: {
+                          colorPrimary: theme.palette.primary.main,
+                        },
+                      }}
                       fallback={
                         <Skeleton
                           variant='rectangular'
@@ -190,7 +220,14 @@ const Dashboard = () => {
             <Typography variant='body1' color='text.secondary'>
               {t('signedOut.subtitle')}
             </Typography>
-            <PricingTable newSubscriptionRedirectUrl={`/${locale}/dashboard`} />
+            <PricingTable
+              appearance={{
+                variables: {
+                  colorPrimary: theme.palette.primary.main,
+                },
+              }}
+              newSubscriptionRedirectUrl={`/${locale}/dashboard?subscribed=true`}
+            />
             <Divider />
             <Typography variant='body1' align='center'>
               {t('signedOut.haveAccount')}
