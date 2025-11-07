@@ -4,10 +4,15 @@ import { ClerkProvider, PricingTable } from '@clerk/nextjs'
 import { Container, Skeleton, useTheme } from '@mui/material'
 import { useLocale } from 'next-intl'
 
+import { usePreventClerkCheckoutDismiss } from '@/hooks/usePreventClerkCheckoutDismiss'
+
 const PricingSection = () => {
   const theme = useTheme()
   const locale = useLocale()
   //const t = useTranslations('home.pricing')
+
+  // Prevent closing the Clerk checkout drawer via outside click or Escape
+  usePreventClerkCheckoutDismiss(true)
 
   return (
     <ClerkProvider

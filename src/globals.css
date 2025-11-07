@@ -3,62 +3,77 @@ body {
 }
 
 .grecaptcha-badge {
-  display: none !important; /* Hide the reCAPTCHA badge */
+  display: none !important;
+  /* Hide the reCAPTCHA badge */
 }
 
 /* Keyframes for animations in different directions */
 @keyframes appearFromBottom {
   from {
     opacity: 0;
-    transform: translateY(5vh); /* Start slightly below the final position */
+    transform: translateY(5vh);
+    /* Start slightly below the final position */
   }
+
   to {
     opacity: 1;
-    transform: translateY(0); /* End at the final position */
+    transform: translateY(0);
+    /* End at the final position */
   }
 }
 
 @keyframes appearFromTop {
   from {
     opacity: 0;
-    transform: translateY(-5vh); /* Start slightly above the final position */
+    transform: translateY(-5vh);
+    /* Start slightly above the final position */
   }
+
   to {
     opacity: 1;
-    transform: translateY(0); /* End at the final position */
+    transform: translateY(0);
+    /* End at the final position */
   }
 }
 
 @keyframes appearFromLeft {
   from {
     opacity: 0;
-    transform: translateX(-5vw); /* Start slightly left of the final position */
+    transform: translateX(-5vw);
+    /* Start slightly left of the final position */
   }
+
   to {
     opacity: 1;
-    transform: translateX(0); /* End at the final position */
+    transform: translateX(0);
+    /* End at the final position */
   }
 }
 
 @keyframes appearFromRight {
   from {
     opacity: 0;
-    transform: translateX(5vw); /* Start slightly right of the final position */
+    transform: translateX(5vw);
+    /* Start slightly right of the final position */
   }
+
   to {
     opacity: 1;
-    transform: translateX(0); /* End at the final position */
+    transform: translateX(0);
+    /* End at the final position */
   }
 }
 
 /* Base class to ensure element is initially hidden */
 .animate {
-  opacity: 0; /* Hidden initially */
+  opacity: 0;
+  /* Hidden initially */
 }
 
 /* Trigger animation when the element is in view */
 .animate.in-view {
-  opacity: 1; /* Ensure visibility after animation */
+  opacity: 1;
+  /* Ensure visibility after animation */
 }
 
 /* Ensure animations only trigger when both `.animate` and `.in-view` are present */
@@ -120,6 +135,7 @@ body {
   animation: l3 1s infinite linear;
   scale: 0.5;
 }
+
 @keyframes l3 {
   20% {
     background-position:
@@ -127,18 +143,21 @@ body {
       50% 50%,
       100% 50%;
   }
+
   40% {
     background-position:
       0 100%,
       50% 0,
       100% 50%;
   }
+
   60% {
     background-position:
       0 50%,
       50% 100%,
       100% 0;
   }
+
   80% {
     background-position:
       0 50%,
@@ -146,4 +165,10 @@ body {
       100% 100%;
   }
 }
+
+/* Temporary fix for Clerk's drawer z-index */
+.cl-drawerRoot[role="dialog"] {
+  z-index: 2000 !important;
+}
+
 /* ---------------------------------- */

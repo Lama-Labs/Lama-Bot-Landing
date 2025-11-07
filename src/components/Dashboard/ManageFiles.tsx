@@ -278,32 +278,6 @@ const ManageFiles = () => {
               {t('empty.subtitle')}
             </Typography>
           </Box>
-          <Tooltip
-            title={
-              !isSubscribed
-                ? t('tooltips.subscriptionRequired')
-                : isLimitReached
-                  ? t('tooltips.limitReached', { limit: filesLimit })
-                  : ''
-            }
-            disableHoverListener={!(isLimitReached || !isSubscribed)}
-            disableFocusListener={!(isLimitReached || !isSubscribed)}
-            disableTouchListener={!(isLimitReached || !isSubscribed)}
-            arrow
-          >
-            <span>
-              <LoadingButton
-                size='small'
-                variant='contained'
-                startIcon={<Upload size={16} />}
-                onClick={() => fileInputRef.current?.click()}
-                loading={uploading}
-                disabled={uploading || isLimitReached || !isSubscribed}
-              >
-                {t('buttons.upload')}
-              </LoadingButton>
-            </span>
-          </Tooltip>
         </Paper>
       ) : (
         <Paper elevation={1}>

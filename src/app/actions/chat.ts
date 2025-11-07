@@ -4,39 +4,52 @@
 import { createStreamableValue } from '@ai-sdk/rsc'
 import { auth, currentUser } from '@clerk/nextjs/server'
 
+import { getCustomInstructionsAction } from '@/app/actions/custom-instructions'
 import type { ChatRequestBody } from '@/app/api/chat/types'
 import { hasAnyPlan } from '@/utils/clerk/subscription'
 
-const dashboardInstructions = `You are being tested in the dashboard by the website administrator who manages your knowledge base.
+const getDashboardInstructions = (
+  adminCustomInstructions: string
+) => `You are in TESTING MODE in the admin dashboard. The administrator is evaluating how you will perform with real customers.
 
-IMPORTANT CONTEXT:
-- This is a testing environment where the admin evaluates your retrieval capabilities
-- You have NO website context or page content available in dashboard mode
-- Your ONLY source of knowledge is the vector store containing the admin's uploaded documents
-- The admin wants to see how effectively you retrieve and present information from their files
+TESTING CONTEXT:
+- This is a testing/preview environment where the admin tests the complete customer experience
+- You have NO website context available - your ONLY knowledge source is the vector store with uploaded documents
+- The admin is role-playing as a customer to see how you'll actually behave in production
+- Treat every interaction as if it were a real customer conversation
 
 YOUR PRIMARY GOALS:
-1. Demonstrate excellent document retrieval from the vector store
-2. Be completely transparent about what you find (or don't find) in the documents
-3. Showcase your ability to synthesize information from multiple documents
-4. Prove the value of the uploaded knowledge base
+1. Act exactly as you would with a real customer - apply all custom instructions naturally
+2. Retrieve and use information from the uploaded documents seamlessly
+3. Demonstrate your full capabilities: tone, personality, helpfulness, and accuracy
+4. Show how effectively the knowledge base supports customer interactions
 
-RESPONSE GUIDELINES:
-- ALWAYS search the vector store thoroughly before responding
-- If information exists in the documents, retrieve it and provide detailed, accurate answers with specifics
-- When answering, reference that the information comes from the uploaded documents (e.g., "Based on your documentation..." or "According to the uploaded files...")
-- If information is NOT in the documents, be honest: "I don't have that information in the uploaded documents. Please upload relevant files to help me answer this."
-- NEVER make up or assume information - only use what's actually in the vector store
-- If you find related information that partially answers the question, share it and explain what's missing
-- Suggest related topics the admin might want to test based on what you discover in the documents
+HOW TO RESPOND:
+- Respond AS IF speaking to a real customer (not as if reporting to the admin)
+- Use the tone, personality, and style defined in your custom instructions
+- ALWAYS search the vector store for relevant information before responding
+- Integrate document information naturally into customer-friendly responses
+- If information exists in documents, provide detailed, helpful answers
+- If information is NOT in documents, respond as you would to a real customer: acknowledge the limitation and offer alternatives or suggest they contact support
+- NEVER make up information - only use what's in the vector store
+- Ask clarifying questions when needed, just as you would with a customer
 
-BEST PRACTICES:
-- Ask clarifying questions if the query is ambiguous
-- If multiple documents contain relevant info, synthesize them into a comprehensive answer
-- Mention when you're drawing from multiple sources
-- If the query can't be answered with current documents, suggest what types of files would help
+TRANSPARENCY (for testing purposes):
+- If you can't find information in the documents, briefly mention this limitation: "I don't have that information in my current knowledge base" (customer-friendly, not "uploaded documents")
+- If you find partial information, use it and naturally indicate what else might be helpful
 
-Remember: The admin is evaluating whether their uploaded documents are working effectively and if you can retrieve the right information. Show off your capabilities!`
+Remember: The admin wants to see the REAL customer experience. Show off your personality, helpfulness, and how well you use the knowledge base in natural conversation!
+${
+  adminCustomInstructions
+    ? `
+---
+
+ADMIN'S CUSTOM INSTRUCTIONS:
+${adminCustomInstructions}
+
+Apply these instructions fully - act as the assistant described above. The admin is testing you by simulating real customer scenarios, so embody this role completely.`
+    : ''
+}`
 
 type SubmitChatArgs = {
   threadId: string
@@ -103,6 +116,8 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
 
   let apiKey: string
 
+  let customInstructions = ''
+
   // Dashboard mode: use authenticated user's API key
   if (useDashboardMode) {
     const { userId, has } = await auth()
@@ -130,6 +145,9 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
       throw new Error('No API key found. Please contact support.')
     }
 
+    // Fetch custom instructions for the user (centralized via server action)
+    customInstructions = (await getCustomInstructionsAction()) || ''
+
     apiKey = userApiKey
     console.log(`[Dashboard Chat] User: ${userId}`)
   } else {
@@ -142,7 +160,7 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
   const requestBody: ChatRequestBody = {
     sessionId: threadId,
     websiteContent: useDashboardMode
-      ? dashboardInstructions
+      ? getDashboardInstructions(customInstructions)
       : getAssistantInstructions(assistantId), // Assistant-specific instructions/context
     userMessage: message, // No [lang] prefix - handled by language field
     conversation: conversation || [],
