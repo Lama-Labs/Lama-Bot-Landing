@@ -167,7 +167,7 @@ body {
 }
 
 /* Temporary fix for Clerk's drawer z-index */
-.cl-drawerRoot[role="dialog"] {
+.cl-drawerRoot[role='dialog'] {
   z-index: 2000 !important;
 }
 

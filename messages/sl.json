@@ -201,9 +201,9 @@
         "initialMessage": "Pozdravljeni! Sem asistent namišljenega fitnes studia. Potrebujete informacije o vadbenih programih, možnostih članstva ali delovnem času? Tu sem, da pomagam!",
         "id": "gym",
         "suggestions": [
-          "Katere članarine ponujate?",
-          "Kateri program je najboljši za začetnike?",
-          "Kakšen je delovni čas ta teden?"
+          "Predlagaj program za začetnike.",
+          "Kakšen je delovni čas ta teden?",
+          "Kdaj je naslednji Body Pump termin?"
         ]
       },
       {

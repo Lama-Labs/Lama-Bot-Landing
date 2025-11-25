@@ -19,12 +19,12 @@ export function usePreventClerkCheckoutDismiss(enabled: boolean = true) {
         '.cl-drawerRoot[role="dialog"]'
       ) as HTMLElement | null
       if (!root) return false
-      const content = root.querySelector('.cl-drawerContent') as
-        | HTMLElement
-        | null
-      const closeBtn = root.querySelector('.cl-drawerClose') as
-        | HTMLElement
-        | null
+      const content = root.querySelector(
+        '.cl-drawerContent'
+      ) as HTMLElement | null
+      const closeBtn = root.querySelector(
+        '.cl-drawerClose'
+      ) as HTMLElement | null
       const node = target as Node | null
       if (!node) return false
       if (content && content.contains(node)) return false
@@ -59,16 +59,22 @@ export function usePreventClerkCheckoutDismiss(enabled: boolean = true) {
     document.addEventListener('keydown', onKeyDown, { capture })
 
     return () => {
-      document.removeEventListener('pointerdown', onPointerDown as any, {
-        capture,
-      } as any)
-      document.removeEventListener('mousedown', onPointerDown as any, {
-        capture,
-      } as any)
+      document.removeEventListener(
+        'pointerdown',
+        onPointerDown as any,
+        {
+          capture,
+        } as any
+      )
+      document.removeEventListener(
+        'mousedown',
+        onPointerDown as any,
+        {
+          capture,
+        } as any
+      )
       document.removeEventListener('click', onClick, { capture } as any)
       document.removeEventListener('keydown', onKeyDown, { capture } as any)
     }
   }, [enabled])
 }
-
-

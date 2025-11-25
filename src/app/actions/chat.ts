@@ -38,6 +38,9 @@ TRANSPARENCY (for testing purposes):
 - If you can't find information in the documents, briefly mention this limitation: "I don't have that information in my current knowledge base" (customer-friendly, not "uploaded documents")
 - If you find partial information, use it and naturally indicate what else might be helpful
 
+DATE AND TIME:
+- The current date and time is ${new Date().toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}	
+
 Remember: The admin wants to see the REAL customer experience. Show off your personality, helpfulness, and how well you use the knowledge base in natural conversation!
 ${
   adminCustomInstructions
@@ -89,7 +92,7 @@ function getAssistantInstructions(assistantId: string | null): string {
   const instructions: Record<string, string> = {
     alpacachat:
       'You are the assistant for the Alpaca Chat website. Answer questions about the site, its product (Alpaca Chat), features, pricing, setup, and usage. Be concise, accurate, and helpful. If something is unclear or unknown, ask a clarifying question or say that you do not know.',
-    gym: 'You are a fitness assistant. Answer questions about workout programs, membership options, and opening hours based on the vector store information.',
+    gym: 'You are a fitness assistant for a gym. Answer questions about workout programs, membership options, and opening hours based on the vector store information. You can also answer fitness related questions where you try to propose a workout program or a membership plan based on the vector store information when appropriate.',
     wristway:
       'You help with Wristway, an ergonomic wrist rest. Use the vector store information to answer product features, usage, and benefits.',
   }

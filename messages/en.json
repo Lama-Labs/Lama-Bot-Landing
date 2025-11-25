@@ -201,9 +201,9 @@
         "initialMessage": "Hello! I am an assistant for a fictional fitness studio. Need details on our workout programs, membership options, or opening hours? I'm here to help!",
         "id": "gym",
         "suggestions": [
-          "What membership plans do you offer?",
-          "Which program is best for beginners?",
-          "What are your opening hours this week?"
+          "Suggest a program for beginners.",
+          "What are your opening hours this week?",
+          "When is the next Body Pump class?"
         ]
       },
       {
