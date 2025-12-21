@@ -3,7 +3,7 @@
 import {
   Box,
   Container,
-  Grid2,
+  Grid,
   Typography,
   useMediaQuery,
   useTheme,
@@ -131,8 +131,8 @@ const Hero = () => {
         }}
       >
         <Container maxWidth='lg'>
-          <Grid2 container spacing={4} alignItems='center'>
-            <Grid2 size={{ xs: 12, md: 6 }}>
+          <Grid container spacing={4} alignItems='center'>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Typography
                 variant='h1'
                 sx={{
@@ -160,9 +160,9 @@ const Hero = () => {
               <Box ref={form} sx={{ display: 'inline-flex', width: '100%' }}>
                 <EmailSubscription displayMode='text' hideCaptchaNotice />
               </Box>
-            </Grid2>
+            </Grid>
             {mounted && !isMediumScreen && (
-              <Grid2 size={{ xs: 12, md: 6 }}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Box
                   sx={{
                     height: { xs: '0', md: '70vh' },
@@ -172,9 +172,9 @@ const Hero = () => {
                 >
                   <ChatWindow embedded />
                 </Box>
-              </Grid2>
+              </Grid>
             )}
-          </Grid2>
+          </Grid>
         </Container>
         {/*  Invisible clone (overlay) inside hero for proper stacking */}
         <Box
@@ -200,8 +200,8 @@ const Hero = () => {
           }}
         >
           <Container maxWidth='lg'>
-            <Grid2 container spacing={4} alignItems='center'>
-              <Grid2 size={{ xs: 12, md: 6 }}>
+            <Grid container spacing={4} alignItems='center'>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Typography
                   variant='h1'
                   sx={{
@@ -219,13 +219,13 @@ const Hero = () => {
                   {t('hero.subtitle')}
                 </Typography>
                 <Box sx={{ height: formHeight }} />
-              </Grid2>
+              </Grid>
               {!isMediumScreen && (
-                <Grid2 size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   {/* This column mirrors layout spacing for desktop visualization */}
-                </Grid2>
+                </Grid>
               )}
-            </Grid2>
+            </Grid>
           </Container>
         </Box>
       </Box>

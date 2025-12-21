@@ -1,9 +1,9 @@
 'use client'
 
-import { LoadingButton } from '@mui/lab'
 import {
   Alert,
   Box,
+  Button,
   IconButton,
   List,
   ListItem,
@@ -236,7 +236,7 @@ const ManageFiles = () => {
             arrow
           >
             <span>
-              <LoadingButton
+              <Button
                 variant='contained'
                 startIcon={<Upload size={16} />}
                 onClick={() => fileInputRef.current?.click()}
@@ -244,7 +244,7 @@ const ManageFiles = () => {
                 disabled={uploading || isLimitReached || !isSubscribed}
               >
                 {uploading ? t('status.uploading') : t('buttons.uploadFile')}
-              </LoadingButton>
+              </Button>
             </span>
           </Tooltip>
         </>
@@ -287,7 +287,7 @@ const ManageFiles = () => {
                 key={doc.id}
                 divider
                 secondaryAction={
-                  <LoadingButton
+                  <Button
                     loading={deleting === doc.id}
                     variant='outlined'
                     color='error'
@@ -297,7 +297,7 @@ const ManageFiles = () => {
                     disabled={doc.status !== 'completed' || uploading}
                   >
                     {t('actions.delete')}
-                  </LoadingButton>
+                  </Button>
                 }
               >
                 <ListItemText

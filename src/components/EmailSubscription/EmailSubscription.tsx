@@ -1,7 +1,6 @@
 'use client'
 
-import { LoadingButton } from '@mui/lab'
-import { Box, Link, TextField, Typography } from '@mui/material'
+import { Box, Button, Link, TextField, Typography } from '@mui/material'
 import type { SxProps, Theme } from '@mui/material/styles'
 import { sendGAEvent } from '@next/third-parties/google'
 import Cookies from 'js-cookie'
@@ -185,7 +184,7 @@ const EmailSubscription = ({
                 ...textFieldSx,
               }}
             />
-            <LoadingButton
+            <Button
               type='submit'
               variant='contained'
               color='primary'
@@ -194,7 +193,7 @@ const EmailSubscription = ({
               sx={{ height: '40px', flex: 'none', ...buttonSx }}
             >
               {displayMode === 'icon' ? <Send /> : resolvedButtonText}
-            </LoadingButton>
+            </Button>
           </Box>
           {!hideCaptchaNotice && (
             <Typography

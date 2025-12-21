@@ -2,10 +2,10 @@
 
 import { useAuth } from '@clerk/nextjs'
 import type { UserResource } from '@clerk/types'
-import { LoadingButton } from '@mui/lab'
 import {
   Alert,
   Box,
+  Button,
   IconButton,
   Skeleton,
   TextField,
@@ -152,7 +152,7 @@ const CustomInstructions = ({ user, isLoaded }: CustomInstructionsProps) => {
               arrow
             >
               <span>
-                <LoadingButton
+                <Button
                   variant='contained'
                   onClick={handleSave}
                   loading={saving}
@@ -163,7 +163,7 @@ const CustomInstructions = ({ user, isLoaded }: CustomInstructionsProps) => {
                   }
                 >
                   {t('customInstructions.saveButton')}
-                </LoadingButton>
+                </Button>
               </span>
             </Tooltip>
           </Box>

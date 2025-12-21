@@ -16,7 +16,7 @@ import {
   Divider,
   Fab,
   Fade,
-  Grid2,
+  Grid,
   Paper,
   Skeleton,
   Typography,
@@ -87,9 +87,9 @@ const Dashboard = () => {
     <>
       <SignedIn>
         <Container maxWidth='xl' sx={{ mt: 8, py: 4 }}>
-          <Grid2 container spacing={4}>
+          <Grid container spacing={4}>
             {/* Main Content */}
-            <Grid2
+            <Grid
               size={{ xs: 12, md: hasActiveSubscription && isMdUp ? 7 : 12 }}
             >
               <Paper
@@ -149,11 +149,11 @@ const Dashboard = () => {
                   </>
                 )}
               </Paper>
-            </Grid2>
+            </Grid>
 
             {/* Chat Window - Desktop Only (Embedded) */}
             {hasActiveSubscription && isMdUp && (
-              <Grid2 size={{ md: 5 }}>
+              <Grid size={{ md: 5 }}>
                 <Box
                   sx={{
                     position: 'sticky',
@@ -164,9 +164,9 @@ const Dashboard = () => {
                 >
                   <ChatWindow mode='dashboard' embedded />
                 </Box>
-              </Grid2>
+              </Grid>
             )}
-          </Grid2>
+          </Grid>
 
           {/* Chat Window - Mobile Only (FAB) */}
           {hasActiveSubscription && !isMdUp && (
