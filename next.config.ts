@@ -10,10 +10,6 @@ const nextConfig: NextConfig = {
     // Temporarily ignore type errors during build to allow incomplete routes to exist
     ignoreBuildErrors: true,
   },
-  eslint: {
-    // Skip ESLint during builds
-    ignoreDuringBuilds: true,
-  },
   // TODO: remove up to here
 }
 

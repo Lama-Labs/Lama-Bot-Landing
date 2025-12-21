@@ -3,45 +3,45 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
+    "dev": "next dev",
+    "build": "next build --webpack",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "format": "prettier --write ."
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.46",
     "@ai-sdk/rsc": "^1.0.65",
-    "@clerk/nextjs": "^6.34.5",
+    "@clerk/nextjs": "^6.36.5",
     "@emotion/cache": "^11.13.1",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@libsql/client": "^0.15.11",
     "@mui/lab": "^6.0.0-beta.15",
     "@mui/material": "^6.1.6",
-    "@mui/material-nextjs": "^6.1.6",
-    "@next/third-parties": "^15.0.3",
+    "@mui/material-nextjs": "^7.3.6",
+    "@next/third-parties": "16.1.0",
     "@types/js-cookie": "^3.0.6",
     "@vercel/analytics": "^1.5.0",
     "ai": "^5.0.65",
     "file-type": "^21.0.0",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.454.0",
-    "next": "15.4.10",
-    "next-intl": "^3.24.0",
+    "next": "16.1.0",
+    "next-intl": "^4.6.1",
     "openai": "^5.11.0",
-    "react": "^18.3.1",
-    "react-dom": "18.3.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
     "react-google-recaptcha": "^3.1.0",
     "svix": "^1.71.0"
   },
   "devDependencies": {
     "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
     "@types/react-google-recaptcha": "^2.1.9",
-    "eslint": "^8",
-    "eslint-config-next": "15.0.2",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "16.1.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",
     "prettier": "^3.3.3",
@@ -50,5 +50,9 @@
   "//": [
     "eslint-config-prettier: Disables conflicting ESLint rules that Prettier will handle.",
     "eslint-plugin-prettier: Integrates Prettier as an ESLint rule, allowing ESLint to display Prettier issues as part of its output."
-  ]
+  ],
+  "overrides": {
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3"
+  }
 }
