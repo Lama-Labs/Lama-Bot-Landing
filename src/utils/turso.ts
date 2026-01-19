@@ -21,13 +21,14 @@ type SaveUsageEventParams = {
   model?: string | null
 }
 
-type UserData = {
+export type UserData = {
   clerkUserId: string
   email?: string | null
   apiKey?: string | null
   documentCount?: number | null
   totalStorageLimit?: number | null
   vectorStoreId?: string | null
+  trial?: string | null
 }
 
 type TableSchema = {
@@ -70,6 +71,7 @@ const TABLE_SCHEMAS: TableSchema[] = [
         document_count INTEGER,
         total_storage_limit INTEGER,
         vector_store_id TEXT,
+        trial TEXT,
         created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
         updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
       )
@@ -229,14 +231,18 @@ export const upsertUser = async (userData: UserData): Promise<void> => {
       updates.push('vector_store_id = ?')
       values.push(userData.vectorStoreId)
     }
+    if (userData.trial !== undefined) {
+      updates.push('trial = ?')
+      values.push(userData.trial)
+    }
 
     // Always update the updated_at timestamp
     updates.push("updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')")
 
     // SQLite UPSERT syntax: INSERT ... ON CONFLICT ... DO UPDATE
     const sql = `
-      INSERT INTO users (clerk_user_id, email, api_key, document_count, total_storage_limit, vector_store_id)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO users (clerk_user_id, email, api_key, document_count, total_storage_limit, vector_store_id, trial)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(clerk_user_id) DO UPDATE SET ${updates.join(', ')}
     `
 
@@ -249,6 +255,7 @@ export const upsertUser = async (userData: UserData): Promise<void> => {
         userData.documentCount ?? null,
         userData.totalStorageLimit ?? null,
         userData.vectorStoreId ?? null,
+        userData.trial ?? null,
         ...values,
       ],
     })
@@ -327,6 +334,83 @@ export const getCustomInstructions = async (
   } catch (error) {
     console.error('[turso] Failed to get custom instructions', {
       clerkUserId,
+      error: (error as Error).message,
+    })
+    return null
+  }
+}
+
+/**
+ * Helper to map a database row to UserData
+ */
+const mapRowToUserData = (row: Record<string, unknown>): UserData => ({
+  clerkUserId: row.clerk_user_id as string,
+  email: row.email as string | null,
+  apiKey: row.api_key as string | null,
+  documentCount: row.document_count as number | null,
+  totalStorageLimit: row.total_storage_limit as number | null,
+  vectorStoreId: row.vector_store_id as string | null,
+  trial: row.trial as string | null,
+})
+
+/**
+ * Retrieves user data by Clerk user ID
+ * Returns null if user is not found or database is unavailable
+ */
+export const getUserData = async (
+  clerkUserId: string
+): Promise<UserData | null> => {
+  try {
+    await ensureInitialized()
+    const client = getClientOrNull()
+    if (!client) return null
+
+    const result = await client.execute({
+      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, vector_store_id, trial
+            FROM users WHERE clerk_user_id = ? LIMIT 1`,
+      args: [clerkUserId],
+    })
+
+    if (result.rows.length === 0) {
+      return null
+    }
+
+    return mapRowToUserData(result.rows[0] as Record<string, unknown>)
+  } catch (error) {
+    console.error('[turso] Failed to get user data', {
+      clerkUserId,
+      error: (error as Error).message,
+    })
+    return null
+  }
+}
+
+/**
+ * Retrieves user data by API key
+ * Uses indexed lookup for fast queries - replaces slow Clerk pagination
+ * Returns null if user is not found or database is unavailable
+ */
+export const getUserByApiKey = async (
+  apiKey: string
+): Promise<UserData | null> => {
+  try {
+    await ensureInitialized()
+    const client = getClientOrNull()
+    if (!client) return null
+
+    const result = await client.execute({
+      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, vector_store_id, trial
+            FROM users WHERE api_key = ? LIMIT 1`,
+      args: [apiKey],
+    })
+
+    if (result.rows.length === 0) {
+      return null
+    }
+
+    return mapRowToUserData(result.rows[0] as Record<string, unknown>)
+  } catch (error) {
+    console.error('[turso] Failed to get user by API key', {
       error: (error as Error).message,
     })
     return null

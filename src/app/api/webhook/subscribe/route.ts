@@ -4,12 +4,9 @@ import type { WebhookEvent } from '@clerk/nextjs/server'
 import { headers } from 'next/headers'
 import { Webhook } from 'svix'
 
-import {
-  getClerkUser,
-  mergeUserPrivateMetadata,
-  mergeUserPublicMetadata,
-} from '@/utils/clerk/users'
+import { getClerkUser } from '@/utils/clerk/users'
 import { openaiClient } from '@/utils/openai-client'
+import { getUserData, upsertUser } from '@/utils/turso'
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET
@@ -89,50 +86,40 @@ export async function POST(req: Request) {
           const userId = subscriptionData.payer.user_id
           console.log(`Processing subscription for user: ${userId}`)
 
-          // Get the user from Clerk
-          const user = await getClerkUser(userId)
+          // Get the user from Clerk (for email) and existing data from DB
+          const [clerkUser, existingUserData] = await Promise.all([
+            getClerkUser(userId),
+            getUserData(userId),
+          ])
 
-          if (user) {
-            // Check if API key and vector store ID already exist in public metadata
-            const existingApiKey = user.publicMetadata?.apiKey
-            const existingVectorStoreId = user.privateMetadata
-              ?.vectorStoreId as string | undefined
+          if (clerkUser) {
+            const email = clerkUser.emailAddresses[0]?.emailAddress ?? null
+            const existingApiKey = existingUserData?.apiKey
+            const existingVectorStoreId = existingUserData?.vectorStoreId
 
-            if (!existingApiKey) {
-              // Generate a secure API key
-              const apiKey = `lama-${crypto.randomBytes(32).toString('hex')}`
+            const planSlug = activePaidItems[0].plan?.slug ?? 'basic'
 
-              // Store the API key and vector store ID in Clerk's metadata
-              await mergeUserPublicMetadata(userId, {
-                apiKey: apiKey,
-              })
-
-              console.log(`API key generated and saved for user: ${userId}`)
-              console.log(`Subscription plan: ${activePaidItems[0].plan.slug}`)
+            // Generate API key if doesn't exist
+            let apiKey = existingApiKey
+            if (!apiKey) {
+              apiKey = `lama-${crypto.randomBytes(32).toString('hex')}`
+              console.log(`API key generated for user: ${userId}`)
+              console.log(`Subscription plan: ${planSlug}`)
             } else {
-              // Update subscription info even if API key exists
-              /*await mergeUserPublicMetadata(userId, {
-                subscriptionPlan: activePaidItems[0].plan.slug,
-                subscriptionStatus: 'active',
-              })*/
-
               console.log(
                 `Subscription updated for user: ${userId} (API key already exists)`
               )
             }
 
-            if (!existingVectorStoreId) {
-              // Create vector store for the user
-              let vectorStoreId: string | undefined
+            // Create vector store if doesn't exist
+            let vectorStoreId = existingVectorStoreId
+            if (!vectorStoreId) {
               try {
                 const vectorStoreName = `${userId}-vector-store`
                 const vectorStore = await openaiClient.vectorStores.create({
                   name: vectorStoreName,
                 })
                 vectorStoreId = vectorStore.id
-                await mergeUserPrivateMetadata(userId, {
-                  vectorStoreId: vectorStoreId,
-                })
                 console.log(
                   `Vector store created for user ${userId}: ${vectorStoreId}`
                 )
@@ -148,14 +135,21 @@ export async function POST(req: Request) {
               }
             }
 
-            // Store the document count and total storage limit in Clerk's metadata
-            await mergeUserPublicMetadata(userId, {
-              documentCount: activePaidItems[0].plan.slug === 'basic' ? 10 : 20,
-              totalStorageLimit:
-                (activePaidItems[0].plan.slug === 'basic' ? 10 : 20) *
-                1024 *
-                1024,
+            // Calculate limits based on plan
+            const documentCount = planSlug === 'basic' ? 10 : 20
+            const totalStorageLimit = documentCount * 1024 * 1024
+
+            // Save all user data to database in one operation
+            await upsertUser({
+              clerkUserId: userId,
+              email,
+              apiKey,
+              vectorStoreId,
+              documentCount,
+              totalStorageLimit,
             })
+
+            console.log(`User data saved to database for user: ${userId}`)
           } else {
             console.error(`User not found: ${userId}`)
           }

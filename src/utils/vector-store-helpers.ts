@@ -1,26 +1,17 @@
 import { Uploadable } from 'openai/uploads'
 
-import { getClerkUser, mergeUserPrivateMetadata } from './clerk/users'
 import { openaiClient } from './openai-client'
+import { getUserData, upsertUser } from './turso'
 
 /**
- * Get the vector store ID for a user from their private metadata
+ * Get the vector store ID for a user from the database
  */
 export async function getUserVectorStoreId(
   userId: string
 ): Promise<string | null> {
   try {
-    const user = await getClerkUser(userId)
-
-    if (!user) {
-      console.error(`User not found: ${userId}`)
-      return null
-    }
-
-    const vectorStoreId = user.privateMetadata?.vectorStoreId as
-      | string
-      | undefined
-    return vectorStoreId || null
+    const userData = await getUserData(userId)
+    return userData?.vectorStoreId ?? null
   } catch (error) {
     console.error(`Error getting vector store ID for user ${userId}:`, error)
     return null
@@ -50,15 +41,14 @@ export async function ensureUserVectorStore(
     vectorStoreId = vectorStore.id
     console.log(`Vector store created for user ${userId}: ${vectorStoreId}`)
 
-    // Save the vector store ID to user's private metadata
-    const saved = await mergeUserPrivateMetadata(userId, {
+    // Save the vector store ID to database
+    await upsertUser({
+      clerkUserId: userId,
       vectorStoreId: vectorStoreId,
     })
-    if (saved) {
-      console.log(
-        `Vector store ID saved to private metadata for user ${userId}: ${vectorStoreId}`
-      )
-    }
+    console.log(
+      `Vector store ID saved to database for user ${userId}: ${vectorStoreId}`
+    )
 
     return vectorStoreId
   } catch (error) {
@@ -91,7 +81,6 @@ export async function uploadFileToVectorStore(
 
     // Prefer returning the underlying Files API id so downstream delete/list work consistently
     const returnedFileId =
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (uploadedFile as any).file_id ?? (uploadedFile as any).id
     console.log(
       `File ${fileName} uploaded to vector store ${vectorStoreId} for user ${userId}`

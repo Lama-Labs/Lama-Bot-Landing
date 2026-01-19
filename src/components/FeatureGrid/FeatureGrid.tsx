@@ -22,8 +22,6 @@ const FeatureGrid = () => {
           {t('subtitle')}
         </Typography>
         <Grid container spacing={3}>
-          {/*todo: fix*/}
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
           {items.map((feature: any, index: number) => (
             <Grid
               key={index}

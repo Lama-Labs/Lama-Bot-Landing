@@ -13,21 +13,19 @@ const isProtectedRoute = createRouteMatcher([])
 
 // Export your middleware using Clerk's wrapper
 export default clerkMiddleware(async (auth, req) => {
-    if (isProtectedRoute(req)) await auth.protect() // only if you want protection on certain routes
-    // Run your additional middleware (like next-intl)
-    // skip internationalization for api routes
-    if (req.nextUrl.pathname.startsWith('/api/')) {
-        return NextResponse.next()
-    }
-    // run assistant logic
-    const response = intlMiddleware(req)
-    await handleAssistantLogic(req, response)
-    return response
+  if (isProtectedRoute(req)) await auth.protect() // only if you want protection on certain routes
+  // Run your additional middleware (like next-intl)
+  // skip internationalization for api routes
+  if (req.nextUrl.pathname.startsWith('/api/')) {
+    return NextResponse.next()
+  }
+  // run assistant logic
+  const response = intlMiddleware(req)
+  await handleAssistantLogic(req, response)
+  return response
 })
 
 // Your matcher
 export const config = {
-    matcher: ['/', '/(en|sl)/:path*', '/api/:path*'],
+  matcher: ['/', '/(en|sl)/:path*', '/api/:path*'],
 }
-
-

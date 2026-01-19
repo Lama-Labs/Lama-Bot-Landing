@@ -3,14 +3,13 @@
   and streams back only the text deltas as a plain text stream. Uses the official `openai` SDK.
 */
 
-import type { User } from '@clerk/backend'
-import { auth, clerkClient } from '@clerk/nextjs/server'
+import { auth } from '@clerk/nextjs/server'
 import { after } from 'next/server'
 import type { ResponseCompletedEvent } from 'openai/resources/responses/responses.mjs'
 
 import { hasAnyPlan } from '@/utils/clerk/subscription'
 import { openaiClient } from '@/utils/openai-client'
-import { saveUsageEvent } from '@/utils/turso'
+import { type UserData, getUserByApiKey, saveUsageEvent } from '@/utils/turso'
 
 import type { ChatRequestBody } from './types'
 
@@ -100,41 +99,9 @@ export async function OPTIONS() {
   })
 }
 
-async function findUserByApiKey(apiKey: string) {
-  // Paginates through Clerk users to find one with matching publicMetadata.apiKey
-  // Intended for smaller instances. For large instances, consider maintaining a lookup table.
-  const client = await clerkClient()
-  const pageSize = 100
-  let offset = 0
-
-  let foundUser: User | null = null
-  // Safeguard to avoid unbounded scans
-  const maxScans = 20
-  let scans = 0
-
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const list = await client.users.getUserList({ limit: pageSize, offset })
-    for (const u of list.data) {
-      const storedKey =
-        (u.publicMetadata?.apiKey as string | undefined) ?? undefined
-      if (storedKey && storedKey === apiKey) {
-        foundUser = u
-        break
-      }
-    }
-
-    if (foundUser) break
-
-    const nextOffset = offset + list.data.length
-    if (nextOffset >= list.totalCount) break
-
-    offset = nextOffset
-    scans += 1
-    if (scans >= maxScans) break
-  }
-
-  return foundUser
+async function findUserByApiKey(apiKey: string): Promise<UserData | null> {
+  // Fast indexed lookup from Turso database
+  return getUserByApiKey(apiKey)
 }
 
 export async function POST(request: Request) {
@@ -162,7 +129,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Resolve Clerk user by API key stored in public metadata
+    // Resolve Clerk user by API key stored in the database
     const user = await findUserByApiKey(apiKey)
     if (!user) {
       return Response.json(
@@ -171,7 +138,11 @@ export async function POST(request: Request) {
       )
     }
 
-    const hasActiveSubscription = hasAnyPlan(has, 'basic', user.publicMetadata)
+    const hasActiveSubscription = await hasAnyPlan(
+      has,
+      'basic',
+      user.clerkUserId
+    )
 
     if (!hasActiveSubscription) {
       return Response.json(
@@ -197,8 +168,7 @@ export async function POST(request: Request) {
 
     const client = openaiClient
 
-    const vectorStoreId: string | null =
-      (user.privateMetadata?.vectorStoreId as string | undefined) ?? null
+    const vectorStoreId: string | null = user.vectorStoreId ?? null
 
     const tools = vectorStoreId
       ? [
@@ -307,7 +277,7 @@ export async function POST(request: Request) {
               try {
                 await saveUsageEvent({
                   sessionId: sessionId ?? null,
-                  clerkUserId: user.id,
+                  clerkUserId: user.clerkUserId,
                   usage: event.response.usage,
                   responseId,
                   model,

@@ -20,7 +20,6 @@ const TextParser: React.FC<TextParserProps> = ({ text }) => {
         // Link
         const match = part.match(/\[(.*?)]\((.*?)\)/)
         if (match) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const [_, text, url] = match
           parsed.push(
             <a key={index} href={url} target='_blank' rel='noopener noreferrer'>
