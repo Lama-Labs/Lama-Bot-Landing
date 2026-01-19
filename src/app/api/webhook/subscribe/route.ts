@@ -9,7 +9,7 @@ import { openaiClient } from '@/utils/openai-client'
 import { getUserData, upsertUser } from '@/utils/turso'
 
 export async function POST(req: Request) {
-  const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET
+  const WEBHOOK_SECRET = process.env.CLERK_SUBSCRIPTION_WEBHOOK_SECRET
 
   if (!WEBHOOK_SECRET) {
     throw new Error(
@@ -86,7 +86,8 @@ export async function POST(req: Request) {
           const userId = subscriptionData.payer.user_id
           console.log(`Processing subscription for user: ${userId}`)
 
-          // Get the user from Clerk (for email) and existing data from DB
+          // Get existing user data from DB (user should already exist from user.created webhook)
+          // Also get Clerk user for email as fallback
           const [clerkUser, existingUserData] = await Promise.all([
             getClerkUser(userId),
             getUserData(userId),
@@ -139,7 +140,8 @@ export async function POST(req: Request) {
             const documentCount = planSlug === 'basic' ? 10 : 20
             const totalStorageLimit = documentCount * 1024 * 1024
 
-            // Save all user data to database in one operation
+            // Update user with subscription-specific data (api key, vector store, limits)
+            // Uses upsert as fallback in case user.created webhook failed
             await upsertUser({
               clerkUserId: userId,
               email,
@@ -149,7 +151,9 @@ export async function POST(req: Request) {
               totalStorageLimit,
             })
 
-            console.log(`User data saved to database for user: ${userId}`)
+            console.log(
+              `User subscription data saved to database for user: ${userId}`
+            )
           } else {
             console.error(`User not found: ${userId}`)
           }

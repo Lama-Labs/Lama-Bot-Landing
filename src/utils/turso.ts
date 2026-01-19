@@ -416,3 +416,34 @@ export const getUserByApiKey = async (
     return null
   }
 }
+
+/**
+ * Deletes a user from the database by Clerk user ID
+ * Also deletes associated custom_instructions
+ */
+export const deleteUser = async (clerkUserId: string): Promise<void> => {
+  try {
+    await ensureInitialized()
+    const client = getClientOrNull()
+    if (!client) return
+
+    // Delete custom instructions first (foreign key constraint)
+    await client.execute({
+      sql: 'DELETE FROM custom_instructions WHERE clerk_user_id = ?',
+      args: [clerkUserId],
+    })
+
+    // Delete user
+    await client.execute({
+      sql: 'DELETE FROM users WHERE clerk_user_id = ?',
+      args: [clerkUserId],
+    })
+
+    console.log(`[turso] User deleted: ${clerkUserId}`)
+  } catch (error) {
+    console.error('[turso] Failed to delete user', {
+      clerkUserId,
+      error: (error as Error).message,
+    })
+  }
+}

@@ -26,6 +26,7 @@ import { useSearchParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
+import { ensureUserInDatabase } from '@/app/actions/ensure-user'
 import { getSubscriptionStatus } from '@/app/actions/subscription'
 import ChatBotAnimation from '@/components/ChatBot/ChatBotAnimation'
 import ChatWindow from '@/components/ChatBot/ChatWindow'
@@ -49,10 +50,16 @@ const Dashboard = () => {
   // Prevent closing the Clerk checkout drawer via outside click or Escape
   usePreventClerkCheckoutDismiss(true)
 
-  // Check subscription status from server
+  // Ensure user exists in DB (fallback if webhook failed) and check subscription status
   useEffect(() => {
+    const initUser = async () => {
+      await ensureUserInDatabase()
+      const status = await getSubscriptionStatus()
+      setHasActiveSubscription(status)
+    }
+
     if (user && isLoaded) {
-      getSubscriptionStatus().then(setHasActiveSubscription)
+      initUser()
     }
   }, [user, isLoaded, refreshKey])
 
@@ -110,18 +117,22 @@ const Dashboard = () => {
                       })}
                     </Typography>
 
-                    {/* File Management Section */}
-                    <ManageFiles />
+                    {hasActiveSubscription && (
+                      <>
+                        {/* File Management Section */}
+                        <ManageFiles />
 
-                    {/* Custom Instructions Section */}
-                    <CustomInstructions user={user} isLoaded={isLoaded} />
+                        {/* Custom Instructions Section */}
+                        <CustomInstructions user={user} isLoaded={isLoaded} />
 
-                    {/* API Key Section */}
-                    <ApiKeySection
-                      key={refreshKey}
-                      user={user}
-                      isLoaded={isLoaded}
-                    />
+                        {/* API Key Section */}
+                        <ApiKeySection
+                          key={refreshKey}
+                          user={user}
+                          isLoaded={isLoaded}
+                        />
+                      </>
+                    )}
 
                     <PricingTable
                       newSubscriptionRedirectUrl={`/${locale}/dashboard?subscribed=true`}
