@@ -1,6 +1,5 @@
 'use client'
 
-import { useAuth } from '@clerk/nextjs'
 import type { UserResource } from '@clerk/types'
 import {
   Alert,
@@ -20,7 +19,7 @@ import {
   getCustomInstructionsAction,
   saveCustomInstructionsAction,
 } from '@/app/actions/custom-instructions'
-import { hasAnyPlan } from '@/utils/clerk/subscription'
+import { getSubscriptionStatus } from '@/app/actions/subscription'
 
 interface CustomInstructionsProps {
   user: UserResource | null | undefined
@@ -34,11 +33,8 @@ const CustomInstructions = ({ user, isLoaded }: CustomInstructionsProps) => {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { has } = useAuth()
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false)
   const t = useTranslations('dashboard')
-
-  // Check if user has active subscription
-  const hasActiveSubscription = hasAnyPlan(has, 'basic', user?.publicMetadata)
 
   const fetchInstructions = useCallback(async () => {
     setLoading(true)
@@ -82,6 +78,8 @@ const CustomInstructions = ({ user, isLoaded }: CustomInstructionsProps) => {
   useEffect(() => {
     if (user && isLoaded) {
       fetchInstructions()
+      // Check subscription status from server
+      getSubscriptionStatus().then(setHasActiveSubscription)
     }
   }, [user, isLoaded, fetchInstructions])
 

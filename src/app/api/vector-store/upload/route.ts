@@ -1,8 +1,9 @@
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth } from '@clerk/nextjs/server'
 import { fileTypeFromBuffer } from 'file-type'
 import { NextRequest } from 'next/server'
 
 import { hasAnyPlan } from '@/utils/clerk/subscription'
+import { getUserData } from '@/utils/turso'
 import {
   getUserVectorStoreDocuments,
   uploadFileToVectorStore,
@@ -16,14 +17,8 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const user = await currentUser()
-
-    if (!user) {
-      return Response.json({ error: 'User not found' }, { status: 404 })
-    }
-
     // Ensure user has an eligible paid plan or matching trial tier (e.g., basic)
-    const isEligible = hasAnyPlan(has, 'basic', user.publicMetadata)
+    const isEligible = await hasAnyPlan(has, 'basic', userId)
     if (!isEligible) {
       return Response.json(
         { error: 'Requires an active paid plan' },
@@ -31,10 +26,13 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Get user data from database
+    const userData = await getUserData(userId)
+
     const documents = await getUserVectorStoreDocuments(userId)
 
-    // Enforce file upload limit from Clerk public metadata
-    const filesLimit = user.publicMetadata?.filesLimit as number
+    // Enforce file upload limit from database
+    const filesLimit = userData?.documentCount ?? 0
     const currentCount = documents.length
     if (currentCount >= filesLimit) {
       return Response.json(
@@ -67,8 +65,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Enforce total storage limit from Clerk public metadata (in megabytes)
-    const totalStorageLimit = user.publicMetadata?.totalStorageLimit as number
+    // Enforce total storage limit from database (in bytes)
+    const totalStorageLimit = userData?.totalStorageLimit ?? 0
     const currentTotalBytes = documents.reduce((sum, doc) => {
       const size = doc.sizeBytes
       return sum + size

@@ -1,12 +1,12 @@
 'use server'
 
-// eslint-disable-next-line import/named
 import { createStreamableValue } from '@ai-sdk/rsc'
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth } from '@clerk/nextjs/server'
 
 import { getCustomInstructionsAction } from '@/app/actions/custom-instructions'
 import type { ChatRequestBody } from '@/app/api/chat/types'
 import { hasAnyPlan } from '@/utils/clerk/subscription'
+import { getUserData } from '@/utils/turso'
 
 const getDashboardInstructions = (
   adminCustomInstructions: string
@@ -42,7 +42,8 @@ DATE AND TIME:
 - The current date and time is ${new Date().toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}	
 
 Remember: The admin wants to see the REAL customer experience. Show off your personality, helpfulness, and how well you use the knowledge base in natural conversation!
-${adminCustomInstructions
+${
+  adminCustomInstructions
     ? `
 ---
 
@@ -51,7 +52,7 @@ ${adminCustomInstructions}
 
 Apply these instructions fully - act as the assistant described above. The admin is testing you by simulating real customer scenarios, so embody this role completely.`
     : ''
-  }`
+}`
 
 type SubmitChatArgs = {
   threadId: string
@@ -130,19 +131,15 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
       )
     }
 
-    const user = await currentUser()
-    if (!user) {
-      throw new Error('User not found')
-    }
-
     // Check if user has an active subscription
-    const hasActiveSubscription = hasAnyPlan(has, 'basic', user.publicMetadata)
+    const hasActiveSubscription = await hasAnyPlan(has, 'basic', userId)
     if (!hasActiveSubscription) {
       throw new Error('Unauthorized: Active subscription required')
     }
 
-    // Get user's API key from metadata
-    const userApiKey = user.publicMetadata?.apiKey as string | undefined
+    // Get user's API key from database
+    const userData = await getUserData(userId)
+    const userApiKey = userData?.apiKey
     if (!userApiKey) {
       throw new Error('No API key found. Please contact support.')
     }
@@ -172,56 +169,56 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
   // Create streamable value for text
   const stream = createStreamableValue<string>('')
 
-    ; (async () => {
-      try {
-        // Determine the base URL for the API call
-        const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
-          ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-          : 'http://localhost:3000'
-        const apiUrl = `${baseUrl}/api/chat`
+  ;(async () => {
+    try {
+      // Determine the base URL for the API call
+      const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+        : 'http://localhost:3000'
+      const apiUrl = `${baseUrl}/api/chat`
 
-        // Call the /api/chat endpoint
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`,
-          },
-          body: JSON.stringify(requestBody),
-        })
+      // Call the /api/chat endpoint
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(requestBody),
+      })
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}))
-          throw new Error(
-            errorData.error || `API request failed with status ${response.status}`
-          )
-        }
-
-        if (!response.body) {
-          throw new Error('Response body is null')
-        }
-
-        // Stream the plain text response
-        const reader = response.body.getReader()
-        const decoder = new TextDecoder()
-        let acc = ''
-
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-
-          const chunk = decoder.decode(value, { stream: true })
-          acc += chunk
-          stream.update(acc)
-        }
-
-        stream.done()
-      } catch (error) {
-        console.error('Error calling /api/chat:', error)
-        // Signal error so frontend catch block displays translated error message
-        stream.error(error instanceof Error ? error.message : 'Unknown error')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(
+          errorData.error || `API request failed with status ${response.status}`
+        )
       }
-    })()
+
+      if (!response.body) {
+        throw new Error('Response body is null')
+      }
+
+      // Stream the plain text response
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let acc = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value, { stream: true })
+        acc += chunk
+        stream.update(acc)
+      }
+
+      stream.done()
+    } catch (error) {
+      console.error('Error calling /api/chat:', error)
+      // Signal error so frontend catch block displays translated error message
+      stream.error(error instanceof Error ? error.message : 'Unknown error')
+    }
+  })()
 
   // Return the text stream handle; the client will read it progressively
   return { text: stream.value }

@@ -4,7 +4,6 @@ import {
   PricingTable,
   SignedIn,
   SignedOut,
-  useAuth,
   useClerk,
   useUser,
 } from '@clerk/nextjs'
@@ -27,17 +26,16 @@ import { useSearchParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
+import { getSubscriptionStatus } from '@/app/actions/subscription'
 import ChatBotAnimation from '@/components/ChatBot/ChatBotAnimation'
 import ChatWindow from '@/components/ChatBot/ChatWindow'
 import ApiKeySection from '@/components/Dashboard/ApiKeySection'
 import CustomInstructions from '@/components/Dashboard/CustomInstructions'
 import ManageFiles from '@/components/Dashboard/ManageFiles'
 import { usePreventClerkCheckoutDismiss } from '@/hooks/usePreventClerkCheckoutDismiss'
-import { hasAnyPlan } from '@/utils/clerk/subscription'
 
 const Dashboard = () => {
   const { user, isLoaded } = useUser()
-  const { has } = useAuth()
   const locale = useLocale()
   const { openUserProfile, openSignIn } = useClerk()
   const t = useTranslations('dashboard')
@@ -45,13 +43,18 @@ const Dashboard = () => {
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'))
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false)
   const searchParams = useSearchParams()
 
   // Prevent closing the Clerk checkout drawer via outside click or Escape
   usePreventClerkCheckoutDismiss(true)
 
-  // Check if user has active subscription using Clerk's billing API
-  const hasActiveSubscription = hasAnyPlan(has, 'basic', user?.publicMetadata)
+  // Check subscription status from server
+  useEffect(() => {
+    if (user && isLoaded) {
+      getSubscriptionStatus().then(setHasActiveSubscription)
+    }
+  }, [user, isLoaded, refreshKey])
 
   // Handle subscription completion redirect
   useEffect(() => {

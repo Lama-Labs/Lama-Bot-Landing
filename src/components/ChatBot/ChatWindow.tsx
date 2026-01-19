@@ -230,7 +230,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       }
     }
     // run once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     init()
   }, [t, setAssistantName, mode, cookieNamespace])
 

@@ -1,7 +1,8 @@
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
 import { hasAnyPlan } from '@/utils/clerk/subscription'
+import { getUserData } from '@/utils/turso'
 
 export async function GET() {
   console.log('=== API KEY RETRIEVAL REQUEST ===')
@@ -16,23 +17,16 @@ export async function GET() {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    // Get the current user to access public metadata for trial/plan checks
-    const user = await currentUser()
-
-    if (!user) {
-      console.log('User not found in database')
-      return new NextResponse('User not found', { status: 404 })
-    }
-
     // Check if the user is eligible via trial tier or paid plan
-    const hasSubscription = hasAnyPlan(has, 'basic', user.publicMetadata)
+    const hasSubscription = await hasAnyPlan(has, 'basic', userId)
     if (!hasSubscription) {
       console.log('User is not a paid user')
       return new NextResponse('User is not a paid user', { status: 403 })
     }
 
-    // Get the API key from public metadata (now stored by webhook)
-    const apiKey = user.publicMetadata?.apiKey as string | undefined
+    // Get the API key from database
+    const userData = await getUserData(userId)
+    const apiKey = userData?.apiKey
 
     if (!apiKey) {
       console.log('No API key found for user')

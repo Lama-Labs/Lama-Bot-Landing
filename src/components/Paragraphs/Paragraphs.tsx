@@ -16,8 +16,6 @@ const Paragraphs = () => {
         gap={18}
         py={9}
       >
-        {/*todo: fix*/}
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
         {items.map((paragraph: any, index: number) => (
           <Paragraph
             key={index}

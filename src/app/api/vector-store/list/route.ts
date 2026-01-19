@@ -1,6 +1,7 @@
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth } from '@clerk/nextjs/server'
 
 import { hasAnyPlan } from '@/utils/clerk/subscription'
+import { getUserData } from '@/utils/turso'
 import { getUserVectorStoreDocuments } from '@/utils/vector-store-helpers'
 
 export async function GET() {
@@ -23,20 +24,17 @@ export async function GET() {
       )
     }
 
-    const user = await currentUser()
-
-    if (!user) {
-      return Response.json({ error: 'User not found' }, { status: 404 })
-    }
+    // Get user data from database
+    const userData = await getUserData(userId)
 
     // Determine if user has an eligible plan (paid or matching trial)
-    const isSubscribed = hasAnyPlan(has, 'basic', user.publicMetadata)
+    const isSubscribed = await hasAnyPlan(has, 'basic', userId)
 
-    // Allowed file count from Clerk public metadata
-    const filesLimit = user.publicMetadata?.filesLimit ?? 0
+    // Allowed file count from database
+    const filesLimit = userData?.documentCount ?? 0
 
-    // Total storage limit from Clerk public metadata
-    const totalStorageLimit = user.publicMetadata?.totalStorageLimit ?? 0
+    // Total storage limit from database
+    const totalStorageLimit = userData?.totalStorageLimit ?? 0
 
     return Response.json({
       success: true,

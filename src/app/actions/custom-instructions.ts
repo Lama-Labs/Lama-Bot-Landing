@@ -1,7 +1,7 @@
 'use server'
 
-import { auth, currentUser } from '@clerk/nextjs/server'
-import { revalidateTag, unstable_cache } from 'next/cache'
+import { auth } from '@clerk/nextjs/server'
+import { unstable_cache, updateTag } from 'next/cache'
 
 import { hasAnyPlan } from '@/utils/clerk/subscription'
 import { getCustomInstructions, saveCustomInstructions } from '@/utils/turso'
@@ -71,14 +71,8 @@ export async function saveCustomInstructionsAction(
     throw new Error('Unauthorized: User must be signed in')
   }
 
-  const user = await currentUser()
-
-  if (!user) {
-    throw new Error('User not found')
-  }
-
   // Ensure user has an eligible paid plan or matching trial tier (e.g., basic)
-  const isEligible = hasAnyPlan(has, 'basic', user.publicMetadata)
+  const isEligible = await hasAnyPlan(has, 'basic', userId)
   if (!isEligible) {
     throw new Error('Requires an active paid plan')
   }
@@ -97,7 +91,7 @@ export async function saveCustomInstructionsAction(
   // Save to database (injection already prevented by Turso's parameterized queries)
   await saveCustomInstructions(userId, sanitizedInstructions)
   // Invalidate cache so subsequent reads get fresh value
-  revalidateTag(tagForUser(userId))
+  updateTag(tagForUser(userId))
 
   return {
     success: true,
