@@ -3,8 +3,10 @@ import { fileTypeFromBuffer } from 'file-type'
 import { NextRequest } from 'next/server'
 
 import { hasAnyPlan } from '@/utils/clerk/subscription'
+import { uploadFileToR2 } from '@/utils/r2-helpers'
 import { getUserData } from '@/utils/turso'
 import {
+  deleteFileFromVectorStore,
   getUserVectorStoreDocuments,
   uploadFileToVectorStore,
 } from '@/utils/vector-store-helpers'
@@ -91,6 +93,30 @@ export async function POST(req: NextRequest) {
     if (!vectorStoreFileId) {
       return Response.json(
         { error: 'Failed to upload file to vector store' },
+        { status: 500 }
+      )
+    }
+
+    // Back up the file to R2 — if this fails, roll back the vector store upload
+    const fileBuffer = Buffer.from(await file.arrayBuffer())
+    const r2Success = await uploadFileToR2(
+      userId,
+      vectorStoreFileId,
+      file.name,
+      fileBuffer,
+      mime
+    )
+
+    if (!r2Success) {
+      // Roll back: remove the file we just added to the vector store
+      await deleteFileFromVectorStore(userId, vectorStoreFileId).catch((err) =>
+        console.error(
+          '[r2] Rollback delete from vector store also failed:',
+          err
+        )
+      )
+      return Response.json(
+        { error: 'Failed to back up file to storage' },
         { status: 500 }
       )
     }

@@ -6,7 +6,7 @@ import { auth } from '@clerk/nextjs/server'
 import { getCustomInstructionsAction } from '@/app/actions/custom-instructions'
 import type { ChatRequestBody } from '@/app/api/chat/types'
 import { hasAnyPlan } from '@/utils/clerk/subscription'
-import { getUserData } from '@/utils/turso'
+import { getCustomInstructions, getUserData } from '@/utils/turso'
 
 const getDashboardInstructions = (
   adminCustomInstructions: string
@@ -63,43 +63,6 @@ type SubmitChatArgs = {
   useDashboardMode?: boolean
 }
 
-function getDemoApiKey(assistantId: string | null): string {
-  const normalizedId = assistantId || 'alpacachat'
-
-  const apiKeysJson = process.env.DEMO_API_KEYS
-  if (!apiKeysJson) {
-    throw new Error('DEMO_API_KEYS environment variable is not configured')
-  }
-
-  let apiKeys: Record<string, string>
-  try {
-    apiKeys = JSON.parse(apiKeysJson)
-  } catch (_error) {
-    throw new Error('DEMO_API_KEYS is not valid JSON')
-  }
-
-  const key = apiKeys[normalizedId]
-  if (!key) {
-    throw new Error(`No API key found for assistant: ${normalizedId}`)
-  }
-
-  return key
-}
-
-function getAssistantInstructions(assistantId: string | null): string {
-  const normalizedId = assistantId || 'alpacachat'
-
-  const instructions: Record<string, string> = {
-    alpacachat:
-      'You are the assistant for the Alpaca Chat website. Answer questions about the site, its product (Alpaca Chat), features, pricing, setup, and usage. Be concise, accurate, and helpful. If something is unclear or unknown, ask a clarifying question or say that you do not know.',
-    gym: 'You are a fitness assistant for a gym. Answer questions about workout programs, membership options, and opening hours based on the vector store information. You can also answer fitness related questions where you try to propose a workout program or a membership plan based on the vector store information when appropriate.',
-    wristway:
-      'You help with Wristway, an ergonomic wrist rest. Use the vector store information to answer product features, usage, and benefits.',
-  }
-
-  return instructions[normalizedId] || instructions['alpacachat']
-}
-
 export async function submitChatMessage(args: SubmitChatArgs): Promise<{
   // NOTE: this is a stream handle, not a final value
   text: ReturnType<typeof createStreamableValue<string>>['value']
@@ -150,17 +113,24 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
     apiKey = userApiKey
     console.log(`[Dashboard Chat] User: ${userId}`)
   } else {
-    // Demo mode: use demo API keys
-    apiKey = getDemoApiKey(assistantId)
-    console.log(`[Demo Chat] Selected assistant: ${assistantId}`)
+    // Demo mode: look up demo user from Turso (same flow as dashboard)
+    const demoUserId = assistantId || 'alpacachat'
+    const userData = await getUserData(demoUserId)
+    if (!userData?.apiKey) {
+      throw new Error(
+        `Demo assistant "${demoUserId}" not configured in database`
+      )
+    }
+
+    apiKey = userData.apiKey
+    customInstructions = (await getCustomInstructions(demoUserId)) || ''
+    console.log(`[Demo Chat] Assistant: ${demoUserId}`)
   }
 
   // Build request body matching the /api/chat endpoint
   const requestBody: ChatRequestBody = {
     sessionId: threadId,
-    websiteContent: useDashboardMode
-      ? getDashboardInstructions(customInstructions)
-      : getAssistantInstructions(assistantId), // Assistant-specific instructions/context
+    websiteContent: getDashboardInstructions(customInstructions),
     userMessage: message, // No [lang] prefix - handled by language field
     conversation: conversation || [],
     language: lang,
