@@ -2,6 +2,7 @@ import type { WebhookEvent } from '@clerk/nextjs/server'
 import { headers } from 'next/headers'
 import { Webhook } from 'svix'
 
+import { deleteAllUserFilesFromR2 } from '@/utils/r2-helpers'
 import { deleteUser, upsertUser } from '@/utils/turso'
 
 export async function POST(req: Request) {
@@ -85,7 +86,7 @@ export async function POST(req: Request) {
     return new Response('User updated', { status: 200 })
   }
 
-  // Handle user.deleted - remove user from database
+  // Handle user.deleted - remove user from database and clean up R2 backups
   if (eventType === 'user.deleted') {
     const { id } = evt.data
 
@@ -93,6 +94,10 @@ export async function POST(req: Request) {
       console.log(`[user.deleted] Deleting user from database: ${id}`)
       await deleteUser(id)
       console.log(`[user.deleted] User deleted successfully: ${id}`)
+
+      // Clean up all R2 backup files for this user
+      console.log(`[user.deleted] Cleaning up R2 backups for user: ${id}`)
+      await deleteAllUserFilesFromR2(id)
     }
 
     return new Response('User deleted', { status: 200 })

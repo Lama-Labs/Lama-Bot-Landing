@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextRequest } from 'next/server'
 
+import { deleteFileFromR2 } from '@/utils/r2-helpers'
 import {
   deleteFileFromVectorStore,
   getUserVectorStoreDocuments,
@@ -46,6 +47,11 @@ export async function DELETE(req: NextRequest) {
         { status: 500 }
       )
     }
+
+    // Also remove the backup from R2 (fire & forget)
+    deleteFileFromR2(userId, fileId).catch((err) =>
+      console.error('[r2] Background delete failed:', err)
+    )
 
     return Response.json({
       success: result,
