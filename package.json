@@ -12,6 +12,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^2.0.46",
     "@ai-sdk/rsc": "^1.0.65",
+    "@aws-sdk/client-s3": "^3.985.0",
     "@clerk/nextjs": "^6.36.5",
     "@emotion/cache": "^11.13.1",
     "@emotion/react": "^11.13.3",
@@ -26,7 +27,7 @@
     "file-type": "^21.0.0",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.454.0",
-    "next": "16.1.0",
+    "next": "16.1.6",
     "next-intl": "^4.6.1",
     "openai": "^5.11.0",
     "react": "19.2.3",

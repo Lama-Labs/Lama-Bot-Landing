@@ -10,9 +10,6 @@ Create a `.env.local` file in the root directory with the following variables:
 # OpenAI API Key
 OPENAI_API_KEY=your_openai_api_key
 
-# Demo API Keys (JSON object mapping assistant IDs to their API keys)
-# Each key should be from a Clerk user account with appropriate vectorStoreId in privateMetadata
-DEMO_API_KEYS={"alpacachat":"key_for_alpacachat_assistant","gym":"key_for_gym_assistant","wristway":"key_for_wristway_assistant"}
 ```
 
 **Note:** The app automatically detects the deployment URL. On Vercel, `VERCEL_PROJECT_PRODUCTION_URL` is automatically provided. Locally, it defaults to `http://localhost:3000`.
