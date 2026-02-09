@@ -110,12 +110,20 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
       const apiUrl = `${baseUrl}/api/chat`
 
       // Call the /api/chat endpoint
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      }
+
+      // Bypass Vercel deployment protection on preview deployments
+      const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET
+      if (bypassSecret) {
+        headers['x-vercel-protection-bypass'] = bypassSecret
+      }
+
       const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
+        headers,
         body: JSON.stringify(requestBody),
       })
 
