@@ -131,6 +131,7 @@ const Dashboard = () => {
                           user={user}
                           isLoaded={isLoaded}
                         />
+                        <Divider />
                       </>
                     )}
 

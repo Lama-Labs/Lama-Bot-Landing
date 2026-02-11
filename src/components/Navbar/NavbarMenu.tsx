@@ -10,15 +10,16 @@ import {
   ListItemButton,
   ListItemText,
 } from '@mui/material'
-import { Menu } from 'lucide-react'
+import { LayoutDashboard, Menu } from 'lucide-react'
 import Image from 'next/image'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import LocaleSwitcher from '@/components/LanguageSwitcher/LocaleSwitcher'
 
 const NavbarMenu = () => {
   const t = useTranslations('navbar')
+  const locale = useLocale()
 
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -110,8 +111,23 @@ const NavbarMenu = () => {
         <Box
           sx={{
             display: { xs: 'none', sm: 'flex' },
+            alignItems: 'center',
+            gap: 1,
           }}
         >
+          <Button
+            variant='contained'
+            color='secondary'
+            startIcon={<LayoutDashboard size={18} />}
+            href={`/${locale}/dashboard`}
+            target='_blank'
+            rel='noopener noreferrer'
+            sx={{
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {t('dashboard')}
+          </Button>
           <LocaleSwitcher
             anchorOrigin={{
               vertical: 'bottom',
@@ -140,6 +156,23 @@ const NavbarMenu = () => {
               </ListItem>
             ))}
           </List>
+          <Divider />
+          <Box sx={{ mx: 2, my: 2 }}>
+            <Button
+              variant='contained'
+              color='secondary'
+              sx={{
+                color: 'white',
+              }}
+              startIcon={<LayoutDashboard size={18} />}
+              href={`/${locale}/dashboard`}
+              target='_blank'
+              rel='noopener noreferrer'
+              fullWidth
+            >
+              {t('dashboard')}
+            </Button>
+          </Box>
           <Divider />
           <Box sx={{ mx: 1, my: 2 }}>
             <LocaleSwitcher
