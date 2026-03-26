@@ -29,6 +29,22 @@ export type UserData = {
   totalStorageLimit?: number | null
   vectorStoreId?: string | null
   trial?: string | null
+  crawlEnabled?: number | null
+  crawlMaxPages?: number | null
+  crawlCooldownDays?: number | null
+}
+
+export type WebsiteKnowledgeData = {
+  id: string
+  clerkUserId: string
+  url: string
+  status: 'pending' | 'completed' | 'failed'
+  errorMessage: string | null
+  crawlId: string | null
+  vectorStoreFileId: string | null
+  lastCrawledAt: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 type TableSchema = {
@@ -72,6 +88,9 @@ const TABLE_SCHEMAS: TableSchema[] = [
         total_storage_limit INTEGER,
         vector_store_id TEXT,
         trial TEXT,
+        crawl_enabled INTEGER DEFAULT 0,
+        crawl_max_pages INTEGER DEFAULT 0,
+        crawl_cooldown_days INTEGER DEFAULT 30,
         created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
         updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
       )
@@ -94,6 +113,27 @@ const TABLE_SCHEMAS: TableSchema[] = [
     `,
     indexes: [
       `CREATE INDEX IF NOT EXISTS idx_custom_instructions_user ON custom_instructions (clerk_user_id)`,
+    ],
+  },
+  {
+    name: 'website_knowledge',
+    createStatement: `
+      CREATE TABLE IF NOT EXISTS website_knowledge (
+        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        clerk_user_id TEXT NOT NULL,
+        url TEXT,
+        status TEXT NOT NULL DEFAULT 'pending',
+        error_message TEXT,
+        crawl_id TEXT,
+        vector_store_file_id TEXT,
+        last_crawled_at TEXT,
+        created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+        updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+        FOREIGN KEY (clerk_user_id) REFERENCES users(clerk_user_id)
+      )
+    `,
+    indexes: [
+      `CREATE INDEX IF NOT EXISTS idx_website_knowledge_user ON website_knowledge (clerk_user_id)`,
     ],
   },
 ]
@@ -140,6 +180,7 @@ const ensureInitialized = async (): Promise<void> => {
         }
       }
     }
+
   })()
   return initPromise
 }
@@ -235,14 +276,26 @@ export const upsertUser = async (userData: UserData): Promise<void> => {
       updates.push('trial = ?')
       values.push(userData.trial)
     }
+    if (userData.crawlEnabled !== undefined) {
+      updates.push('crawl_enabled = ?')
+      values.push(userData.crawlEnabled)
+    }
+    if (userData.crawlMaxPages !== undefined) {
+      updates.push('crawl_max_pages = ?')
+      values.push(userData.crawlMaxPages)
+    }
+    if (userData.crawlCooldownDays !== undefined) {
+      updates.push('crawl_cooldown_days = ?')
+      values.push(userData.crawlCooldownDays)
+    }
 
     // Always update the updated_at timestamp
     updates.push("updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')")
 
     // SQLite UPSERT syntax: INSERT ... ON CONFLICT ... DO UPDATE
     const sql = `
-      INSERT INTO users (clerk_user_id, email, api_key, document_count, total_storage_limit, vector_store_id, trial)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO users (clerk_user_id, email, api_key, document_count, total_storage_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(clerk_user_id) DO UPDATE SET ${updates.join(', ')}
     `
 
@@ -256,6 +309,9 @@ export const upsertUser = async (userData: UserData): Promise<void> => {
         userData.totalStorageLimit ?? null,
         userData.vectorStoreId ?? null,
         userData.trial ?? null,
+        userData.crawlEnabled ?? 0,
+        userData.crawlMaxPages ?? 0,
+        userData.crawlCooldownDays ?? 30,
         ...values,
       ],
     })
@@ -351,6 +407,9 @@ const mapRowToUserData = (row: Record<string, unknown>): UserData => ({
   totalStorageLimit: row.total_storage_limit as number | null,
   vectorStoreId: row.vector_store_id as string | null,
   trial: row.trial as string | null,
+  crawlEnabled: row.crawl_enabled as number | null,
+  crawlMaxPages: row.crawl_max_pages as number | null,
+  crawlCooldownDays: row.crawl_cooldown_days as number | null,
 })
 
 /**
@@ -366,7 +425,7 @@ export const getUserData = async (
     if (!client) return null
 
     const result = await client.execute({
-      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, vector_store_id, trial
+      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days
             FROM users WHERE clerk_user_id = ? LIMIT 1`,
       args: [clerkUserId],
     })
@@ -399,7 +458,7 @@ export const getUserByApiKey = async (
     if (!client) return null
 
     const result = await client.execute({
-      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, vector_store_id, trial
+      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days
             FROM users WHERE api_key = ? LIMIT 1`,
       args: [apiKey],
     })
@@ -427,9 +486,13 @@ export const deleteUser = async (clerkUserId: string): Promise<void> => {
     const client = getClientOrNull()
     if (!client) return
 
-    // Delete custom instructions first (foreign key constraint)
+    // Delete related records first (foreign key constraints)
     await client.execute({
       sql: 'DELETE FROM custom_instructions WHERE clerk_user_id = ?',
+      args: [clerkUserId],
+    })
+    await client.execute({
+      sql: 'DELETE FROM website_knowledge WHERE clerk_user_id = ?',
       args: [clerkUserId],
     })
 
@@ -447,3 +510,173 @@ export const deleteUser = async (clerkUserId: string): Promise<void> => {
     })
   }
 }
+
+// ── Website Knowledge CRUD ──────────────────────────────────────────
+
+const mapRowToWebsiteKnowledge = (
+  row: Record<string, unknown>
+): WebsiteKnowledgeData => ({
+  id: row.id as string,
+  clerkUserId: row.clerk_user_id as string,
+  url: row.url as string,
+  status: row.status as WebsiteKnowledgeData['status'],
+  errorMessage: row.error_message as string | null,
+  crawlId: row.crawl_id as string | null,
+  vectorStoreFileId: row.vector_store_file_id as string | null,
+  lastCrawledAt: row.last_crawled_at as string | null,
+  createdAt: row.created_at as string,
+  updatedAt: row.updated_at as string,
+})
+
+/**
+ * Creates a pending website knowledge crawl record (replaces any existing record for the user)
+ */
+export const createWebsiteKnowledgeCrawl = async (
+  clerkUserId: string,
+  url: string,
+  crawlId: string
+): Promise<void> => {
+  try {
+    await ensureInitialized()
+    const client = getClientOrNull()
+    if (!client) return
+
+    // Upsert: update existing row (preserving vector_store_file_id) or insert new
+    const existing = await client.execute({
+      sql: 'SELECT id FROM website_knowledge WHERE clerk_user_id = ? LIMIT 1',
+      args: [clerkUserId],
+    })
+
+    if (existing.rows.length > 0) {
+      await client.execute({
+        sql: `UPDATE website_knowledge
+              SET url = ?, status = 'pending', crawl_id = ?, error_message = NULL,
+                  updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+              WHERE clerk_user_id = ?`,
+        args: [url, crawlId, clerkUserId],
+      })
+    } else {
+      await client.execute({
+        sql: `INSERT INTO website_knowledge (id, clerk_user_id, url, status, crawl_id)
+              VALUES (lower(hex(randomblob(16))), ?, ?, 'pending', ?)`,
+        args: [clerkUserId, url, crawlId],
+      })
+    }
+  } catch (error) {
+    console.error('[turso] Failed to create website knowledge crawl', {
+      clerkUserId,
+      error: (error as Error).message,
+    })
+  }
+}
+
+/**
+ * Retrieves the website knowledge record for a user
+ */
+export const getWebsiteKnowledge = async (
+  clerkUserId: string
+): Promise<WebsiteKnowledgeData | null> => {
+  try {
+    await ensureInitialized()
+    const client = getClientOrNull()
+    if (!client) return null
+
+    const result = await client.execute({
+      sql: `SELECT id, clerk_user_id, url, status, error_message, crawl_id, vector_store_file_id, last_crawled_at, created_at, updated_at
+            FROM website_knowledge WHERE clerk_user_id = ? LIMIT 1`,
+      args: [clerkUserId],
+    })
+
+    if (result.rows.length === 0) return null
+    return mapRowToWebsiteKnowledge(result.rows[0] as Record<string, unknown>)
+  } catch (error) {
+    console.error('[turso] Failed to get website knowledge', {
+      clerkUserId,
+      error: (error as Error).message,
+    })
+    return null
+  }
+}
+
+/**
+ * Updates a website knowledge record with crawl results (success)
+ */
+export const completeWebsiteKnowledgeCrawl = async (
+  clerkUserId: string,
+  vectorStoreFileId: string
+): Promise<void> => {
+  try {
+    await ensureInitialized()
+    const client = getClientOrNull()
+    if (!client) return
+
+    await client.execute({
+      sql: `UPDATE website_knowledge
+            SET vector_store_file_id = ?, status = 'completed', error_message = NULL,
+                last_crawled_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
+                updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+            WHERE clerk_user_id = ?`,
+      args: [vectorStoreFileId, clerkUserId],
+    })
+  } catch (error) {
+    console.error('[turso] Failed to complete website knowledge crawl', {
+      clerkUserId,
+      error: (error as Error).message,
+    })
+  }
+}
+
+/**
+ * Marks a website knowledge crawl as failed
+ */
+export const failWebsiteKnowledgeCrawl = async (
+  clerkUserId: string,
+  errorMessage: string
+): Promise<void> => {
+  try {
+    await ensureInitialized()
+    const client = getClientOrNull()
+    if (!client) return
+
+    await client.execute({
+      sql: `UPDATE website_knowledge
+            SET status = 'failed', error_message = ?,
+                updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+            WHERE clerk_user_id = ?`,
+      args: [errorMessage, clerkUserId],
+    })
+  } catch (error) {
+    console.error('[turso] Failed to mark website knowledge crawl as failed', {
+      clerkUserId,
+      error: (error as Error).message,
+    })
+  }
+}
+
+/**
+ * Clears the vector_store_file_id for a user's website knowledge record.
+ * Called when the crawl file is manually deleted by the user.
+ */
+export const clearWebsiteKnowledgeFileId = async (
+  fileId: string
+): Promise<void> => {
+  try {
+    await ensureInitialized()
+    const client = getClientOrNull()
+    if (!client) return
+
+    await client.execute({
+      sql: `UPDATE website_knowledge
+            SET vector_store_file_id = NULL,
+                updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+            WHERE vector_store_file_id = ?`,
+      args: [fileId],
+    })
+  } catch (error) {
+    console.error('[turso] Failed to clear website knowledge file ID', {
+      fileId,
+      error: (error as Error).message,
+    })
+  }
+}
+
