@@ -152,6 +152,21 @@
         "fetchError": "Error loading instructions"
       }
     },
+    "websiteKnowledge": {
+      "title": "Website Knowledge",
+      "tooltip": "Crawl your website to automatically extract content for your AI assistant. The crawled content is added to your knowledge base and used by the chatbot to answer questions.",
+      "urlPlaceholder": "https://yourwebsite.com",
+      "crawlButton": "Crawl Website",
+      "crawling": "Crawling...",
+      "lastCrawled": "Last crawled: {date}",
+      "cooldownMessage": "Next crawl available after {date}",
+      "crawlComplete": "Website crawled successfully. The content has been added to your knowledge base.",
+      "messages": {
+        "fetchError": "Error loading website knowledge",
+        "crawlError": "Failed to start website crawl",
+        "urlRequired": "Please enter a website URL"
+      }
+    },
     "files": {
       "title": "Your Knowledge Base",
       "tooltip": "Manage your uploaded files that are used to train your AI chatbot. You can upload documents, delete them, and monitor their processing status.",

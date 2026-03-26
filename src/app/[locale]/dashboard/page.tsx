@@ -33,6 +33,7 @@ import ChatWindow from '@/components/ChatBot/ChatWindow'
 import ApiKeySection from '@/components/Dashboard/ApiKeySection'
 import CustomInstructions from '@/components/Dashboard/CustomInstructions'
 import ManageFiles from '@/components/Dashboard/ManageFiles'
+import WebsiteKnowledge from '@/components/Dashboard/WebsiteKnowledge'
 import { usePreventClerkCheckoutDismiss } from '@/hooks/usePreventClerkCheckoutDismiss'
 
 const Dashboard = () => {
@@ -124,6 +125,9 @@ const Dashboard = () => {
 
                         {/* Custom Instructions Section */}
                         <CustomInstructions user={user} isLoaded={isLoaded} />
+
+                        {/* Website Knowledge Section */}
+                        <WebsiteKnowledge />
 
                         {/* API Key Section */}
                         <ApiKeySection

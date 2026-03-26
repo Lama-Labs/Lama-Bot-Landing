@@ -152,6 +152,21 @@
         "fetchError": "Napaka pri nalaganju navodil"
       }
     },
+    "websiteKnowledge": {
+      "title": "Znanje spletne strani",
+      "tooltip": "Preglejte svojo spletno stran za samodejno pridobivanje vsebine za vašega AI pomočnika. Pregledana vsebina se doda v vašo bazo znanja in jo klepetalni robot uporablja za odgovarjanje na vprašanja.",
+      "urlPlaceholder": "https://vasastran.si",
+      "crawlButton": "Preglej spletno stran",
+      "crawling": "Pregledovanje...",
+      "lastCrawled": "Zadnji pregled: {date}",
+      "cooldownMessage": "Naslednji pregled možen po {date}",
+      "crawlComplete": "Spletna stran uspešno pregledana. Vsebina je bila dodana v vašo bazo znanja.",
+      "messages": {
+        "fetchError": "Napaka pri nalaganju znanja spletne strani",
+        "crawlError": "Napaka pri začetku pregleda spletne strani",
+        "urlRequired": "Vnesite URL spletne strani"
+      }
+    },
     "files": {
       "title": "Vaše baze znanja",
       "tooltip": "Upravljajte naložene datoteke, ki se uporabljajo za učenje vašega AI klepetalnega robota. Lahko nalagate dokumente, jih brišete in spremljate stanje obdelave.",

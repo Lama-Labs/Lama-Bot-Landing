@@ -140,6 +140,11 @@ export async function POST(req: Request) {
             const documentCount = planSlug === 'basic' ? 10 : 20
             const totalStorageLimit = documentCount * 1024 * 1024
 
+            // Crawl limits based on plan
+            const crawlEnabled = planSlug === 'basic' ? 1 : 1
+            const crawlMaxPages = planSlug === 'basic' ? 20 : 20
+            const crawlCooldownDays = planSlug === 'basic' ? 30 : 30
+
             // Update user with subscription-specific data (api key, vector store, limits)
             // Uses upsert as fallback in case user.created webhook failed
             await upsertUser({
@@ -149,6 +154,9 @@ export async function POST(req: Request) {
               vectorStoreId,
               documentCount,
               totalStorageLimit,
+              crawlEnabled,
+              crawlMaxPages,
+              crawlCooldownDays,
             })
 
             console.log(
