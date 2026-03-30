@@ -120,14 +120,15 @@ const Dashboard = () => {
 
                     {hasActiveSubscription && (
                       <>
-                        {/* File Management Section */}
-                        <ManageFiles />
+
+                        {/* Website Knowledge Section */}
+                        <WebsiteKnowledge />
 
                         {/* Custom Instructions Section */}
                         <CustomInstructions user={user} isLoaded={isLoaded} />
 
-                        {/* Website Knowledge Section */}
-                        <WebsiteKnowledge />
+                        {/* File Management Section */}
+                        <ManageFiles />
 
                         {/* API Key Section */}
                         <ApiKeySection
