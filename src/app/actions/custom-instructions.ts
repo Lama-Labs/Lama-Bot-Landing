@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server'
 import { unstable_cache, updateTag } from 'next/cache'
 
 import { hasAnyPlan } from '@/utils/clerk/subscription'
+import { ANY_PAID_PLAN } from '@/utils/plans'
 import { getCustomInstructions, saveCustomInstructions } from '@/utils/turso'
 
 const tagForUser = (userId: string) => `custom-instructions:${userId}`
@@ -72,7 +73,7 @@ export async function saveCustomInstructionsAction(
   }
 
   // Ensure user has an eligible paid plan or matching trial tier (e.g., basic)
-  const isEligible = await hasAnyPlan(has, 'basic', userId)
+  const isEligible = await hasAnyPlan(has, ANY_PAID_PLAN, userId)
   if (!isEligible) {
     throw new Error('Requires an active paid plan')
   }

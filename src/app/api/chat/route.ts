@@ -7,6 +7,7 @@ import { after } from 'next/server'
 import type { ResponseCompletedEvent } from 'openai/resources/responses/responses.mjs'
 
 import { hasAnyPlanByUserId } from '@/utils/clerk/subscription'
+import { ANY_PAID_PLAN } from '@/utils/plans'
 import { openaiClient } from '@/utils/openai-client'
 import {
   type UserData,
@@ -178,7 +179,7 @@ export async function POST(request: Request) {
 
     const hasActiveSubscription = await hasAnyPlanByUserId(
       user.clerkUserId,
-      'basic'
+      ANY_PAID_PLAN
     )
 
     if (!hasActiveSubscription) {

@@ -5,6 +5,7 @@ import { auth } from '@clerk/nextjs/server'
 
 import type { ChatRequestBody } from '@/app/api/chat/types'
 import { hasAnyPlan } from '@/utils/clerk/subscription'
+import { ANY_PAID_PLAN } from '@/utils/plans'
 import { getUserData } from '@/utils/turso'
 
 /**
@@ -60,7 +61,7 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
     }
 
     // Check if user has an active subscription
-    const hasActiveSubscription = await hasAnyPlan(has, 'basic', userId)
+    const hasActiveSubscription = await hasAnyPlan(has, ANY_PAID_PLAN, userId)
     if (!hasActiveSubscription) {
       throw new Error('Unauthorized: Active subscription required')
     }

@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server'
 import Firecrawl from '@mendable/firecrawl-js'
 
 import { hasAnyPlan } from '@/utils/clerk/subscription'
+import { ANY_PAID_PLAN } from '@/utils/plans'
 import { deleteCrawlFromR2, uploadCrawlToR2 } from '@/utils/r2-helpers'
 import {
   type WebsiteKnowledgeData,
@@ -251,7 +252,7 @@ export async function triggerCrawlAction(
   const { userId, has } = await auth()
   if (!userId) throw new Error('Unauthorized: User must be signed in')
 
-  const isEligible = await hasAnyPlan(has, 'basic', userId)
+  const isEligible = await hasAnyPlan(has, ANY_PAID_PLAN, userId)
   if (!isEligible) {
     return { success: false, error: 'Requires an active paid plan' }
   }

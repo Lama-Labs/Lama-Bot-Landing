@@ -27,7 +27,10 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
 import { ensureUserInDatabase } from '@/app/actions/ensure-user'
-import { getSubscriptionStatus } from '@/app/actions/subscription'
+import {
+  type SubscriptionStatus,
+  getSubscriptionStatus,
+} from '@/app/actions/subscription'
 import ChatBotAnimation from '@/components/ChatBot/ChatBotAnimation'
 import ChatWindow from '@/components/ChatBot/ChatWindow'
 import ApiKeySection from '@/components/Dashboard/ApiKeySection'
@@ -45,7 +48,10 @@ const Dashboard = () => {
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'))
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
-  const [hasActiveSubscription, setHasActiveSubscription] = useState(false)
+  const [subscription, setSubscription] = useState<SubscriptionStatus>({
+    hasSubscription: false,
+    hasPlusPlan: false,
+  })
   const searchParams = useSearchParams()
 
   // Prevent closing the Clerk checkout drawer via outside click or Escape
@@ -56,7 +62,7 @@ const Dashboard = () => {
     const initUser = async () => {
       await ensureUserInDatabase()
       const status = await getSubscriptionStatus()
-      setHasActiveSubscription(status)
+      setSubscription(status)
     }
 
     if (user && isLoaded) {
@@ -101,7 +107,7 @@ const Dashboard = () => {
           <Grid container spacing={4}>
             {/* Main Content */}
             <Grid
-              size={{ xs: 12, md: hasActiveSubscription && isMdUp ? 7 : 12 }}
+              size={{ xs: 12, md: subscription.hasSubscription && isMdUp ? 7 : 12 }}
             >
               <Paper
                 elevation={3}
@@ -118,7 +124,7 @@ const Dashboard = () => {
                       })}
                     </Typography>
 
-                    {hasActiveSubscription && (
+                    {subscription.hasSubscription && (
                       <>
 
                         {/* Website Knowledge Section */}
@@ -127,8 +133,8 @@ const Dashboard = () => {
                         {/* Custom Instructions Section */}
                         <CustomInstructions user={user} isLoaded={isLoaded} />
 
-                        {/* File Management Section */}
-                        <ManageFiles />
+                        {/* File Management Section (Plus plan only) */}
+                        {subscription.hasPlusPlan && <ManageFiles />}
 
                         {/* API Key Section */}
                         <ApiKeySection
@@ -172,7 +178,7 @@ const Dashboard = () => {
             </Grid>
 
             {/* Chat Window - Desktop Only (Embedded) */}
-            {hasActiveSubscription && isMdUp && (
+            {subscription.hasSubscription && isMdUp && (
               <Grid size={{ md: 5 }}>
                 <Box
                   sx={{
@@ -189,7 +195,7 @@ const Dashboard = () => {
           </Grid>
 
           {/* Chat Window - Mobile Only (FAB) */}
-          {hasActiveSubscription && !isMdUp && (
+          {subscription.hasSubscription && !isMdUp && (
             <>
               <Box
                 sx={{

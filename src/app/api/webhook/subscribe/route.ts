@@ -6,7 +6,13 @@ import { Webhook } from 'svix'
 
 import { getClerkUser } from '@/utils/clerk/users'
 import { openaiClient } from '@/utils/openai-client'
-import { getUserData, upsertUser } from '@/utils/turso'
+import { PLANS, getPlanLimits } from '@/utils/plans'
+import { deleteFileFromR2 } from '@/utils/r2-helpers'
+import { getUserData, getWebsiteKnowledge, upsertUser } from '@/utils/turso'
+import {
+  deleteFileFromVectorStore,
+  getUserVectorStoreDocuments,
+} from '@/utils/vector-store-helpers'
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.CLERK_SUBSCRIPTION_WEBHOOK_SECRET
@@ -137,13 +143,48 @@ export async function POST(req: Request) {
             }
 
             // Calculate limits based on plan
-            const documentCount = planSlug === 'basic' ? 10 : 20
-            const totalStorageLimit = documentCount * 1024 * 1024
+            const limits = getPlanLimits(planSlug)
 
-            // Crawl limits based on plan
-            const crawlEnabled = planSlug === 'basic' ? 1 : 1
-            const crawlMaxPages = planSlug === 'basic' ? 20 : 20
-            const crawlCooldownDays = planSlug === 'basic' ? 30 : 30
+            // Handle downgrade: delete uploaded documents when switching to basic
+            // Only runs when the user has a vector store (i.e., was previously provisioned)
+            if (
+              eventType === 'subscription.updated' &&
+              planSlug === PLANS.BASIC &&
+              existingVectorStoreId
+            ) {
+              try {
+                const [allDocs, wk] = await Promise.all([
+                  getUserVectorStoreDocuments(userId),
+                  getWebsiteKnowledge(userId),
+                ])
+                const crawlFileId = wk?.vectorStoreFileId ?? null
+                const uploadedDocs = (allDocs ?? []).filter(
+                  (doc) => doc.id !== crawlFileId
+                )
+
+                if (uploadedDocs.length > 0) {
+                  console.log(
+                    `[webhook] Downgrade detected for ${userId}: deleting ${uploadedDocs.length} uploaded file(s)`
+                  )
+                  await Promise.allSettled(
+                    uploadedDocs.map(async (doc) => {
+                      await deleteFileFromVectorStore(userId, doc.id)
+                      deleteFileFromR2(userId, doc.id).catch((err) =>
+                        console.error(
+                          `[webhook] Failed to delete R2 file ${doc.id}:`,
+                          err
+                        )
+                      )
+                    })
+                  )
+                }
+              } catch (downgradeError) {
+                console.error(
+                  '[webhook] Failed to delete files on downgrade:',
+                  downgradeError
+                )
+              }
+            }
 
             // Update user with subscription-specific data (api key, vector store, limits)
             // Uses upsert as fallback in case user.created webhook failed
@@ -152,11 +193,11 @@ export async function POST(req: Request) {
               email,
               apiKey,
               vectorStoreId,
-              documentCount,
-              totalStorageLimit,
-              crawlEnabled,
-              crawlMaxPages,
-              crawlCooldownDays,
+              documentCount: limits.documentCount,
+              totalStorageLimit: limits.totalStorageLimit,
+              crawlEnabled: limits.crawlEnabled,
+              crawlMaxPages: limits.crawlMaxPages,
+              crawlCooldownDays: limits.crawlCooldownDays,
             })
 
             console.log(

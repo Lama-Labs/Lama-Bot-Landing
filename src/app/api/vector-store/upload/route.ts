@@ -3,6 +3,7 @@ import { fileTypeFromBuffer } from 'file-type'
 import { NextRequest } from 'next/server'
 
 import { hasAnyPlan } from '@/utils/clerk/subscription'
+import { PLUS_ONLY_PLAN } from '@/utils/plans'
 import { uploadFileToR2 } from '@/utils/r2-helpers'
 import { getUserData, getWebsiteKnowledge } from '@/utils/turso'
 import {
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Ensure user has an eligible paid plan or matching trial tier (e.g., basic)
-    const isEligible = await hasAnyPlan(has, 'basic', userId)
+    const isEligible = await hasAnyPlan(has, PLUS_ONLY_PLAN, userId)
     if (!isEligible) {
       return Response.json(
         { error: 'Requires an active paid plan' },

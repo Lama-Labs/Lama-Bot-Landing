@@ -79,7 +79,9 @@ const CustomInstructions = ({ user, isLoaded }: CustomInstructionsProps) => {
     if (user && isLoaded) {
       fetchInstructions()
       // Check subscription status from server
-      getSubscriptionStatus().then(setHasActiveSubscription)
+      getSubscriptionStatus().then((s) =>
+        setHasActiveSubscription(s.hasSubscription)
+      )
     }
   }, [user, isLoaded, fetchInstructions])
 

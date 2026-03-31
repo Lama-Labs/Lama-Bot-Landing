@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 
 import { hasAnyPlan } from '@/utils/clerk/subscription'
+import { PLUS_ONLY_PLAN } from '@/utils/plans'
 import { getUserData, getWebsiteKnowledge } from '@/utils/turso'
 import { getUserVectorStoreDocuments } from '@/utils/vector-store-helpers'
 
@@ -33,7 +34,7 @@ export async function GET() {
       .sort((a, b) => b.createdAt - a.createdAt)
 
     // Determine if user has an eligible plan (paid or matching trial)
-    const isSubscribed = await hasAnyPlan(has, 'basic', userId)
+    const isSubscribed = await hasAnyPlan(has, PLUS_ONLY_PLAN, userId)
 
     // Allowed file count from database
     const filesLimit = userData?.documentCount ?? 0
