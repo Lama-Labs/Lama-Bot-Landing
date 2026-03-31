@@ -1,8 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextRequest } from 'next/server'
 
-import { deleteCrawlFromR2, deleteFileFromR2 } from '@/utils/r2-helpers'
-import { clearWebsiteKnowledgeFileId, getWebsiteKnowledge } from '@/utils/turso'
+import { deleteFileFromR2 } from '@/utils/r2-helpers'
 import {
   deleteFileFromVectorStore,
   getUserVectorStoreDocuments,
@@ -39,10 +38,6 @@ export async function DELETE(req: NextRequest) {
       )
     }
 
-    // Check if this is a crawl file before deleting (need the reference intact)
-    const wk = await getWebsiteKnowledge(userId)
-    const isCrawlFile = wk?.vectorStoreFileId === fileId
-
     // Delete file from user's vector store
     const result = await deleteFileFromVectorStore(userId, fileId)
 
@@ -53,20 +48,10 @@ export async function DELETE(req: NextRequest) {
       )
     }
 
-    if (isCrawlFile) {
-      // Crawl file: delete from crawl R2 path and clear DB reference
-      deleteCrawlFromR2(userId).catch((err) =>
-        console.error('[r2] Background crawl backup delete failed:', err)
-      )
-      clearWebsiteKnowledgeFileId(fileId).catch((err) =>
-        console.error('[turso] Background clear crawl file ID failed:', err)
-      )
-    } else {
-      // Regular document: delete from standard R2 path
-      deleteFileFromR2(userId, fileId).catch((err) =>
-        console.error('[r2] Background delete failed:', err)
-      )
-    }
+    // Clean up R2 backup
+    deleteFileFromR2(userId, fileId).catch((err) =>
+      console.error('[r2] Background delete failed:', err)
+    )
 
     return Response.json({
       success: result,

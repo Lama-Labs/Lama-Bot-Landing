@@ -4,15 +4,16 @@ import { auth } from '@clerk/nextjs/server'
 import Firecrawl from '@mendable/firecrawl-js'
 
 import { hasAnyPlan } from '@/utils/clerk/subscription'
+import { deleteCrawlFromR2, uploadCrawlToR2 } from '@/utils/r2-helpers'
 import {
   type WebsiteKnowledgeData,
+  clearWebsiteKnowledgeFileId,
   completeWebsiteKnowledgeCrawl,
   createWebsiteKnowledgeCrawl,
   failWebsiteKnowledgeCrawl,
   getWebsiteKnowledge,
   getUserData,
 } from '@/utils/turso'
-import { uploadCrawlToR2 } from '@/utils/r2-helpers'
 import {
   deleteFileFromVectorStore,
   uploadFileToVectorStore,
@@ -64,6 +65,7 @@ export type CrawlStatusResponse = {
   crawlMaxPages: number
   canCrawl: boolean
   cooldownEndsAt?: string | null
+  crawlFileId?: string | null
 }
 
 /**
@@ -186,6 +188,7 @@ export async function getWebsiteKnowledgeStatusAction(): Promise<CrawlStatusResp
               { lastCrawledAt: new Date().toISOString() },
               cooldownDays
             ),
+            crawlFileId: fileId,
           }
         }
 
@@ -235,6 +238,7 @@ export async function getWebsiteKnowledgeStatusAction(): Promise<CrawlStatusResp
     crawlMaxPages,
     canCrawl: record.status === 'pending' ? false : (crawlEnabled && !cooldownEndsAt),
     cooldownEndsAt,
+    crawlFileId: record.vectorStoreFileId,
   }
 }
 
@@ -300,6 +304,36 @@ export async function triggerCrawlAction(
     })
     return { success: false, error: 'Crawl service is unavailable. Please try again later.' }
   }
+}
+
+/**
+ * Deletes the crawl file from the vector store, R2 backup, and clears the DB reference.
+ */
+export async function deleteCrawlFileAction(): Promise<{ success: boolean; error?: string }> {
+  const { userId } = await auth()
+  if (!userId) throw new Error('Unauthorized: User must be signed in')
+
+  const record = await getWebsiteKnowledge(userId)
+  if (!record?.vectorStoreFileId) {
+    return { success: false, error: 'No crawl file to delete' }
+  }
+
+  const fileId = record.vectorStoreFileId
+
+  const deleted = await deleteFileFromVectorStore(userId, fileId)
+  if (!deleted) {
+    return { success: false, error: 'Failed to delete crawl file from vector store' }
+  }
+
+  // Await DB clear so callers see consistent state on re-fetch
+  await clearWebsiteKnowledgeFileId(fileId)
+
+  // Fire-and-forget: R2 backup cleanup
+  deleteCrawlFromR2(userId).catch((err) =>
+    console.error('[website-knowledge] Background crawl R2 delete failed:', err)
+  )
+
+  return { success: true }
 }
 
 function computeCooldownEnd(

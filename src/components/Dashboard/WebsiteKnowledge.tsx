@@ -6,17 +6,19 @@ import {
   Button,
   CircularProgress,
   IconButton,
+  Paper,
   Skeleton,
   TextField,
   Tooltip,
   Typography,
 } from '@mui/material'
-import { Globe, Info } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { Globe, Info, Trash2 } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import {
   type CrawlStatusResponse,
+  deleteCrawlFileAction,
   getWebsiteKnowledgeStatusAction,
   triggerCrawlAction,
 } from '@/app/actions/website-knowledge'
@@ -28,9 +30,11 @@ const WebsiteKnowledge = () => {
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(true)
   const [crawling, setCrawling] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const t = useTranslations('dashboard')
+  const locale = useLocale()
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -99,6 +103,18 @@ const WebsiteKnowledge = () => {
     } else {
       setCrawling(false)
     }
+  }
+
+  const handleDelete = async () => {
+    setDeleting(true)
+    setError(null)
+    const result = await deleteCrawlFileAction()
+    if (!result.success) {
+      setError(result.error ?? t('websiteKnowledge.messages.deleteError'))
+    } else {
+      await fetchStatus()
+    }
+    setDeleting(false)
   }
 
   if (loading) {
@@ -187,31 +203,69 @@ const WebsiteKnowledge = () => {
           </Tooltip>
         </Box>
 
-        {/* Status info */}
-        {status?.lastCrawledAt && (
-          <Typography variant='caption' color='text.secondary'>
-            {t('websiteKnowledge.lastCrawled', {
-              date: new Date(status.lastCrawledAt).toLocaleString(),
-            })}
-          </Typography>
-        )}
-
         {/* Error display */}
         {(error || status?.status === 'failed') && (
           <Alert
             severity='error'
-            sx={{ mt: 1 }}
             onClose={() => setError(null)}
           >
             {error || status?.errorMessage || t('websiteKnowledge.messages.crawlError')}
           </Alert>
         )}
 
-        {/* Success message */}
-        {status?.status === 'completed' && !error && (
-          <Alert severity='success' sx={{ mt: 1 }}>
-            {t('websiteKnowledge.crawlComplete')}
-          </Alert>
+        {/* Crawl file info row */}
+        {status?.status === 'completed' && status.crawlFileId && (
+          <Paper
+            elevation={0}
+            sx={{
+              px: 2,
+              py: 1.5,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              bgcolor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+            }}
+          >
+            <Globe size={20} style={{ flexShrink: 0, opacity: 0.6 }} />
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant='body2' color='text.primary' noWrap>
+                {status.url}
+              </Typography>
+              {status.lastCrawledAt && (
+                <Typography variant='caption' color='text.secondary'>
+                  {t('websiteKnowledge.lastCrawled', {
+                    date: new Date(status.lastCrawledAt).toLocaleDateString(locale, {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    }),
+                  })}
+                </Typography>
+              )}
+            </Box>
+            <Button
+              variant='outlined'
+              color='error'
+              size='small'
+              startIcon={<Trash2 size={16} />}
+              loading={deleting}
+              onClick={handleDelete}
+            >
+              {t('websiteKnowledge.deleteButton')}
+            </Button>
+          </Paper>
+        )}
+
+        {/* Status info when no crawl file exists */}
+        {status?.lastCrawledAt && !(status?.status === 'completed' && status.crawlFileId) && (
+          <Typography variant='caption' color='text.secondary'>
+            {t('websiteKnowledge.lastCrawled', {
+              date: new Date(status.lastCrawledAt).toLocaleString(),
+            })}
+          </Typography>
         )}
       </Box>
     </Box>

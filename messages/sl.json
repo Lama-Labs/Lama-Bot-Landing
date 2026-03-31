@@ -160,11 +160,12 @@
       "crawling": "Pregledovanje...",
       "lastCrawled": "Zadnji pregled: {date}",
       "cooldownMessage": "Naslednji pregled možen po {date}",
-      "crawlComplete": "Spletna stran uspešno pregledana. Vsebina je bila dodana v vašo bazo znanja.",
+      "deleteButton": "Izbriši",
       "messages": {
         "fetchError": "Napaka pri nalaganju znanja spletne strani",
         "crawlError": "Napaka pri začetku pregleda spletne strani",
-        "urlRequired": "Vnesite URL spletne strani"
+        "urlRequired": "Vnesite URL spletne strani",
+        "deleteError": "Napaka pri brisanju datoteke pregleda"
       }
     },
     "files": {

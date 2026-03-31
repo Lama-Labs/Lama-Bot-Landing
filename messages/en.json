@@ -160,11 +160,12 @@
       "crawling": "Crawling...",
       "lastCrawled": "Last crawled: {date}",
       "cooldownMessage": "Next crawl available after {date}",
-      "crawlComplete": "Website crawled successfully. The content has been added to your knowledge base.",
+      "deleteButton": "Delete",
       "messages": {
         "fetchError": "Error loading website knowledge",
         "crawlError": "Failed to start website crawl",
-        "urlRequired": "Please enter a website URL"
+        "urlRequired": "Please enter a website URL",
+        "deleteError": "Failed to delete crawl file"
       }
     },
     "files": {

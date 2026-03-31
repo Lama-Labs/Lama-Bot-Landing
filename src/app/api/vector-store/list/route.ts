@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 
 import { hasAnyPlan } from '@/utils/clerk/subscription'
-import { getUserData } from '@/utils/turso'
+import { getUserData, getWebsiteKnowledge } from '@/utils/turso'
 import { getUserVectorStoreDocuments } from '@/utils/vector-store-helpers'
 
 export async function GET() {
@@ -12,20 +12,25 @@ export async function GET() {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get all documents from user's vector store and sort by createdAt desc
-    const documents = (await getUserVectorStoreDocuments(userId)).sort(
-      (a, b) => b.createdAt - a.createdAt
-    )
+    // Fetch documents, crawl record, and user data in parallel
+    const [rawDocuments, wk, userData] = await Promise.all([
+      getUserVectorStoreDocuments(userId),
+      getWebsiteKnowledge(userId),
+      getUserData(userId),
+    ])
 
-    if (documents === null) {
+    if (rawDocuments === null) {
       return Response.json(
         { error: 'No vector store found for user' },
         { status: 404 }
       )
     }
 
-    // Get user data from database
-    const userData = await getUserData(userId)
+    // Exclude crawl file from document list and quota calculations
+    const crawlFileId = wk?.vectorStoreFileId ?? null
+    const documents = rawDocuments
+      .filter((doc) => doc.id !== crawlFileId)
+      .sort((a, b) => b.createdAt - a.createdAt)
 
     // Determine if user has an eligible plan (paid or matching trial)
     const isSubscribed = await hasAnyPlan(has, 'basic', userId)
