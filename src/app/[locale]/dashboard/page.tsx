@@ -1,12 +1,6 @@
 'use client'
 
-import {
-  PricingTable,
-  SignedIn,
-  SignedOut,
-  useClerk,
-  useUser,
-} from '@clerk/nextjs'
+import { PricingTable, Show, useClerk, useUser } from '@clerk/nextjs';
 import {
   Box,
   Button,
@@ -102,7 +96,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <SignedIn>
+      <Show when="signed-in">
         <Container maxWidth='xl' sx={{ mt: 8, py: 4 }}>
           <Grid container spacing={4}>
             {/* Main Content */}
@@ -233,8 +227,8 @@ const Dashboard = () => {
             </>
           )}
         </Container>
-      </SignedIn>
-      <SignedOut>
+      </Show>
+      <Show when="signed-out">
         <Container maxWidth='md' sx={{ mt: 8, py: 4 }}>
           <Paper
             elevation={3}
@@ -267,9 +261,9 @@ const Dashboard = () => {
             </Button>
           </Paper>
         </Container>
-      </SignedOut>
+      </Show>
     </>
-  )
+  );
 }
 
 export default Dashboard

@@ -1,6 +1,6 @@
 'use client'
 
-import type { UserResource } from '@clerk/types'
+import type { UserResource } from "@clerk/shared/types"
 import {
   Alert,
   Box,

@@ -42,15 +42,14 @@ export default async function DashboardLayout({
   const messages = await getMessages()
 
   return (
-    <ClerkProvider afterSignOutUrl={`/${locale}/dashboard`}>
-      <html lang={locale}>
-        <body
-          style={{
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
+    <html lang={locale}>
+      <body
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      ><ClerkProvider afterSignOutUrl={`/${locale}/dashboard`}>
           <AppRouterCacheProvider>
             <ThemeProvider theme={theme}>
               <CssBaseline />
@@ -67,8 +66,7 @@ export default async function DashboardLayout({
               </NextIntlClientProvider>
             </ThemeProvider>
           </AppRouterCacheProvider>
-        </body>
-      </html>
-    </ClerkProvider>
-  )
+        </ClerkProvider></body>
+    </html>
+  );
 }

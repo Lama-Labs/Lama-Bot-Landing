@@ -1,8 +1,7 @@
 import crypto from 'crypto'
 
-import type { WebhookEvent } from '@clerk/nextjs/server'
-import { headers } from 'next/headers'
-import { Webhook } from 'svix'
+import { verifyWebhook } from '@clerk/nextjs/webhooks'
+import type { NextRequest } from 'next/server'
 
 import { getClerkUser } from '@/utils/clerk/users'
 import { openaiClient } from '@/utils/openai-client'
@@ -14,64 +13,21 @@ import {
   getUserVectorStoreDocuments,
 } from '@/utils/vector-store-helpers'
 
-export async function POST(req: Request) {
-  const WEBHOOK_SECRET = process.env.CLERK_SUBSCRIPTION_WEBHOOK_SECRET
-
-  if (!WEBHOOK_SECRET) {
-    throw new Error(
-      'Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local'
-    )
-  }
-
-  const headerPayload = await headers()
-  const svix_id = headerPayload.get('svix-id')
-  const svix_timestamp = headerPayload.get('svix-timestamp')
-  const svix_signature = headerPayload.get('svix-signature')
-
-  if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response('Error occurred -- no svix headers', {
-      status: 400,
-    })
-  }
-
-  const payload = await req.json()
-  const body = JSON.stringify(payload)
-
-  const wh = new Webhook(WEBHOOK_SECRET)
-  let evt: WebhookEvent
-
+export async function POST(req: NextRequest) {
+  let evt
   try {
-    evt = wh.verify(body, {
-      'svix-id': svix_id,
-      'svix-timestamp': svix_timestamp,
-      'svix-signature': svix_signature,
-    }) as WebhookEvent
+    evt = await verifyWebhook(req, {
+      signingSecret: process.env.CLERK_SUBSCRIPTION_WEBHOOK_SECRET,
+    })
   } catch (err) {
     console.error('Error verifying webhook:', err)
-    return new Response('Error occurred', {
-      status: 400,
-    })
+    return new Response('Error occurred', { status: 400 })
   }
 
   const { id } = evt.data
   const eventType = evt.type
 
   console.log(`Webhook with an ID of ${id} and type of ${eventType}`)
-  console.log('Webhook body:', body)
-  console.log('Webhook event data:', evt.data)
-  console.log('Webhook event type:', evt.type)
-  console.log('Webhook headers:', {
-    'svix-id': svix_id,
-    'svix-timestamp': svix_timestamp,
-    'svix-signature': svix_signature,
-  })
-
-  // Log all webhook data for debugging purposes
-  console.log('=== WEBHOOK DATA LOG ===')
-  console.log('Event Type:', eventType)
-  console.log('Event ID:', id)
-  console.log('Full Event Data:', JSON.stringify(evt.data, null, 2))
-  console.log('=== END WEBHOOK DATA LOG ===')
 
   // Handle subscription events
   if (
