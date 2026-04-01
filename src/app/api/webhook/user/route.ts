@@ -2,7 +2,8 @@ import { verifyWebhook } from '@clerk/nextjs/webhooks'
 import type { NextRequest } from 'next/server'
 
 import { deleteAllUserFilesFromR2 } from '@/utils/r2-helpers'
-import { deleteUser, upsertUser } from '@/utils/turso'
+import { deleteUser, getUserData, upsertUser } from '@/utils/turso'
+import { deleteVectorStore } from '@/utils/vector-store-helpers'
 
 export async function POST(req: NextRequest) {
   let evt
@@ -62,6 +63,10 @@ export async function POST(req: NextRequest) {
     const { id } = evt.data
 
     if (id) {
+      // Fetch vector store ID before deleting user record
+      const userData = await getUserData(id)
+      const vectorStoreId = userData?.vectorStoreId
+
       console.log(`[user.deleted] Deleting user from database: ${id}`)
       await deleteUser(id)
       console.log(`[user.deleted] User deleted successfully: ${id}`)
@@ -69,6 +74,12 @@ export async function POST(req: NextRequest) {
       // Clean up all R2 backup files for this user
       console.log(`[user.deleted] Cleaning up R2 backups for user: ${id}`)
       await deleteAllUserFilesFromR2(id)
+
+      // Clean up OpenAI vector store
+      if (vectorStoreId) {
+        console.log(`[user.deleted] Deleting vector store for user: ${id}`)
+        await deleteVectorStore(vectorStoreId)
+      }
     }
 
     return new Response('User deleted', { status: 200 })
