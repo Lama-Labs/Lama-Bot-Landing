@@ -27,11 +27,23 @@ export type UserData = {
   apiKey?: string | null
   documentCount?: number | null
   totalStorageLimit?: number | null
+  monthlyTokenLimit?: number | null
   vectorStoreId?: string | null
   trial?: string | null
   crawlEnabled?: number | null
   crawlMaxPages?: number | null
   crawlCooldownDays?: number | null
+}
+
+export type TokenUsageData = {
+  id: string
+  clerkUserId: string
+  periodStart: string
+  periodEnd: string
+  tokenQuota: number
+  usedTokens: number
+  createdAt: string
+  updatedAt: string
 }
 
 export type WebsiteKnowledgeData = {
@@ -86,6 +98,7 @@ const TABLE_SCHEMAS: TableSchema[] = [
         api_key TEXT,
         document_count INTEGER,
         total_storage_limit INTEGER,
+        monthly_token_limit INTEGER DEFAULT 0,
         vector_store_id TEXT,
         trial TEXT,
         crawl_enabled INTEGER DEFAULT 0,
@@ -113,6 +126,25 @@ const TABLE_SCHEMAS: TableSchema[] = [
     `,
     indexes: [
       `CREATE INDEX IF NOT EXISTS idx_custom_instructions_user ON custom_instructions (clerk_user_id)`,
+    ],
+  },
+  {
+    name: 'TokenUsage',
+    createStatement: `
+      CREATE TABLE IF NOT EXISTS TokenUsage (
+        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        clerk_user_id TEXT NOT NULL,
+        period_start TEXT NOT NULL,
+        period_end TEXT NOT NULL,
+        token_quota INTEGER NOT NULL,
+        used_tokens INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+        updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+        FOREIGN KEY (clerk_user_id) REFERENCES users(clerk_user_id)
+      )
+    `,
+    indexes: [
+      `CREATE UNIQUE INDEX IF NOT EXISTS idx_token_usage_user_period ON TokenUsage (clerk_user_id, period_start)`,
     ],
   },
   {
@@ -268,6 +300,10 @@ export const upsertUser = async (userData: UserData): Promise<void> => {
       updates.push('total_storage_limit = ?')
       values.push(userData.totalStorageLimit)
     }
+    if (userData.monthlyTokenLimit !== undefined) {
+      updates.push('monthly_token_limit = ?')
+      values.push(userData.monthlyTokenLimit)
+    }
     if (userData.vectorStoreId !== undefined) {
       updates.push('vector_store_id = ?')
       values.push(userData.vectorStoreId)
@@ -294,8 +330,8 @@ export const upsertUser = async (userData: UserData): Promise<void> => {
 
     // SQLite UPSERT syntax: INSERT ... ON CONFLICT ... DO UPDATE
     const sql = `
-      INSERT INTO users (clerk_user_id, email, api_key, document_count, total_storage_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO users (clerk_user_id, email, api_key, document_count, total_storage_limit, monthly_token_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(clerk_user_id) DO UPDATE SET ${updates.join(', ')}
     `
 
@@ -307,6 +343,7 @@ export const upsertUser = async (userData: UserData): Promise<void> => {
         userData.apiKey ?? null,
         userData.documentCount ?? null,
         userData.totalStorageLimit ?? null,
+        userData.monthlyTokenLimit ?? null,
         userData.vectorStoreId ?? null,
         userData.trial ?? null,
         userData.crawlEnabled ?? 0,
@@ -405,6 +442,7 @@ const mapRowToUserData = (row: Record<string, unknown>): UserData => ({
   apiKey: row.api_key as string | null,
   documentCount: row.document_count as number | null,
   totalStorageLimit: row.total_storage_limit as number | null,
+  monthlyTokenLimit: row.monthly_token_limit as number | null,
   vectorStoreId: row.vector_store_id as string | null,
   trial: row.trial as string | null,
   crawlEnabled: row.crawl_enabled as number | null,
@@ -425,7 +463,7 @@ export const getUserData = async (
     if (!client) return null
 
     const result = await client.execute({
-      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days
+      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, monthly_token_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days
             FROM users WHERE clerk_user_id = ? LIMIT 1`,
       args: [clerkUserId],
     })
@@ -458,7 +496,7 @@ export const getUserByApiKey = async (
     if (!client) return null
 
     const result = await client.execute({
-      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days
+      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, monthly_token_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days
             FROM users WHERE api_key = ? LIMIT 1`,
       args: [apiKey],
     })
@@ -493,6 +531,10 @@ export const deleteUser = async (clerkUserId: string): Promise<void> => {
     })
     await client.execute({
       sql: 'DELETE FROM website_knowledge WHERE clerk_user_id = ?',
+      args: [clerkUserId],
+    })
+    await client.execute({
+      sql: 'DELETE FROM TokenUsage WHERE clerk_user_id = ?',
       args: [clerkUserId],
     })
 
@@ -679,4 +721,3 @@ export const clearWebsiteKnowledgeFileId = async (
     })
   }
 }
-

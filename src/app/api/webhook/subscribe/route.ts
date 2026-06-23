@@ -151,6 +151,7 @@ export async function POST(req: NextRequest) {
               vectorStoreId,
               documentCount: limits.documentCount,
               totalStorageLimit: limits.totalStorageLimit,
+              monthlyTokenLimit: limits.monthlyTokenLimit,
               crawlEnabled: limits.crawlEnabled,
               crawlMaxPages: limits.crawlMaxPages,
               crawlCooldownDays: limits.crawlCooldownDays,

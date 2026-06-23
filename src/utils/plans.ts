@@ -17,6 +17,7 @@ export type PlanLimits = {
   crawlEnabled: number
   crawlMaxPages: number
   crawlCooldownDays: number
+  monthlyTokenLimit: number
 }
 
 const MB = 1024 * 1024
@@ -28,6 +29,7 @@ export const PLAN_LIMITS: Record<PlanSlug, PlanLimits> = {
     crawlEnabled: 1,
     crawlMaxPages: 20,
     crawlCooldownDays: 30,
+    monthlyTokenLimit: 100_000,
   },
   plus: {
     documentCount: 20,
@@ -35,6 +37,7 @@ export const PLAN_LIMITS: Record<PlanSlug, PlanLimits> = {
     crawlEnabled: 1,
     crawlMaxPages: 50,
     crawlCooldownDays: 7,
+    monthlyTokenLimit: 300_000,
   },
 }
 
