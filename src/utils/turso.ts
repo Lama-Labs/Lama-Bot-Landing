@@ -46,6 +46,16 @@ export type TokenUsageData = {
   updatedAt: string
 }
 
+export type TokenQuotaCheckResult = {
+  allowed: boolean
+  tokenUsageId: string
+  tokenQuota: number
+  usedTokens: number
+  remainingTokens: number
+  periodStart: string
+  periodEnd: string
+}
+
 export type WebsiteKnowledgeData = {
   id: string
   clerkUserId: string
@@ -226,6 +236,209 @@ const safeStringify = (value: unknown): string | null => {
   }
 }
 
+const addOneMonth = (date: Date): Date => {
+  const next = new Date(date)
+  next.setUTCMonth(next.getUTCMonth() + 1)
+  return next
+}
+
+const isDateWithinPeriod = (
+  now: Date,
+  periodStartIso: string,
+  periodEndIso: string
+): boolean => {
+  const periodStart = new Date(periodStartIso)
+  const periodEnd = new Date(periodEndIso)
+  return now >= periodStart && now < periodEnd
+}
+
+const mapRowToTokenUsageData = (
+  row: Record<string, unknown>
+): TokenUsageData => ({
+  id: row.id as string,
+  clerkUserId: row.clerk_user_id as string,
+  periodStart: row.period_start as string,
+  periodEnd: row.period_end as string,
+  tokenQuota: row.token_quota as number,
+  usedTokens: row.used_tokens as number,
+  createdAt: row.created_at as string,
+  updatedAt: row.updated_at as string,
+})
+
+const getLatestTokenUsage = async (
+  client: Client,
+  clerkUserId: string
+): Promise<TokenUsageData | null> => {
+  const result = await client.execute({
+    sql: `SELECT id, clerk_user_id, period_start, period_end, token_quota, used_tokens, created_at, updated_at
+          FROM TokenUsage
+          WHERE clerk_user_id = ?
+          ORDER BY period_end DESC
+          LIMIT 1`,
+    args: [clerkUserId],
+  })
+
+  if (result.rows.length === 0) {
+    return null
+  }
+
+  return mapRowToTokenUsageData(result.rows[0] as Record<string, unknown>)
+}
+
+const getTokenUsageByPeriodStart = async (
+  client: Client,
+  clerkUserId: string,
+  periodStart: string
+): Promise<TokenUsageData | null> => {
+  const result = await client.execute({
+    sql: `SELECT id, clerk_user_id, period_start, period_end, token_quota, used_tokens, created_at, updated_at
+          FROM TokenUsage
+          WHERE clerk_user_id = ? AND period_start = ?
+          LIMIT 1`,
+    args: [clerkUserId, periodStart],
+  })
+
+  if (result.rows.length === 0) {
+    return null
+  }
+
+  return mapRowToTokenUsageData(result.rows[0] as Record<string, unknown>)
+}
+
+const getOrCreateTokenUsagePeriod = async (
+  client: Client,
+  clerkUserId: string,
+  tokenQuota: number,
+  periodStart: string,
+  periodEnd: string
+): Promise<TokenUsageData> => {
+  const existing = await getTokenUsageByPeriodStart(
+    client,
+    clerkUserId,
+    periodStart
+  )
+  if (existing) {
+    return existing
+  }
+
+  // TODO: Before creating a new quota period, verify the user still has a valid subscription/trial.
+  await client.execute({
+    sql: `INSERT OR IGNORE INTO TokenUsage (
+            id,
+            clerk_user_id,
+            period_start,
+            period_end,
+            token_quota,
+            used_tokens
+          ) VALUES (lower(hex(randomblob(16))), ?, ?, ?, ?, 0)`,
+    args: [clerkUserId, periodStart, periodEnd, tokenQuota],
+  })
+
+  const created = await getTokenUsageByPeriodStart(client, clerkUserId, periodStart)
+  if (!created) {
+    throw new Error('Failed to create token usage period')
+  }
+
+  return created
+}
+
+export const checkUserTokenQuota = async (
+  clerkUserId: string
+): Promise<TokenQuotaCheckResult | null> => {
+  try {
+    await ensureInitialized()
+    const client = getClientOrNull()
+    if (!client) return null
+
+    const user = await getUserData(clerkUserId)
+    if (!user) return null
+
+    const tokenQuota = user.monthlyTokenLimit ?? 0
+    const now = new Date()
+
+    let activeTokenUsage = await getLatestTokenUsage(client, clerkUserId)
+
+    if (!activeTokenUsage) {
+      const periodStart = now.toISOString()
+      const periodEnd = addOneMonth(now).toISOString()
+      activeTokenUsage = await getOrCreateTokenUsagePeriod(
+        client,
+        clerkUserId,
+        tokenQuota,
+        periodStart,
+        periodEnd
+      )
+    } else if (
+      !isDateWithinPeriod(
+        now,
+        activeTokenUsage.periodStart,
+        activeTokenUsage.periodEnd
+      )
+    ) {
+      let nextPeriodStart = new Date(activeTokenUsage.periodEnd)
+      let nextPeriodEnd = addOneMonth(nextPeriodStart)
+
+      // TODO check new period creation logic
+      while (now >= nextPeriodEnd) {
+        nextPeriodStart = nextPeriodEnd
+        nextPeriodEnd = addOneMonth(nextPeriodStart)
+      }
+
+      activeTokenUsage = await getOrCreateTokenUsagePeriod(
+        client,
+        clerkUserId,
+        tokenQuota,
+        nextPeriodStart.toISOString(),
+        nextPeriodEnd.toISOString()
+      )
+    }
+
+    const usedTokens = activeTokenUsage.usedTokens
+    return {
+      allowed: usedTokens < activeTokenUsage.tokenQuota,
+      tokenUsageId: activeTokenUsage.id,
+      tokenQuota: activeTokenUsage.tokenQuota,
+      usedTokens,
+      remainingTokens: Math.max(activeTokenUsage.tokenQuota - usedTokens, 0),
+      periodStart: activeTokenUsage.periodStart,
+      periodEnd: activeTokenUsage.periodEnd,
+    }
+  } catch (error) {
+    console.error('[turso] Failed to check user token quota', {
+      clerkUserId,
+      error: (error as Error).message,
+    })
+    return null
+  }
+}
+
+export const incrementTokenUsage = async (
+  tokenUsageId: string,
+  tokenCount: number
+): Promise<void> => {
+  try {
+    if (tokenCount <= 0) return
+
+    await ensureInitialized()
+    const client = getClientOrNull()
+    if (!client) return
+
+    await client.execute({
+      sql: `UPDATE TokenUsage
+            SET used_tokens = used_tokens + ?,
+                updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+            WHERE id = ?`,
+      args: [tokenCount, tokenUsageId],
+    })
+  } catch (error) {
+    console.error('[turso] Failed to increment token usage', {
+      tokenUsageId,
+      tokenCount,
+      error: (error as Error).message,
+    })
+  }
+}
+
 export const saveUsageEvent = async (
   params: SaveUsageEventParams
 ): Promise<void> => {
@@ -343,7 +556,7 @@ export const upsertUser = async (userData: UserData): Promise<void> => {
         userData.apiKey ?? null,
         userData.documentCount ?? null,
         userData.totalStorageLimit ?? null,
-        userData.monthlyTokenLimit ?? null,
+        userData.monthlyTokenLimit ?? 0,
         userData.vectorStoreId ?? null,
         userData.trial ?? null,
         userData.crawlEnabled ?? 0,

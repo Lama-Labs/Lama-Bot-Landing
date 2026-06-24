@@ -236,6 +236,7 @@
       }
     ],
     "errorMessage": "Imam nekaj tehničnih težav. Prosim, poskusite znova pozneje. 🐑",
+    "tokenQuotaExceededMessage": "Dosegli ste mesečno omejitev žetonov. Poskusite znova v naslednjem obračunskem obdobju.",
     "dashboard": {
       "assistantName": "Moj asistent",
       "initialMessage": "Dobrodošli v testnem okolju! Pripravljen sem prikazati svoje sposobnosti z vašimi naloženimi dokumenti. Vprašajte me karkoli, da preizkusite, kako dobro pridobivam in predstavljam informacije iz vaše baze znanja. Kaj bi radi raziskali?"

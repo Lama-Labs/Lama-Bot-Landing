@@ -133,6 +133,9 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
+          if (response.status === 429) {
+            throw new Error('TOKEN_QUOTA_EXCEEDED')
+          }
           throw new Error(
             errorData.error || `API request failed with status ${response.status}`
           )

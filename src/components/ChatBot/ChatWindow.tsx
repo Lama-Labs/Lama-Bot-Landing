@@ -119,7 +119,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     } catch (error) {
       console.error('Error fetching from API:', error)
       // Update the placeholder message with error text instead of adding a new one
-      responseEntry.text = t('errorMessage')
+      responseEntry.text =
+        error === 'TOKEN_QUOTA_EXCEEDED'
+          ? t('tokenQuotaExceededMessage')
+          : t('errorMessage')
       setResponses((prev) => [...prev])
     } finally {
       setIsBusy(false)

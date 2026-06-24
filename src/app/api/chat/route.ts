@@ -7,12 +7,14 @@ import { after } from 'next/server'
 import type { ResponseCompletedEvent } from 'openai/resources/responses/responses.mjs'
 
 import { hasAnyPlanByUserId } from '@/utils/clerk/subscription'
-import { ANY_PAID_PLAN } from '@/utils/plans'
 import { openaiClient } from '@/utils/openai-client'
+import { ANY_PAID_PLAN } from '@/utils/plans'
 import {
   type UserData,
+  checkUserTokenQuota,
   getCustomInstructions,
   getUserByApiKey,
+  incrementTokenUsage,
   saveUsageEvent,
 } from '@/utils/turso'
 
@@ -286,6 +288,28 @@ export async function POST(request: Request) {
       )
     }
 
+    const quota = await checkUserTokenQuota(user.clerkUserId)
+    if (!quota) {
+      return Response.json(
+        { error: 'Unable to verify token quota' },
+        { status: 500, headers: { ...corsHeaders() } }
+      )
+    }
+
+    if (!quota.allowed) {
+      return Response.json(
+        {
+          error: 'Token quota exceeded',
+          tokenQuota: quota.tokenQuota,
+          usedTokens: quota.usedTokens,
+          remainingTokens: quota.remainingTokens,
+          periodStart: quota.periodStart,
+          periodEnd: quota.periodEnd,
+        },
+        { status: 429, headers: { ...corsHeaders() } }
+      )
+    }
+
     // Fetch custom instructions from Turso
     const customInstructions =
       (await getCustomInstructions(user.clerkUserId)) || ''
@@ -427,6 +451,10 @@ export async function POST(request: Request) {
                   responseId,
                   model,
                 })
+                await incrementTokenUsage(
+                  quota.tokenUsageId,
+                  event.response.usage?.total_tokens ?? 0
+                )
               } catch (e) {
                 console.error('failed to save usage event', {
                   error: (e as Error).message,
