@@ -1,6 +1,12 @@
 import 'server-only'
 import { type Client, createClient } from '@libsql/client'
 
+import {
+  ActivePlanPeriod,
+  getActivePlanPeriodByUserId,
+} from './clerk/subscription'
+import { ANY_PAID_PLAN } from './plans'
+
 export interface UsageDetails {
   input_tokens?: number
   output_tokens?: number
@@ -326,26 +332,17 @@ const getTokenUsageByPeriodStart = async (
 }
 
 /**
- * Returns the token usage row for a known period start, creating it when missing.
- * The row snapshots the user's quota for that period so later allowance changes do
- * not retroactively modify past usage windows.
+ * Ensures a token usage row exists for the exact period boundary that was already
+ * chosen by the caller. The row snapshots the user's quota for that period so later
+ * allowance changes do not retroactively modify past usage windows.
  */
-const getOrCreateTokenUsagePeriod = async (
+const createTokenUsagePeriod = async (
   client: Client,
   clerkUserId: string,
   tokenQuota: number,
   periodStart: string,
   periodEnd: string
 ): Promise<TokenUsageData> => {
-  const existing = await getTokenUsageByPeriodStart(
-    client,
-    clerkUserId,
-    periodStart
-  )
-  if (existing) {
-    return existing
-  }
-
   // TODO: Before creating a new quota period, verify the user still has a valid subscription/trial.
   await client.execute({
     sql: `INSERT OR IGNORE INTO TokenUsage (
@@ -368,9 +365,60 @@ const getOrCreateTokenUsagePeriod = async (
 }
 
 /**
- * Resolves the active token quota period for the user and reports whether another
- * chat request is currently allowed. If the latest period has expired, a new one is
- * created starting from the next applicable period boundary.
+ * Resolves the TokenUsage window that should apply to the current request from the
+ * active Clerk/trial billing period. If a latest Turso record exists, the next
+ * window continues from that period end when still inside the same billing cycle.
+ */
+const resolveTokenUsageWindow = (
+  now: Date,
+  activePlanPeriod: ActivePlanPeriod,
+  latestTokenUsage?: TokenUsageData | null
+): { periodStart: string; periodEnd: string } | null => {
+  const billingPeriodStart = new Date(activePlanPeriod.periodStart)
+  const billingPeriodEnd = new Date(activePlanPeriod.periodEnd)
+
+  if (!(now >= billingPeriodStart && now < billingPeriodEnd)) {
+    return null
+  }
+
+  if (activePlanPeriod.planPeriod === 'month') {
+    return {
+      periodStart: billingPeriodStart.toISOString(),
+      periodEnd: billingPeriodEnd.toISOString(),
+    }
+  }
+
+  let periodStart = latestTokenUsage
+    ? new Date(latestTokenUsage.periodEnd)
+    : new Date(billingPeriodStart)
+
+  if (periodStart < billingPeriodStart) {
+    periodStart = billingPeriodStart
+  }
+
+  // Walk monthly quota windows inside the active billing period until we reach
+  // the window that should contain the current request time.
+  while (periodStart < billingPeriodEnd) {
+    const uncappedPeriodEnd = addOneMonth(periodStart)
+    const periodEnd =
+      uncappedPeriodEnd > billingPeriodEnd ? billingPeriodEnd : uncappedPeriodEnd
+
+    if (now < periodEnd) {
+      return {
+        periodStart: periodStart.toISOString(),
+        periodEnd: periodEnd.toISOString(),
+      }
+    }
+
+    periodStart = uncappedPeriodEnd
+  }
+
+  return null
+}
+
+/**
+ * Resolves the current token quota window for the user from Turso first and only
+ * consults Clerk/trial billing metadata when a new TokenUsage row must be created.
  */
 export const checkUserTokenQuota = async (
   clerkUserId: string
@@ -385,43 +433,39 @@ export const checkUserTokenQuota = async (
 
     const tokenQuota = user.monthlyTokenLimit ?? 0
     const now = new Date()
-
     let activeTokenUsage = await getLatestTokenUsage(client, clerkUserId)
 
-    if (!activeTokenUsage) {
-      const periodStart = now.toISOString()
-      const periodEnd = addOneMonth(now).toISOString()
-      activeTokenUsage = await getOrCreateTokenUsagePeriod(
-        client,
-        clerkUserId,
-        tokenQuota,
-        periodStart,
-        periodEnd
-      )
-    } else if (
+    if (
+      !activeTokenUsage ||
       !isDateWithinPeriod(
         now,
         activeTokenUsage.periodStart,
         activeTokenUsage.periodEnd
       )
     ) {
-      let nextPeriodStart = new Date(activeTokenUsage.periodEnd)
-      let nextPeriodEnd = addOneMonth(nextPeriodStart)
+      const activePlanPeriod = await getActivePlanPeriodByUserId(
+        clerkUserId,
+        ANY_PAID_PLAN
+      )
+      if (!activePlanPeriod) return null
 
-      // TODO check new period creation logic
-      while (now >= nextPeriodEnd) {
-        nextPeriodStart = nextPeriodEnd
-        nextPeriodEnd = addOneMonth(nextPeriodStart)
-      }
+      const tokenWindow = resolveTokenUsageWindow(
+        now,
+        activePlanPeriod,
+        activeTokenUsage
+      )
+      if (!tokenWindow) return null
 
-      activeTokenUsage = await getOrCreateTokenUsagePeriod(
+      activeTokenUsage = await createTokenUsagePeriod(
         client,
         clerkUserId,
         tokenQuota,
-        nextPeriodStart.toISOString(),
-        nextPeriodEnd.toISOString()
+        tokenWindow.periodStart,
+        tokenWindow.periodEnd
       )
     }
+
+    if (!activeTokenUsage) return null
 
     const usedTokens = activeTokenUsage.usedTokens
     return {
