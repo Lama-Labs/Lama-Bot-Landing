@@ -236,12 +236,20 @@ const safeStringify = (value: unknown): string | null => {
   }
 }
 
+/**
+ * Advances a UTC timestamp by one calendar month while preserving the current time-of-day.
+ * Used to define the end of a token quota period.
+ */
 const addOneMonth = (date: Date): Date => {
   const next = new Date(date)
   next.setUTCMonth(next.getUTCMonth() + 1)
   return next
 }
 
+/**
+ * Returns true when `now` is within the token usage period, inclusive of `periodStart`
+ * and exclusive of `periodEnd`.
+ */
 const isDateWithinPeriod = (
   now: Date,
   periodStartIso: string,
@@ -252,6 +260,9 @@ const isDateWithinPeriod = (
   return now >= periodStart && now < periodEnd
 }
 
+/**
+ * Maps a TokenUsage database row to the application shape used by quota helpers.
+ */
 const mapRowToTokenUsageData = (
   row: Record<string, unknown>
 ): TokenUsageData => ({
@@ -265,6 +276,11 @@ const mapRowToTokenUsageData = (
   updatedAt: row.updated_at as string,
 })
 
+/**
+ * Returns the most recently ending token usage period for a user.
+ * This is the starting point for determining whether the current request falls
+ * inside an active quota window or needs a new one.
+ */
 const getLatestTokenUsage = async (
   client: Client,
   clerkUserId: string
@@ -285,6 +301,10 @@ const getLatestTokenUsage = async (
   return mapRowToTokenUsageData(result.rows[0] as Record<string, unknown>)
 }
 
+/**
+ * Looks up a user's token usage period by its exact `period_start` timestamp.
+ * This is used to safely read back a period row after inserting it with a known start.
+ */
 const getTokenUsageByPeriodStart = async (
   client: Client,
   clerkUserId: string,
@@ -305,6 +325,11 @@ const getTokenUsageByPeriodStart = async (
   return mapRowToTokenUsageData(result.rows[0] as Record<string, unknown>)
 }
 
+/**
+ * Returns the token usage row for a known period start, creating it when missing.
+ * The row snapshots the user's quota for that period so later allowance changes do
+ * not retroactively modify past usage windows.
+ */
 const getOrCreateTokenUsagePeriod = async (
   client: Client,
   clerkUserId: string,
@@ -342,6 +367,11 @@ const getOrCreateTokenUsagePeriod = async (
   return created
 }
 
+/**
+ * Resolves the active token quota period for the user and reports whether another
+ * chat request is currently allowed. If the latest period has expired, a new one is
+ * created starting from the next applicable period boundary.
+ */
 export const checkUserTokenQuota = async (
   clerkUserId: string
 ): Promise<TokenQuotaCheckResult | null> => {
@@ -412,6 +442,11 @@ export const checkUserTokenQuota = async (
   }
 }
 
+/**
+ * Increments usage on the already-authorized TokenUsage period after the chat response
+ * completes. This intentionally allows a request that was valid at preflight time even
+ * if the final token total pushes the user over quota.
+ */
 export const incrementTokenUsage = async (
   tokenUsageId: string,
   tokenCount: number
