@@ -55,11 +55,6 @@ export type TokenUsageData = {
 export type TokenQuotaCheckResult = {
   allowed: boolean
   tokenUsageId: string
-  tokenQuota: number
-  usedTokens: number
-  remainingTokens: number
-  periodStart: string
-  periodEnd: string
 }
 
 export type WebsiteKnowledgeData = {
@@ -145,7 +140,7 @@ const TABLE_SCHEMAS: TableSchema[] = [
     ],
   },
   {
-    name: 'TokenUsage',
+    name: 'token_usage',
     createStatement: `
       CREATE TABLE IF NOT EXISTS TokenUsage (
         id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
@@ -485,11 +480,6 @@ export const checkUserTokenQuota = async (
     return {
       allowed: usedTokens < activeTokenUsage.tokenQuota,
       tokenUsageId: activeTokenUsage.id,
-      tokenQuota: activeTokenUsage.tokenQuota,
-      usedTokens,
-      remainingTokens: Math.max(activeTokenUsage.tokenQuota - usedTokens, 0),
-      periodStart: activeTokenUsage.periodStart,
-      periodEnd: activeTokenUsage.periodEnd,
     }
   } catch (error) {
     console.error('[turso] Failed to check user token quota', {

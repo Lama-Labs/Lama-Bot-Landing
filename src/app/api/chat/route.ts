@@ -298,14 +298,7 @@ export async function POST(request: Request) {
 
     if (!quota.allowed) {
       return Response.json(
-        {
-          error: 'Token quota exceeded',
-          tokenQuota: quota.tokenQuota,
-          usedTokens: quota.usedTokens,
-          remainingTokens: quota.remainingTokens,
-          periodStart: quota.periodStart,
-          periodEnd: quota.periodEnd,
-        },
+        { error: 'Token quota exceeded' },
         { status: 429, headers: { ...corsHeaders() } }
       )
     }
