@@ -142,7 +142,7 @@ const TABLE_SCHEMAS: TableSchema[] = [
   {
     name: 'token_usage',
     createStatement: `
-      CREATE TABLE IF NOT EXISTS TokenUsage (
+      CREATE TABLE IF NOT EXISTS token_usage (
         id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
         clerk_user_id TEXT NOT NULL,
         period_start TEXT NOT NULL,
@@ -155,7 +155,7 @@ const TABLE_SCHEMAS: TableSchema[] = [
       )
     `,
     indexes: [
-      `CREATE UNIQUE INDEX IF NOT EXISTS idx_token_usage_user_period ON TokenUsage (clerk_user_id, period_start)`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS idx_token_usage_user_period ON token_usage (clerk_user_id, period_start)`,
     ],
   },
   {
@@ -287,7 +287,7 @@ const getLatestTokenUsage = async (
 ): Promise<TokenUsageData | null> => {
   const result = await client.execute({
     sql: `SELECT id, clerk_user_id, period_start, period_end, token_quota, used_tokens, created_at, updated_at
-          FROM TokenUsage
+          FROM token_usage
           WHERE clerk_user_id = ?
           ORDER BY period_end DESC
           LIMIT 1`,
@@ -312,7 +312,7 @@ const getTokenUsageByPeriodStart = async (
 ): Promise<TokenUsageData | null> => {
   const result = await client.execute({
     sql: `SELECT id, clerk_user_id, period_start, period_end, token_quota, used_tokens, created_at, updated_at
-          FROM TokenUsage
+          FROM token_usage
           WHERE clerk_user_id = ? AND period_start = ?
           LIMIT 1`,
     args: [clerkUserId, periodStart],
@@ -338,7 +338,7 @@ const createTokenUsagePeriod = async (
   periodEnd: string
 ): Promise<TokenUsageData> => {
   await client.execute({
-    sql: `INSERT OR IGNORE INTO TokenUsage (
+    sql: `INSERT OR IGNORE INTO token_usage (
             id,
             clerk_user_id,
             period_start,
@@ -507,7 +507,7 @@ export const incrementTokenUsage = async (
     if (!client) return
 
     await client.execute({
-      sql: `UPDATE TokenUsage
+      sql: `UPDATE token_usage
             SET used_tokens = used_tokens + ?,
                 updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
             WHERE id = ?`,
@@ -830,7 +830,7 @@ export const deleteUser = async (clerkUserId: string): Promise<void> => {
       args: [clerkUserId],
     })
     await client.execute({
-      sql: 'DELETE FROM TokenUsage WHERE clerk_user_id = ?',
+      sql: 'DELETE FROM token_usage WHERE clerk_user_id = ?',
       args: [clerkUserId],
     })
 
