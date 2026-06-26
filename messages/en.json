@@ -236,6 +236,7 @@
       }
     ],
     "errorMessage": "I'm experiencing some technical difficulties. Please try again later. 🐑",
+    "subscriptionInvalidMessage": "Your subscription is no longer active. Please renew your plan to continue using chat.",
     "tokenQuotaExceededMessage": "Your monthly token quota has been reached. Please try again in your next billing period.",
     "dashboard": {
       "assistantName": "My Assistant",

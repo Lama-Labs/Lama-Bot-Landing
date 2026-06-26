@@ -1,6 +1,7 @@
 import 'server-only'
 import { type Client, createClient } from '@libsql/client'
 
+import { CHAT_ERROR_CODE } from './chat-errors'
 import {
   ActivePlanPeriod,
   getActivePlanPeriodByUserId,
@@ -52,10 +53,20 @@ export type TokenUsageData = {
   updatedAt: string
 }
 
-export type TokenQuotaCheckResult = {
+type TokenQuotaAllowedResult = {
   allowed: boolean
   tokenUsageId: string
+  error?: undefined
 }
+
+type TokenQuotaErrorResult = {
+  allowed: false
+  error: typeof CHAT_ERROR_CODE.NO_ACTIVE_TOKEN_WINDOW
+}
+
+export type TokenQuotaCheckResult =
+  | TokenQuotaAllowedResult
+  | TokenQuotaErrorResult
 
 export type WebsiteKnowledgeData = {
   id: string
@@ -463,7 +474,12 @@ export const checkUserTokenQuota = async (
       const tokenWindow = activePlanPeriod
         ? resolveTokenUsageWindow(now, activePlanPeriod, activeTokenUsage)
         : resolveTrialTokenUsageWindow(now, user)
-      if (!tokenWindow) return null
+      if (!tokenWindow) {
+        return {
+          allowed: false,
+          error: CHAT_ERROR_CODE.NO_ACTIVE_TOKEN_WINDOW,
+        }
+      }
 
       activeTokenUsage = await createTokenUsagePeriod(
         client,

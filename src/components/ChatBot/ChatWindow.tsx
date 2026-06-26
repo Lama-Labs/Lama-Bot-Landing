@@ -12,6 +12,7 @@ import ExampleAssistantMessageBubble from '@/components/ChatBot/ExampleAssistant
 import MessageBubble from '@/components/ChatBot/MessageBubble'
 import SuggestionChips from '@/components/ChatBot/SuggestionChips'
 import { useChat } from '@/context/ChatContext'
+import { getChatErrorTranslationKey } from '@/utils/chat-errors'
 import {
   appendConversationTurn,
   clearAssistantId as clearAssistantIdCookie,
@@ -117,12 +118,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       ]
       setConversation(updated, cookieNamespace)
     } catch (error) {
-      console.error('Error fetching from API:', error)
-      // Update the placeholder message with error text instead of adding a new one
-      responseEntry.text =
-        error === 'TOKEN_QUOTA_EXCEEDED'
-          ? t('tokenQuotaExceededMessage')
-          : t('errorMessage')
+      responseEntry.text = t(getChatErrorTranslationKey(error))
       setResponses((prev) => [...prev])
     } finally {
       setIsBusy(false)

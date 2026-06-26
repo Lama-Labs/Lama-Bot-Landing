@@ -6,6 +6,7 @@
 import { after } from 'next/server'
 import type { ResponseCompletedEvent } from 'openai/resources/responses/responses.mjs'
 
+import { CHAT_ERROR_CODE } from '@/utils/chat-errors'
 import { hasAnyPlanByUserId } from '@/utils/clerk/subscription'
 import { openaiClient } from '@/utils/openai-client'
 import { ANY_PAID_PLAN } from '@/utils/plans'
@@ -293,6 +294,13 @@ export async function POST(request: Request) {
       return Response.json(
         { error: 'Unable to verify token quota' },
         { status: 500, headers: { ...corsHeaders() } }
+      )
+    }
+
+    if (quota.error === CHAT_ERROR_CODE.NO_ACTIVE_TOKEN_WINDOW) {
+      return Response.json(
+        { error: 'Unauthorized: user does not have an active subscription' },
+        { status: 401, headers: { ...corsHeaders() } }
       )
     }
 

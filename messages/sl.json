@@ -236,6 +236,7 @@
       }
     ],
     "errorMessage": "Imam nekaj tehničnih težav. Prosim, poskusite znova pozneje. 🐑",
+    "subscriptionInvalidMessage": "Vaša naročnina ni več aktivna. Za nadaljnjo uporabo klepeta obnovite svoj paket.",
     "tokenQuotaExceededMessage": "Dosegli ste mesečno omejitev žetonov. Poskusite znova v naslednjem obračunskem obdobju.",
     "dashboard": {
       "assistantName": "Moj asistent",
