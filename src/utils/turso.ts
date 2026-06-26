@@ -5,7 +5,7 @@ import {
   ActivePlanPeriod,
   getActivePlanPeriodByUserId,
 } from './clerk/subscription'
-import { ANY_PAID_PLAN } from './plans'
+import { ANY_PAID_PLAN, TRIAL_LENGTH_MS } from './plans'
 
 export interface UsageDetails {
   input_tokens?: number
@@ -228,7 +228,6 @@ const ensureInitialized = async (): Promise<void> => {
         }
       }
     }
-
   })()
   return initPromise
 }
@@ -343,7 +342,6 @@ const createTokenUsagePeriod = async (
   periodStart: string,
   periodEnd: string
 ): Promise<TokenUsageData> => {
-  // TODO: Before creating a new quota period, verify the user still has a valid subscription/trial.
   await client.execute({
     sql: `INSERT OR IGNORE INTO TokenUsage (
             id,
@@ -401,7 +399,9 @@ const resolveTokenUsageWindow = (
   while (periodStart < billingPeriodEnd) {
     const uncappedPeriodEnd = addOneMonth(periodStart)
     const periodEnd =
-      uncappedPeriodEnd > billingPeriodEnd ? billingPeriodEnd : uncappedPeriodEnd
+      uncappedPeriodEnd > billingPeriodEnd
+        ? billingPeriodEnd
+        : uncappedPeriodEnd
 
     if (now < periodEnd) {
       return {
@@ -414,6 +414,23 @@ const resolveTokenUsageWindow = (
   }
 
   return null
+}
+
+const resolveTrialTokenUsageWindow = (
+  now: Date,
+  user: UserData
+): { periodStart: string; periodEnd: string } | null => {
+  if (
+    !user.trial ||
+    !ANY_PAID_PLAN.includes(user.trial as (typeof ANY_PAID_PLAN)[number])
+  ) {
+    return null
+  }
+
+  return {
+    periodStart: now.toISOString(),
+    periodEnd: new Date(now.getTime() + TRIAL_LENGTH_MS).toISOString(),
+  }
 }
 
 /**
@@ -447,13 +464,10 @@ export const checkUserTokenQuota = async (
         clerkUserId,
         ANY_PAID_PLAN
       )
-      if (!activePlanPeriod) return null
 
-      const tokenWindow = resolveTokenUsageWindow(
-        now,
-        activePlanPeriod,
-        activeTokenUsage
-      )
+      const tokenWindow = activePlanPeriod
+        ? resolveTokenUsageWindow(now, activePlanPeriod, activeTokenUsage)
+        : resolveTrialTokenUsageWindow(now, user)
       if (!tokenWindow) return null
 
       activeTokenUsage = await createTokenUsagePeriod(

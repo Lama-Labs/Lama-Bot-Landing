@@ -5,6 +5,9 @@ export const PLANS = {
 
 export type PlanSlug = (typeof PLANS)[keyof typeof PLANS]
 
+/** default trial length of 1 week */
+export const TRIAL_LENGTH_MS = 7 * 24 * 60 * 60 * 1000
+
 /** Plans that grant base subscription features (chat, crawl, custom instructions, API key) */
 export const ANY_PAID_PLAN: PlanSlug[] = [PLANS.BASIC, PLANS.PLUS]
 
