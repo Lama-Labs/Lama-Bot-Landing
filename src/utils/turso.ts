@@ -248,13 +248,31 @@ const safeStringify = (value: unknown): string | null => {
 }
 
 /**
- * Advances a UTC timestamp by one calendar month while preserving the current time-of-day.
- * Used to define the end of a token quota period.
+ * Adds calendar months to a UTC timestamp, clamping to the target month's last
+ * day when the anchor day does not exist there.
  */
-const addOneMonth = (date: Date): Date => {
-  const next = new Date(date)
-  next.setUTCMonth(next.getUTCMonth() + 1)
-  return next
+const addUtcMonthsClamped = (date: Date, months: number): Date => {
+  const targetMonthStart = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1)
+  )
+  const targetYear = targetMonthStart.getUTCFullYear()
+  const targetMonth = targetMonthStart.getUTCMonth()
+  const lastDayOfTargetMonth = new Date(
+    Date.UTC(targetYear, targetMonth + 1, 0)
+  ).getUTCDate()
+  const targetDay = Math.min(date.getUTCDate(), lastDayOfTargetMonth)
+
+  return new Date(
+    Date.UTC(
+      targetYear,
+      targetMonth,
+      targetDay,
+      date.getUTCHours(),
+      date.getUTCMinutes(),
+      date.getUTCSeconds(),
+      date.getUTCMilliseconds()
+    )
+  )
 }
 
 /**
@@ -360,7 +378,11 @@ const createTokenUsagePeriod = async (
     args: [clerkUserId, periodStart, periodEnd, tokenQuota],
   })
 
-  const created = await getTokenUsageByPeriodStart(client, clerkUserId, periodStart)
+  const created = await getTokenUsageByPeriodStart(
+    client,
+    clerkUserId,
+    periodStart
+  )
   if (!created) {
     throw new Error('Failed to create token usage period')
   }
@@ -375,8 +397,7 @@ const createTokenUsagePeriod = async (
  */
 const resolveTokenUsageWindow = (
   now: Date,
-  activePlanPeriod: ActivePlanPeriod,
-  latestTokenUsage?: TokenUsageData | null
+  activePlanPeriod: ActivePlanPeriod
 ): { periodStart: string; periodEnd: string } | null => {
   const billingPeriodStart = new Date(activePlanPeriod.periodStart)
   const billingPeriodEnd = new Date(activePlanPeriod.periodEnd)
@@ -392,31 +413,31 @@ const resolveTokenUsageWindow = (
     }
   }
 
-  let periodStart = latestTokenUsage
-    ? new Date(latestTokenUsage.periodEnd)
-    : new Date(billingPeriodStart)
+  for (let monthOffset = 0; ; monthOffset += 1) {
+    const canonicalPeriodStart = addUtcMonthsClamped(
+      billingPeriodStart,
+      monthOffset
+    )
 
-  if (periodStart < billingPeriodStart) {
-    periodStart = billingPeriodStart
-  }
+    if (canonicalPeriodStart >= billingPeriodEnd) {
+      break
+    }
 
-  // Walk monthly quota windows inside the active billing period until we reach
-  // the window that should contain the current request time.
-  while (periodStart < billingPeriodEnd) {
-    const uncappedPeriodEnd = addOneMonth(periodStart)
+    const uncappedPeriodEnd = addUtcMonthsClamped(
+      billingPeriodStart,
+      monthOffset + 1
+    )
     const periodEnd =
       uncappedPeriodEnd > billingPeriodEnd
         ? billingPeriodEnd
         : uncappedPeriodEnd
 
-    if (now < periodEnd) {
+    if (now >= canonicalPeriodStart && now < periodEnd) {
       return {
-        periodStart: periodStart.toISOString(),
+        periodStart: canonicalPeriodStart.toISOString(),
         periodEnd: periodEnd.toISOString(),
       }
     }
-
-    periodStart = uncappedPeriodEnd
   }
 
   return null
@@ -472,7 +493,7 @@ export const checkUserTokenQuota = async (
       )
 
       const tokenWindow = activePlanPeriod
-        ? resolveTokenUsageWindow(now, activePlanPeriod, activeTokenUsage)
+        ? resolveTokenUsageWindow(now, activePlanPeriod)
         : resolveTrialTokenUsageWindow(now, user)
       if (!tokenWindow) {
         return {
