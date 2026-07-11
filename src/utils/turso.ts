@@ -34,7 +34,8 @@ export type UserData = {
   apiKey?: string | null
   documentCount?: number | null
   totalStorageLimit?: number | null
-  monthlyTokenLimit?: number | null
+  monthlyInputTokenLimit?: number | null
+  monthlyOutputTokenLimit?: number | null
   vectorStoreId?: string | null
   trial?: string | null
   crawlEnabled?: number | null
@@ -47,10 +48,17 @@ export type TokenUsageData = {
   clerkUserId: string
   periodStart: string
   periodEnd: string
-  tokenQuota: number
-  usedTokens: number
+  inputTokenQuota: number
+  outputTokenQuota: number
+  usedInputTokens: number
+  usedOutputTokens: number
   createdAt: string
   updatedAt: string
+}
+
+type IncrementTokenUsageParams = {
+  inputTokens?: number | null
+  outputTokens?: number | null
 }
 
 type TokenQuotaAllowedResult = {
@@ -120,7 +128,8 @@ const TABLE_SCHEMAS: TableSchema[] = [
         api_key TEXT,
         document_count INTEGER,
         total_storage_limit INTEGER,
-        monthly_token_limit INTEGER DEFAULT 0,
+        monthly_input_token_limit INTEGER DEFAULT 0,
+        monthly_output_token_limit INTEGER DEFAULT 0,
         vector_store_id TEXT,
         trial TEXT,
         crawl_enabled INTEGER DEFAULT 0,
@@ -158,8 +167,10 @@ const TABLE_SCHEMAS: TableSchema[] = [
         clerk_user_id TEXT NOT NULL,
         period_start TEXT NOT NULL,
         period_end TEXT NOT NULL,
-        token_quota INTEGER NOT NULL,
-        used_tokens INTEGER NOT NULL DEFAULT 0,
+        input_token_quota INTEGER NOT NULL DEFAULT 0,
+        output_token_quota INTEGER NOT NULL DEFAULT 0,
+        used_input_tokens INTEGER NOT NULL DEFAULT 0,
+        used_output_tokens INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
         updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
         FOREIGN KEY (clerk_user_id) REFERENCES users(clerk_user_id)
@@ -299,8 +310,10 @@ const mapRowToTokenUsageData = (
   clerkUserId: row.clerk_user_id as string,
   periodStart: row.period_start as string,
   periodEnd: row.period_end as string,
-  tokenQuota: row.token_quota as number,
-  usedTokens: row.used_tokens as number,
+  inputTokenQuota: row.input_token_quota as number,
+  outputTokenQuota: row.output_token_quota as number,
+  usedInputTokens: row.used_input_tokens as number,
+  usedOutputTokens: row.used_output_tokens as number,
   createdAt: row.created_at as string,
   updatedAt: row.updated_at as string,
 })
@@ -315,7 +328,7 @@ const getLatestTokenUsage = async (
   clerkUserId: string
 ): Promise<TokenUsageData | null> => {
   const result = await client.execute({
-    sql: `SELECT id, clerk_user_id, period_start, period_end, token_quota, used_tokens, created_at, updated_at
+    sql: `SELECT id, clerk_user_id, period_start, period_end, input_token_quota, output_token_quota, used_input_tokens, used_output_tokens, created_at, updated_at
           FROM token_usage
           WHERE clerk_user_id = ?
           ORDER BY period_end DESC
@@ -340,7 +353,7 @@ const getTokenUsageByPeriodStart = async (
   periodStart: string
 ): Promise<TokenUsageData | null> => {
   const result = await client.execute({
-    sql: `SELECT id, clerk_user_id, period_start, period_end, token_quota, used_tokens, created_at, updated_at
+    sql: `SELECT id, clerk_user_id, period_start, period_end, input_token_quota, output_token_quota, used_input_tokens, used_output_tokens, created_at, updated_at
           FROM token_usage
           WHERE clerk_user_id = ? AND period_start = ?
           LIMIT 1`,
@@ -362,7 +375,8 @@ const getTokenUsageByPeriodStart = async (
 const createTokenUsagePeriod = async (
   client: Client,
   clerkUserId: string,
-  tokenQuota: number,
+  inputTokenQuota: number,
+  outputTokenQuota: number,
   periodStart: string,
   periodEnd: string
 ): Promise<TokenUsageData> => {
@@ -372,10 +386,18 @@ const createTokenUsagePeriod = async (
             clerk_user_id,
             period_start,
             period_end,
-            token_quota,
-            used_tokens
-          ) VALUES (lower(hex(randomblob(16))), ?, ?, ?, ?, 0)`,
-    args: [clerkUserId, periodStart, periodEnd, tokenQuota],
+            input_token_quota,
+            output_token_quota,
+            used_input_tokens,
+            used_output_tokens
+          ) VALUES (lower(hex(randomblob(16))), ?, ?, ?, ?, ?, 0, 0)`,
+    args: [
+      clerkUserId,
+      periodStart,
+      periodEnd,
+      inputTokenQuota,
+      outputTokenQuota,
+    ],
   })
 
   const created = await getTokenUsageByPeriodStart(
@@ -475,7 +497,8 @@ export const checkUserTokenQuota = async (
     const user = await getUserData(clerkUserId)
     if (!user) return null
 
-    const tokenQuota = user.monthlyTokenLimit ?? 0
+    const inputTokenQuota = user.monthlyInputTokenLimit ?? 0
+    const outputTokenQuota = user.monthlyOutputTokenLimit ?? 0
     const now = new Date()
     let activeTokenUsage = await getLatestTokenUsage(client, clerkUserId)
 
@@ -505,7 +528,8 @@ export const checkUserTokenQuota = async (
       activeTokenUsage = await createTokenUsagePeriod(
         client,
         clerkUserId,
-        tokenQuota,
+        inputTokenQuota,
+        outputTokenQuota,
         tokenWindow.periodStart,
         tokenWindow.periodEnd
       )
@@ -513,9 +537,10 @@ export const checkUserTokenQuota = async (
 
     if (!activeTokenUsage) return null
 
-    const usedTokens = activeTokenUsage.usedTokens
     return {
-      allowed: usedTokens < activeTokenUsage.tokenQuota,
+      allowed:
+        activeTokenUsage.usedInputTokens < activeTokenUsage.inputTokenQuota &&
+        activeTokenUsage.usedOutputTokens < activeTokenUsage.outputTokenQuota,
       tokenUsageId: activeTokenUsage.id,
     }
   } catch (error) {
@@ -530,14 +555,17 @@ export const checkUserTokenQuota = async (
 /**
  * Increments usage on the already-authorized TokenUsage period after the chat response
  * completes. This intentionally allows a request that was valid at preflight time even
- * if the final token total pushes the user over quota.
+ * if the final token usage pushes the user over quota.
  */
 export const incrementTokenUsage = async (
   tokenUsageId: string,
-  tokenCount: number
+  params: IncrementTokenUsageParams
 ): Promise<void> => {
   try {
-    if (tokenCount <= 0) return
+    const inputTokens = params.inputTokens ?? 0
+    const outputTokens = params.outputTokens ?? 0
+
+    if (inputTokens <= 0 && outputTokens <= 0) return
 
     await ensureInitialized()
     const client = getClientOrNull()
@@ -545,15 +573,17 @@ export const incrementTokenUsage = async (
 
     await client.execute({
       sql: `UPDATE token_usage
-            SET used_tokens = used_tokens + ?,
+            SET used_input_tokens = used_input_tokens + ?,
+                used_output_tokens = used_output_tokens + ?,
                 updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
             WHERE id = ?`,
-      args: [tokenCount, tokenUsageId],
+      args: [inputTokens, outputTokens, tokenUsageId],
     })
   } catch (error) {
     console.error('[turso] Failed to increment token usage', {
       tokenUsageId,
-      tokenCount,
+      inputTokens: params.inputTokens,
+      outputTokens: params.outputTokens,
       error: (error as Error).message,
     })
   }
@@ -633,9 +663,13 @@ export const upsertUser = async (userData: UserData): Promise<void> => {
       updates.push('total_storage_limit = ?')
       values.push(userData.totalStorageLimit)
     }
-    if (userData.monthlyTokenLimit !== undefined) {
-      updates.push('monthly_token_limit = ?')
-      values.push(userData.monthlyTokenLimit)
+    if (userData.monthlyInputTokenLimit !== undefined) {
+      updates.push('monthly_input_token_limit = ?')
+      values.push(userData.monthlyInputTokenLimit)
+    }
+    if (userData.monthlyOutputTokenLimit !== undefined) {
+      updates.push('monthly_output_token_limit = ?')
+      values.push(userData.monthlyOutputTokenLimit)
     }
     if (userData.vectorStoreId !== undefined) {
       updates.push('vector_store_id = ?')
@@ -663,8 +697,8 @@ export const upsertUser = async (userData: UserData): Promise<void> => {
 
     // SQLite UPSERT syntax: INSERT ... ON CONFLICT ... DO UPDATE
     const sql = `
-      INSERT INTO users (clerk_user_id, email, api_key, document_count, total_storage_limit, monthly_token_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO users (clerk_user_id, email, api_key, document_count, total_storage_limit, monthly_input_token_limit, monthly_output_token_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(clerk_user_id) DO UPDATE SET ${updates.join(', ')}
     `
 
@@ -676,7 +710,8 @@ export const upsertUser = async (userData: UserData): Promise<void> => {
         userData.apiKey ?? null,
         userData.documentCount ?? null,
         userData.totalStorageLimit ?? null,
-        userData.monthlyTokenLimit ?? 0,
+        userData.monthlyInputTokenLimit ?? 0,
+        userData.monthlyOutputTokenLimit ?? 0,
         userData.vectorStoreId ?? null,
         userData.trial ?? null,
         userData.crawlEnabled ?? 0,
@@ -775,7 +810,8 @@ const mapRowToUserData = (row: Record<string, unknown>): UserData => ({
   apiKey: row.api_key as string | null,
   documentCount: row.document_count as number | null,
   totalStorageLimit: row.total_storage_limit as number | null,
-  monthlyTokenLimit: row.monthly_token_limit as number | null,
+  monthlyInputTokenLimit: row.monthly_input_token_limit as number | null,
+  monthlyOutputTokenLimit: row.monthly_output_token_limit as number | null,
   vectorStoreId: row.vector_store_id as string | null,
   trial: row.trial as string | null,
   crawlEnabled: row.crawl_enabled as number | null,
@@ -796,7 +832,7 @@ export const getUserData = async (
     if (!client) return null
 
     const result = await client.execute({
-      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, monthly_token_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days
+      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, monthly_input_token_limit, monthly_output_token_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days
             FROM users WHERE clerk_user_id = ? LIMIT 1`,
       args: [clerkUserId],
     })
@@ -829,7 +865,7 @@ export const getUserByApiKey = async (
     if (!client) return null
 
     const result = await client.execute({
-      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, monthly_token_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days
+      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, monthly_input_token_limit, monthly_output_token_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days
             FROM users WHERE api_key = ? LIMIT 1`,
       args: [apiKey],
     })

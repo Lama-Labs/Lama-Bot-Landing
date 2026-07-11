@@ -452,10 +452,10 @@ export async function POST(request: Request) {
                   responseId,
                   model,
                 })
-                await incrementTokenUsage(
-                  quota.tokenUsageId,
-                  event.response.usage?.total_tokens ?? 0
-                )
+                await incrementTokenUsage(quota.tokenUsageId, {
+                  inputTokens: event.response.usage?.input_tokens,
+                  outputTokens: event.response.usage?.output_tokens,
+                })
               } catch (e) {
                 console.error('failed to save usage event', {
                   error: (e as Error).message,
