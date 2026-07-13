@@ -96,6 +96,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         lang,
         conversation,
         useDashboardMode: mode === 'dashboard',
+        // No WordPress site to read a timezone from here, so the tester's own local clock stands in for the site's.
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       })
 
       // Read the stream and progressively update the last assistant message
@@ -171,17 +173,17 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           // Get selected assistant info for attaching suggestions
           const selectedAssistant = assistantIdCookie
             ? (t
-                .raw('initialAssistants')
-                .find(
-                  (assistant: { id: string }) =>
-                    assistant.id === assistantIdCookie
-                ) as
-                | {
-                    initialMessage?: string
-                    suggestions?: string[]
-                    name?: string
-                  }
-                | undefined)
+              .raw('initialAssistants')
+              .find(
+                (assistant: { id: string }) =>
+                  assistant.id === assistantIdCookie
+              ) as
+              | {
+                initialMessage?: string
+                suggestions?: string[]
+                name?: string
+              }
+              | undefined)
             : undefined
 
           for (const turn of conv) {
