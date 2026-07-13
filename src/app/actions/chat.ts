@@ -4,6 +4,7 @@ import { createStreamableValue } from '@ai-sdk/rsc'
 import { auth } from '@clerk/nextjs/server'
 
 import type { ChatRequestBody } from '@/app/api/chat/types'
+import { CHAT_ERROR_CODE, getChatErrorCodeByStatus } from '@/utils/chat-errors'
 import { hasAnyPlan } from '@/utils/clerk/subscription'
 import { ANY_PAID_PLAN } from '@/utils/plans'
 import { getUserData } from '@/utils/turso'
@@ -65,7 +66,7 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
     // Check if user has an active subscription
     const hasActiveSubscription = await hasAnyPlan(has, ANY_PAID_PLAN, userId)
     if (!hasActiveSubscription) {
-      throw new Error('Unauthorized: Active subscription required')
+      throw new Error(CHAT_ERROR_CODE.SUBSCRIPTION_INVALID)
     }
 
     // Get user's API key from database
@@ -133,6 +134,10 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
+          const chatErrorCode = getChatErrorCodeByStatus(response.status)
+          if (chatErrorCode) {
+            throw new Error(chatErrorCode)
+          }
           throw new Error(
             errorData.error || `API request failed with status ${response.status}`
           )

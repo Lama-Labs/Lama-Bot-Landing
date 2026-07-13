@@ -5,6 +5,9 @@ export const PLANS = {
 
 export type PlanSlug = (typeof PLANS)[keyof typeof PLANS]
 
+/** default trial length of 1 week */
+export const TRIAL_LENGTH_MS = 7 * 24 * 60 * 60 * 1000
+
 /** Plans that grant base subscription features (chat, crawl, custom instructions, API key) */
 export const ANY_PAID_PLAN: PlanSlug[] = [PLANS.BASIC, PLANS.PLUS]
 
@@ -17,6 +20,8 @@ export type PlanLimits = {
   crawlEnabled: number
   crawlMaxPages: number
   crawlCooldownDays: number
+  monthlyInputTokenLimit: number
+  monthlyOutputTokenLimit: number
 }
 
 const MB = 1024 * 1024
@@ -28,6 +33,8 @@ export const PLAN_LIMITS: Record<PlanSlug, PlanLimits> = {
     crawlEnabled: 1,
     crawlMaxPages: 20,
     crawlCooldownDays: 30,
+    monthlyInputTokenLimit: 100_000,
+    monthlyOutputTokenLimit: 100_000,
   },
   plus: {
     documentCount: 20,
@@ -35,6 +42,8 @@ export const PLAN_LIMITS: Record<PlanSlug, PlanLimits> = {
     crawlEnabled: 1,
     crawlMaxPages: 50,
     crawlCooldownDays: 7,
+    monthlyInputTokenLimit: 300_000,
+    monthlyOutputTokenLimit: 300_000,
   },
 }
 

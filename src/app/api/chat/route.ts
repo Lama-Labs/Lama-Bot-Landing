@@ -6,13 +6,16 @@
 import { after } from 'next/server'
 import type { ResponseCompletedEvent } from 'openai/resources/responses/responses.mjs'
 
+import { CHAT_ERROR_CODE } from '@/utils/chat-errors'
 import { hasAnyPlanByUserId } from '@/utils/clerk/subscription'
-import { ANY_PAID_PLAN } from '@/utils/plans'
 import { openaiClient } from '@/utils/openai-client'
+import { ANY_PAID_PLAN } from '@/utils/plans'
 import {
   type UserData,
+  checkUserTokenQuota,
   getCustomInstructions,
   getUserByApiKey,
+  incrementTokenUsage,
   saveUsageEvent,
 } from '@/utils/turso'
 
@@ -286,6 +289,28 @@ export async function POST(request: Request) {
       )
     }
 
+    const quota = await checkUserTokenQuota(user.clerkUserId)
+    if (!quota) {
+      return Response.json(
+        { error: 'Unable to verify token quota' },
+        { status: 500, headers: { ...corsHeaders() } }
+      )
+    }
+
+    if (quota.error === CHAT_ERROR_CODE.NO_ACTIVE_TOKEN_WINDOW) {
+      return Response.json(
+        { error: 'Unauthorized: user does not have an active subscription' },
+        { status: 401, headers: { ...corsHeaders() } }
+      )
+    }
+
+    if (!quota.allowed) {
+      return Response.json(
+        { error: 'Token quota exceeded' },
+        { status: 429, headers: { ...corsHeaders() } }
+      )
+    }
+
     // Fetch custom instructions from Turso
     const customInstructions =
       (await getCustomInstructions(user.clerkUserId)) || ''
@@ -426,6 +451,10 @@ export async function POST(request: Request) {
                   usage: event.response.usage,
                   responseId,
                   model,
+                })
+                await incrementTokenUsage(quota.tokenUsageId, {
+                  inputTokens: event.response.usage?.input_tokens,
+                  outputTokens: event.response.usage?.output_tokens,
                 })
               } catch (e) {
                 console.error('failed to save usage event', {

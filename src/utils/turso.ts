@@ -1,6 +1,13 @@
 import 'server-only'
 import { type Client, createClient } from '@libsql/client'
 
+import { CHAT_ERROR_CODE } from './chat-errors'
+import {
+  ActivePlanPeriod,
+  getActivePlanPeriodByUserId,
+} from './clerk/subscription'
+import { ANY_PAID_PLAN, TRIAL_LENGTH_MS } from './plans'
+
 export interface UsageDetails {
   input_tokens?: number
   output_tokens?: number
@@ -27,12 +34,47 @@ export type UserData = {
   apiKey?: string | null
   documentCount?: number | null
   totalStorageLimit?: number | null
+  monthlyInputTokenLimit?: number | null
+  monthlyOutputTokenLimit?: number | null
   vectorStoreId?: string | null
   trial?: string | null
   crawlEnabled?: number | null
   crawlMaxPages?: number | null
   crawlCooldownDays?: number | null
 }
+
+export type TokenUsageData = {
+  id: string
+  clerkUserId: string
+  periodStart: string
+  periodEnd: string
+  inputTokenQuota: number
+  outputTokenQuota: number
+  usedInputTokens: number
+  usedOutputTokens: number
+  createdAt: string
+  updatedAt: string
+}
+
+type IncrementTokenUsageParams = {
+  inputTokens?: number | null
+  outputTokens?: number | null
+}
+
+type TokenQuotaAllowedResult = {
+  allowed: boolean
+  tokenUsageId: string
+  error?: undefined
+}
+
+type TokenQuotaErrorResult = {
+  allowed: false
+  error: typeof CHAT_ERROR_CODE.NO_ACTIVE_TOKEN_WINDOW
+}
+
+export type TokenQuotaCheckResult =
+  | TokenQuotaAllowedResult
+  | TokenQuotaErrorResult
 
 export type WebsiteKnowledgeData = {
   id: string
@@ -86,6 +128,8 @@ const TABLE_SCHEMAS: TableSchema[] = [
         api_key TEXT,
         document_count INTEGER,
         total_storage_limit INTEGER,
+        monthly_input_token_limit INTEGER DEFAULT 0,
+        monthly_output_token_limit INTEGER DEFAULT 0,
         vector_store_id TEXT,
         trial TEXT,
         crawl_enabled INTEGER DEFAULT 0,
@@ -113,6 +157,27 @@ const TABLE_SCHEMAS: TableSchema[] = [
     `,
     indexes: [
       `CREATE INDEX IF NOT EXISTS idx_custom_instructions_user ON custom_instructions (clerk_user_id)`,
+    ],
+  },
+  {
+    name: 'token_usage',
+    createStatement: `
+      CREATE TABLE IF NOT EXISTS token_usage (
+        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        clerk_user_id TEXT NOT NULL,
+        period_start TEXT NOT NULL,
+        period_end TEXT NOT NULL,
+        input_token_quota INTEGER NOT NULL DEFAULT 0,
+        output_token_quota INTEGER NOT NULL DEFAULT 0,
+        used_input_tokens INTEGER NOT NULL DEFAULT 0,
+        used_output_tokens INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+        updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+        FOREIGN KEY (clerk_user_id) REFERENCES users(clerk_user_id)
+      )
+    `,
+    indexes: [
+      `CREATE UNIQUE INDEX IF NOT EXISTS idx_token_usage_user_period ON token_usage (clerk_user_id, period_start)`,
     ],
   },
   {
@@ -180,7 +245,6 @@ const ensureInitialized = async (): Promise<void> => {
         }
       }
     }
-
   })()
   return initPromise
 }
@@ -191,6 +255,337 @@ const safeStringify = (value: unknown): string | null => {
     return JSON.stringify(value)
   } catch {
     return null
+  }
+}
+
+/**
+ * Adds calendar months to a UTC timestamp, clamping to the target month's last
+ * day when the anchor day does not exist there.
+ */
+const addUtcMonthsClamped = (date: Date, months: number): Date => {
+  const targetMonthStart = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1)
+  )
+  const targetYear = targetMonthStart.getUTCFullYear()
+  const targetMonth = targetMonthStart.getUTCMonth()
+  const lastDayOfTargetMonth = new Date(
+    Date.UTC(targetYear, targetMonth + 1, 0)
+  ).getUTCDate()
+  const targetDay = Math.min(date.getUTCDate(), lastDayOfTargetMonth)
+
+  return new Date(
+    Date.UTC(
+      targetYear,
+      targetMonth,
+      targetDay,
+      date.getUTCHours(),
+      date.getUTCMinutes(),
+      date.getUTCSeconds(),
+      date.getUTCMilliseconds()
+    )
+  )
+}
+
+/**
+ * Returns true when `now` is within the token usage period, inclusive of `periodStart`
+ * and exclusive of `periodEnd`.
+ */
+const isDateWithinPeriod = (
+  now: Date,
+  periodStartIso: string,
+  periodEndIso: string
+): boolean => {
+  const periodStart = new Date(periodStartIso)
+  const periodEnd = new Date(periodEndIso)
+  return now >= periodStart && now < periodEnd
+}
+
+/**
+ * Maps a TokenUsage database row to the application shape used by quota helpers.
+ */
+const mapRowToTokenUsageData = (
+  row: Record<string, unknown>
+): TokenUsageData => ({
+  id: row.id as string,
+  clerkUserId: row.clerk_user_id as string,
+  periodStart: row.period_start as string,
+  periodEnd: row.period_end as string,
+  inputTokenQuota: row.input_token_quota as number,
+  outputTokenQuota: row.output_token_quota as number,
+  usedInputTokens: row.used_input_tokens as number,
+  usedOutputTokens: row.used_output_tokens as number,
+  createdAt: row.created_at as string,
+  updatedAt: row.updated_at as string,
+})
+
+/**
+ * Returns the most recently ending token usage period for a user.
+ * This is the starting point for determining whether the current request falls
+ * inside an active quota window or needs a new one.
+ */
+const getLatestTokenUsage = async (
+  client: Client,
+  clerkUserId: string
+): Promise<TokenUsageData | null> => {
+  const result = await client.execute({
+    sql: `SELECT id, clerk_user_id, period_start, period_end, input_token_quota, output_token_quota, used_input_tokens, used_output_tokens, created_at, updated_at
+          FROM token_usage
+          WHERE clerk_user_id = ?
+          ORDER BY period_end DESC
+          LIMIT 1`,
+    args: [clerkUserId],
+  })
+
+  if (result.rows.length === 0) {
+    return null
+  }
+
+  return mapRowToTokenUsageData(result.rows[0] as Record<string, unknown>)
+}
+
+/**
+ * Looks up a user's token usage period by its exact `period_start` timestamp.
+ * This is used to safely read back a period row after inserting it with a known start.
+ */
+const getTokenUsageByPeriodStart = async (
+  client: Client,
+  clerkUserId: string,
+  periodStart: string
+): Promise<TokenUsageData | null> => {
+  const result = await client.execute({
+    sql: `SELECT id, clerk_user_id, period_start, period_end, input_token_quota, output_token_quota, used_input_tokens, used_output_tokens, created_at, updated_at
+          FROM token_usage
+          WHERE clerk_user_id = ? AND period_start = ?
+          LIMIT 1`,
+    args: [clerkUserId, periodStart],
+  })
+
+  if (result.rows.length === 0) {
+    return null
+  }
+
+  return mapRowToTokenUsageData(result.rows[0] as Record<string, unknown>)
+}
+
+/**
+ * Ensures a token usage row exists for the exact period boundary that was already
+ * chosen by the caller. The row snapshots the user's quota for that period so later
+ * allowance changes do not retroactively modify past usage windows.
+ */
+const createTokenUsagePeriod = async (
+  client: Client,
+  clerkUserId: string,
+  inputTokenQuota: number,
+  outputTokenQuota: number,
+  periodStart: string,
+  periodEnd: string
+): Promise<TokenUsageData> => {
+  await client.execute({
+    sql: `INSERT OR IGNORE INTO token_usage (
+            id,
+            clerk_user_id,
+            period_start,
+            period_end,
+            input_token_quota,
+            output_token_quota,
+            used_input_tokens,
+            used_output_tokens
+          ) VALUES (lower(hex(randomblob(16))), ?, ?, ?, ?, ?, 0, 0)`,
+    args: [
+      clerkUserId,
+      periodStart,
+      periodEnd,
+      inputTokenQuota,
+      outputTokenQuota,
+    ],
+  })
+
+  const created = await getTokenUsageByPeriodStart(
+    client,
+    clerkUserId,
+    periodStart
+  )
+  if (!created) {
+    throw new Error('Failed to create token usage period')
+  }
+
+  return created
+}
+
+/**
+ * Resolves the TokenUsage window that should apply to the current request from the
+ * active Clerk/trial billing period. If a latest Turso record exists, the next
+ * window continues from that period end when still inside the same billing cycle.
+ */
+const resolveTokenUsageWindow = (
+  now: Date,
+  activePlanPeriod: ActivePlanPeriod
+): { periodStart: string; periodEnd: string } | null => {
+  const billingPeriodStart = new Date(activePlanPeriod.periodStart)
+  const billingPeriodEnd = new Date(activePlanPeriod.periodEnd)
+
+  if (!(now >= billingPeriodStart && now < billingPeriodEnd)) {
+    return null
+  }
+
+  if (activePlanPeriod.planPeriod === 'month') {
+    return {
+      periodStart: billingPeriodStart.toISOString(),
+      periodEnd: billingPeriodEnd.toISOString(),
+    }
+  }
+
+  for (let monthOffset = 0; ; monthOffset += 1) {
+    const canonicalPeriodStart = addUtcMonthsClamped(
+      billingPeriodStart,
+      monthOffset
+    )
+
+    if (canonicalPeriodStart >= billingPeriodEnd) {
+      break
+    }
+
+    const uncappedPeriodEnd = addUtcMonthsClamped(
+      billingPeriodStart,
+      monthOffset + 1
+    )
+    const periodEnd =
+      uncappedPeriodEnd > billingPeriodEnd
+        ? billingPeriodEnd
+        : uncappedPeriodEnd
+
+    if (now >= canonicalPeriodStart && now < periodEnd) {
+      return {
+        periodStart: canonicalPeriodStart.toISOString(),
+        periodEnd: periodEnd.toISOString(),
+      }
+    }
+  }
+
+  return null
+}
+
+const resolveTrialTokenUsageWindow = (
+  now: Date,
+  user: UserData
+): { periodStart: string; periodEnd: string } | null => {
+  if (
+    !user.trial ||
+    !ANY_PAID_PLAN.includes(user.trial as (typeof ANY_PAID_PLAN)[number])
+  ) {
+    return null
+  }
+
+  return {
+    periodStart: now.toISOString(),
+    periodEnd: new Date(now.getTime() + TRIAL_LENGTH_MS).toISOString(),
+  }
+}
+
+/**
+ * Resolves the current token quota window for the user from Turso first and only
+ * consults Clerk/trial billing metadata when a new TokenUsage row must be created.
+ */
+export const checkUserTokenQuota = async (
+  clerkUserId: string
+): Promise<TokenQuotaCheckResult | null> => {
+  try {
+    await ensureInitialized()
+    const client = getClientOrNull()
+    if (!client) return null
+
+    const user = await getUserData(clerkUserId)
+    if (!user) return null
+
+    const inputTokenQuota = user.monthlyInputTokenLimit ?? 0
+    const outputTokenQuota = user.monthlyOutputTokenLimit ?? 0
+    const now = new Date()
+    let activeTokenUsage = await getLatestTokenUsage(client, clerkUserId)
+
+    if (
+      !activeTokenUsage ||
+      !isDateWithinPeriod(
+        now,
+        activeTokenUsage.periodStart,
+        activeTokenUsage.periodEnd
+      )
+    ) {
+      const activePlanPeriod = await getActivePlanPeriodByUserId(
+        clerkUserId,
+        ANY_PAID_PLAN
+      )
+
+      const tokenWindow = activePlanPeriod
+        ? resolveTokenUsageWindow(now, activePlanPeriod)
+        : resolveTrialTokenUsageWindow(now, user)
+      if (!tokenWindow) {
+        return {
+          allowed: false,
+          error: CHAT_ERROR_CODE.NO_ACTIVE_TOKEN_WINDOW,
+        }
+      }
+
+      activeTokenUsage = await createTokenUsagePeriod(
+        client,
+        clerkUserId,
+        inputTokenQuota,
+        outputTokenQuota,
+        tokenWindow.periodStart,
+        tokenWindow.periodEnd
+      )
+    }
+
+    if (!activeTokenUsage) return null
+
+    return {
+      allowed:
+        activeTokenUsage.usedInputTokens < activeTokenUsage.inputTokenQuota &&
+        activeTokenUsage.usedOutputTokens < activeTokenUsage.outputTokenQuota,
+      tokenUsageId: activeTokenUsage.id,
+    }
+  } catch (error) {
+    console.error('[turso] Failed to check user token quota', {
+      clerkUserId,
+      error: (error as Error).message,
+    })
+    return null
+  }
+}
+
+/**
+ * Increments usage on the already-authorized TokenUsage period after the chat response
+ * completes. This intentionally allows a request that was valid at preflight time even
+ * if the final token usage pushes the user over quota.
+ */
+export const incrementTokenUsage = async (
+  tokenUsageId: string,
+  params: IncrementTokenUsageParams
+): Promise<void> => {
+  try {
+    const inputTokens = params.inputTokens ?? 0
+    const outputTokens = params.outputTokens ?? 0
+
+    if (inputTokens <= 0 && outputTokens <= 0) return
+
+    await ensureInitialized()
+    const client = getClientOrNull()
+    if (!client) return
+
+    await client.execute({
+      sql: `UPDATE token_usage
+            SET used_input_tokens = used_input_tokens + ?,
+                used_output_tokens = used_output_tokens + ?,
+                updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+            WHERE id = ?`,
+      args: [inputTokens, outputTokens, tokenUsageId],
+    })
+  } catch (error) {
+    console.error('[turso] Failed to increment token usage', {
+      tokenUsageId,
+      inputTokens: params.inputTokens,
+      outputTokens: params.outputTokens,
+      error: (error as Error).message,
+    })
   }
 }
 
@@ -268,6 +663,14 @@ export const upsertUser = async (userData: UserData): Promise<void> => {
       updates.push('total_storage_limit = ?')
       values.push(userData.totalStorageLimit)
     }
+    if (userData.monthlyInputTokenLimit !== undefined) {
+      updates.push('monthly_input_token_limit = ?')
+      values.push(userData.monthlyInputTokenLimit)
+    }
+    if (userData.monthlyOutputTokenLimit !== undefined) {
+      updates.push('monthly_output_token_limit = ?')
+      values.push(userData.monthlyOutputTokenLimit)
+    }
     if (userData.vectorStoreId !== undefined) {
       updates.push('vector_store_id = ?')
       values.push(userData.vectorStoreId)
@@ -294,8 +697,8 @@ export const upsertUser = async (userData: UserData): Promise<void> => {
 
     // SQLite UPSERT syntax: INSERT ... ON CONFLICT ... DO UPDATE
     const sql = `
-      INSERT INTO users (clerk_user_id, email, api_key, document_count, total_storage_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO users (clerk_user_id, email, api_key, document_count, total_storage_limit, monthly_input_token_limit, monthly_output_token_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(clerk_user_id) DO UPDATE SET ${updates.join(', ')}
     `
 
@@ -307,6 +710,8 @@ export const upsertUser = async (userData: UserData): Promise<void> => {
         userData.apiKey ?? null,
         userData.documentCount ?? null,
         userData.totalStorageLimit ?? null,
+        userData.monthlyInputTokenLimit ?? 0,
+        userData.monthlyOutputTokenLimit ?? 0,
         userData.vectorStoreId ?? null,
         userData.trial ?? null,
         userData.crawlEnabled ?? 0,
@@ -405,6 +810,8 @@ const mapRowToUserData = (row: Record<string, unknown>): UserData => ({
   apiKey: row.api_key as string | null,
   documentCount: row.document_count as number | null,
   totalStorageLimit: row.total_storage_limit as number | null,
+  monthlyInputTokenLimit: row.monthly_input_token_limit as number | null,
+  monthlyOutputTokenLimit: row.monthly_output_token_limit as number | null,
   vectorStoreId: row.vector_store_id as string | null,
   trial: row.trial as string | null,
   crawlEnabled: row.crawl_enabled as number | null,
@@ -425,7 +832,7 @@ export const getUserData = async (
     if (!client) return null
 
     const result = await client.execute({
-      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days
+      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, monthly_input_token_limit, monthly_output_token_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days
             FROM users WHERE clerk_user_id = ? LIMIT 1`,
       args: [clerkUserId],
     })
@@ -458,7 +865,7 @@ export const getUserByApiKey = async (
     if (!client) return null
 
     const result = await client.execute({
-      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days
+      sql: `SELECT clerk_user_id, email, api_key, document_count, total_storage_limit, monthly_input_token_limit, monthly_output_token_limit, vector_store_id, trial, crawl_enabled, crawl_max_pages, crawl_cooldown_days
             FROM users WHERE api_key = ? LIMIT 1`,
       args: [apiKey],
     })
@@ -493,6 +900,10 @@ export const deleteUser = async (clerkUserId: string): Promise<void> => {
     })
     await client.execute({
       sql: 'DELETE FROM website_knowledge WHERE clerk_user_id = ?',
+      args: [clerkUserId],
+    })
+    await client.execute({
+      sql: 'DELETE FROM token_usage WHERE clerk_user_id = ?',
       args: [clerkUserId],
     })
 
@@ -679,4 +1090,3 @@ export const clearWebsiteKnowledgeFileId = async (
     })
   }
 }
-
