@@ -36,6 +36,8 @@ const CustomInstructions = ({ user, isLoaded }: CustomInstructionsProps) => {
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false)
   const t = useTranslations('dashboard')
 
+  const userId = user?.id
+
   const fetchInstructions = useCallback(async () => {
     setLoading(true)
     try {
@@ -75,15 +77,19 @@ const CustomInstructions = ({ user, isLoaded }: CustomInstructionsProps) => {
     }
   }
 
+  // Keyed on userId, not the Clerk `user` object or `fetchInstructions`: both get a new
+  // identity on every session-token refresh, and re-running the fetch would overwrite
+  // whatever the user is currently typing.
   useEffect(() => {
-    if (user && isLoaded) {
+    if (userId && isLoaded) {
       fetchInstructions()
       // Check subscription status from server
       getSubscriptionStatus().then((s) =>
         setHasActiveSubscription(s.hasSubscription)
       )
     }
-  }, [user, isLoaded, fetchInstructions])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see above
+  }, [userId, isLoaded])
 
   return (
     <Box>

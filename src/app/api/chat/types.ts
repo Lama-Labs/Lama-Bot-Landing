@@ -4,4 +4,5 @@ export type ChatRequestBody = {
   userMessage: string
   conversation: { role: 'user' | 'assistant'; content: string }[]
   language: string
+  timeZone?: string
 }
