@@ -366,7 +366,7 @@ export async function POST(request: Request) {
       : null
 
     const sdkStream = await client.responses.stream({
-      model: 'gpt-5.4-mini',
+      model: 'gpt-5.4-nano',
       input: [
         {
           role: 'user',
