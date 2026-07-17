@@ -25,6 +25,19 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
 
+// TODO decide on length
+const MAX_REQUEST_BODY_BYTES = 256 * 1024
+const MAX_USER_MESSAGE_CHARS = 4 * 1024
+const MAX_WEBSITE_CONTENT_CHARS = 128 * 1024
+const MAX_CONVERSATION_TURNS = 20
+const MAX_CONVERSATION_CONTENT_CHARS = 4 * 1024
+const MAX_LANGUAGE_CHARS = 32
+const MAX_SESSION_ID_CHARS = 128
+const MAX_TIME_ZONE_CHARS = 128
+
+type RequestTooLargeError = typeof CHAT_ERROR_CODE.REQUEST_TOO_LARGE
+type ChatRequestParseResult = ChatRequestBody | RequestTooLargeError | null
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
@@ -39,7 +52,7 @@ function isChatTurn(
   )
 }
 
-function parseChatRequestBody(value: unknown): ChatRequestBody | null {
+function parseChatRequestBody(value: unknown): ChatRequestParseResult {
   if (!isRecord(value)) return null
 
   const {
@@ -63,12 +76,27 @@ function parseChatRequestBody(value: unknown): ChatRequestBody | null {
   }
 
   if (!websiteContent.trim() || !userMessage.trim()) return null
+  if (
+    sessionId.length > MAX_SESSION_ID_CHARS ||
+    websiteContent.length > MAX_WEBSITE_CONTENT_CHARS ||
+    userMessage.length > MAX_USER_MESSAGE_CHARS ||
+    language.length > MAX_LANGUAGE_CHARS ||
+    (timeZone?.length ?? 0) > MAX_TIME_ZONE_CHARS
+  ) {
+    return CHAT_ERROR_CODE.REQUEST_TOO_LARGE
+  }
 
   return {
     sessionId,
     websiteContent,
     userMessage,
-    conversation: conversation.filter(isChatTurn),
+    conversation: conversation
+      .filter(isChatTurn)
+      .slice(-MAX_CONVERSATION_TURNS)
+      .map((turn) => ({
+        role: turn.role,
+        content: turn.content.slice(0, MAX_CONVERSATION_CONTENT_CHARS),
+      })),
     language,
     timeZone,
   }
@@ -364,9 +392,23 @@ export async function POST(request: Request) {
     const customInstructions =
       (await getCustomInstructions(user.clerkUserId)) || ''
 
-    const chatRequestBody = parseChatRequestBody(
-      await request.json().catch(() => null)
-    )
+    const contentLength = request.headers.get('content-length')
+    if (contentLength && Number(contentLength) > MAX_REQUEST_BODY_BYTES) {
+      return Response.json(
+        { error: 'Request body too large' },
+        { status: 413, headers: { ...corsHeaders() } }
+      )
+    }
+
+    const parsedBody = await request.json().catch(() => null)
+    const chatRequestBody = parseChatRequestBody(parsedBody)
+    if (chatRequestBody === CHAT_ERROR_CODE.REQUEST_TOO_LARGE) {
+      return Response.json(
+        { error: 'Request body too large' },
+        { status: 413, headers: { ...corsHeaders() } }
+      )
+    }
+
     if (!chatRequestBody) {
       return Response.json(
         { error: 'Invalid request body' },
