@@ -33,6 +33,20 @@ type SubmitChatArgs = {
   timeZone?: string
 }
 
+// Keep user-facing chat errors specific only for approved public error codes.
+function getSafeStreamError(error: unknown): string {
+  let message = ''
+
+  if (error instanceof Error) {
+    message = error.message
+  } else if (typeof error === 'string') {
+    message = error
+  }
+
+  const publicErrorCodes = Object.values(CHAT_ERROR_CODE) as string[]
+  return publicErrorCodes.includes(message) ? message : 'CHAT_REQUEST_FAILED'
+}
+
 export async function submitChatMessage(args: SubmitChatArgs): Promise<{
   // NOTE: this is a stream handle, not a final value
   text: ReturnType<typeof createStreamableValue<string>>['value']
@@ -134,14 +148,11 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
         const chatErrorCode = getChatErrorCodeByStatus(response.status)
         if (chatErrorCode) {
           throw new Error(chatErrorCode)
         }
-        throw new Error(
-          errorData.error || `API request failed with status ${response.status}`
-        )
+        throw new Error('CHAT_REQUEST_FAILED')
       }
 
       if (!response.body) {
@@ -166,7 +177,7 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
     } catch (error) {
       console.error('Error calling /api/chat:', error)
       // Signal error so frontend catch block displays translated error message
-      stream.error(error instanceof Error ? error.message : 'Unknown error')
+      stream.error(getSafeStreamError(error))
     }
   }
 
