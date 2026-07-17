@@ -106,68 +106,71 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
   // Create streamable value for text
   const stream = createStreamableValue<string>('')
 
-    ; (async () => {
-      try {
-        // Determine the base URL for the API call
-        const baseUrl = process.env.VERCEL_URL
-          ? `https://${process.env.VERCEL_URL}`
-          : 'http://localhost:3000'
-        const apiUrl = `${baseUrl}/api/chat`
+  async function runChatRequest() {
+    try {
+      // Determine the base URL for the API call
+      const baseUrl = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : 'http://localhost:3000'
+      const apiUrl = `${baseUrl}/api/chat`
 
-        // Call the /api/chat endpoint
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        }
-
-        // Bypass Vercel deployment protection on preview deployments
-        const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET
-        if (bypassSecret) {
-          headers['x-vercel-protection-bypass'] = bypassSecret
-        }
-
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(requestBody),
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}))
-          const chatErrorCode = getChatErrorCodeByStatus(response.status)
-          if (chatErrorCode) {
-            throw new Error(chatErrorCode)
-          }
-          throw new Error(
-            errorData.error || `API request failed with status ${response.status}`
-          )
-        }
-
-        if (!response.body) {
-          throw new Error('Response body is null')
-        }
-
-        // Stream the plain text response
-        const reader = response.body.getReader()
-        const decoder = new TextDecoder()
-        let acc = ''
-
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-
-          const chunk = decoder.decode(value, { stream: true })
-          acc += chunk
-          stream.update(acc)
-        }
-
-        stream.done()
-      } catch (error) {
-        console.error('Error calling /api/chat:', error)
-        // Signal error so frontend catch block displays translated error message
-        stream.error(error instanceof Error ? error.message : 'Unknown error')
+      // Call the /api/chat endpoint
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
       }
-    })()
+
+      // Bypass Vercel deployment protection on preview deployments
+      const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET
+      if (bypassSecret) {
+        headers['x-vercel-protection-bypass'] = bypassSecret
+      }
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(requestBody),
+        redirect: 'error',
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        const chatErrorCode = getChatErrorCodeByStatus(response.status)
+        if (chatErrorCode) {
+          throw new Error(chatErrorCode)
+        }
+        throw new Error(
+          errorData.error || `API request failed with status ${response.status}`
+        )
+      }
+
+      if (!response.body) {
+        throw new Error('Response body is null')
+      }
+
+      // Stream the plain text response
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let acc = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value, { stream: true })
+        acc += chunk
+        stream.update(acc)
+      }
+
+      stream.done()
+    } catch (error) {
+      console.error('Error calling /api/chat:', error)
+      // Signal error so frontend catch block displays translated error message
+      stream.error(error instanceof Error ? error.message : 'Unknown error')
+    }
+  }
+
+  void runChatRequest()
 
   // Return the text stream handle; the client will read it progressively
   return { text: stream.value }
