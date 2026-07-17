@@ -25,6 +25,55 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function isChatTurn(
+  value: unknown
+): value is ChatRequestBody['conversation'][number] {
+  return (
+    isRecord(value) &&
+    (value.role === 'user' || value.role === 'assistant') &&
+    typeof value.content === 'string'
+  )
+}
+
+function parseChatRequestBody(value: unknown): ChatRequestBody | null {
+  if (!isRecord(value)) return null
+
+  const {
+    sessionId,
+    websiteContent,
+    userMessage,
+    conversation = [],
+    language,
+    timeZone,
+  } = value
+
+  if (
+    typeof sessionId !== 'string' ||
+    typeof websiteContent !== 'string' ||
+    typeof userMessage !== 'string' ||
+    typeof language !== 'string' ||
+    !Array.isArray(conversation) ||
+    (timeZone !== undefined && typeof timeZone !== 'string')
+  ) {
+    return null
+  }
+
+  if (!websiteContent.trim() || !userMessage.trim()) return null
+
+  return {
+    sessionId,
+    websiteContent,
+    userMessage,
+    conversation: conversation.filter(isChatTurn),
+    language,
+    timeZone,
+  }
+}
+
 /**
  * Callers supply the clock the assistant should reason with: the WordPress
  * plugin sends the site's configured zone, the dashboard/demo sends the
@@ -82,7 +131,7 @@ function buildCurrentDateTimeInfo(timeZone: string): string {
 function sanitizeOwnerInstructions(instructions: string): string {
   let current = instructions
 
-  for (; ;) {
+  for (;;) {
     const next = current.replace(/<\/?owner_instructions>/gi, '')
     if (next === current) return current
     current = next
@@ -315,6 +364,16 @@ export async function POST(request: Request) {
     const customInstructions =
       (await getCustomInstructions(user.clerkUserId)) || ''
 
+    const chatRequestBody = parseChatRequestBody(
+      await request.json().catch(() => null)
+    )
+    if (!chatRequestBody) {
+      return Response.json(
+        { error: 'Invalid request body' },
+        { status: 400, headers: { ...corsHeaders() } }
+      )
+    }
+
     const {
       sessionId,
       websiteContent,
@@ -322,16 +381,9 @@ export async function POST(request: Request) {
       conversation,
       language,
       timeZone,
-    }: ChatRequestBody = await request.json().catch(() => ({}))
+    } = chatRequestBody
 
     const siteTimeZone = resolveTimeZone(timeZone)
-
-    if (!websiteContent || !userMessage) {
-      return Response.json(
-        { error: 'Missing required fields: websiteContent and/or userMessage' },
-        { status: 400, headers: { ...corsHeaders() } }
-      )
-    }
 
     const client = openaiClient
 
@@ -339,12 +391,12 @@ export async function POST(request: Request) {
 
     const tools = vectorStoreId
       ? [
-        {
-          type: 'file_search' as const,
-          vector_store_ids: [vectorStoreId],
-          max_num_results: 20,
-        },
-      ]
+          {
+            type: 'file_search' as const,
+            vector_store_ids: [vectorStoreId],
+            max_num_results: 20,
+          },
+        ]
       : []
 
     // Mitigation: Do not trust client-provided roles as prior assistant messages.
@@ -353,16 +405,16 @@ export async function POST(request: Request) {
     // "<role>: <message>\n".
     const serializedConversationContent = Array.isArray(conversation)
       ? (() => {
-        const text = conversation
-          .filter(
-            (m) =>
-              (m?.role === 'user' || m?.role === 'assistant') &&
-              typeof m?.content === 'string'
-          )
-          .map((m) => `${m.role}: ${m.content}`)
-          .join('\n')
-        return text.length > 0 ? { type: 'input_text' as const, text } : null
-      })()
+          const text = conversation
+            .filter(
+              (m) =>
+                (m?.role === 'user' || m?.role === 'assistant') &&
+                typeof m?.content === 'string'
+            )
+            .map((m) => `${m.role}: ${m.content}`)
+            .join('\n')
+          return text.length > 0 ? { type: 'input_text' as const, text } : null
+        })()
       : null
 
     const sdkStream = await client.responses.stream({
@@ -376,11 +428,11 @@ export async function POST(request: Request) {
         },
         ...(serializedConversationContent
           ? [
-            {
-              role: 'user' as const,
-              content: [serializedConversationContent],
-            },
-          ]
+              {
+                role: 'user' as const,
+                content: [serializedConversationContent],
+              },
+            ]
           : []),
         {
           role: 'user',
@@ -468,7 +520,7 @@ export async function POST(request: Request) {
         sdkStream.on('end', async () => {
           try {
             await sdkStream.done()
-          } catch { }
+          } catch {}
           controller.close()
           console.log(`[${nowIso()}] Chat request completed successfully`)
         })
@@ -479,13 +531,13 @@ export async function POST(request: Request) {
           })
           try {
             controller.close()
-          } catch { }
+          } catch {}
         })
       },
       cancel() {
         try {
           sdkStream.abort?.()
-        } catch { }
+        } catch {}
       },
     })
 
