@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
             // Generate API key if doesn't exist
             let apiKey = existingApiKey
             if (!apiKey) {
-              apiKey = `lama-${crypto.randomBytes(32).toString('hex')}`
+              apiKey = `alpaca-${crypto.randomBytes(32).toString('hex')}`
               console.log(`API key generated for user: ${userId}`)
               console.log(`Subscription plan: ${planSlug}`)
             } else {
