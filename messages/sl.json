@@ -3,6 +3,7 @@
     "home": "Domov",
     "about": "Storitev",
     "contact": "Kontakt",
+    "dashboard": "Nadzorna plošča",
     "localeSwitcher": {
       "en": "English",
       "sl": "slovenščina"
@@ -131,6 +132,7 @@
     },
     "apiKey": {
       "title": "Vaš API ključ",
+      "subtitle": "Kopirajte ta ključ in ga prilepite v nastavitve vtičnika Alpaca Chat za WordPress, da aktivirate AI pomočnika na vaši spletni strani:",
       "tooltip": "Ta API ključ uporabite za overjanje svojih zahtevkov do Alpaca Chat API-ja. Hranite ga varno in ga ne delite javno.",
       "messages": {
         "noSubscription": "Ni aktivne naročnine. Izberite paket, da pridobite API ključ.",
@@ -150,8 +152,24 @@
         "fetchError": "Napaka pri nalaganju navodil"
       }
     },
+    "websiteKnowledge": {
+      "title": "Znanje spletne strani",
+      "tooltip": "Preglejte svojo spletno stran za samodejno pridobivanje vsebine za vašega AI pomočnika. Pregledana vsebina se doda v vašo bazo znanja in jo klepetalni robot uporablja za odgovarjanje na vprašanja.",
+      "urlPlaceholder": "https://vasastran.si",
+      "crawlButton": "Preglej spletno stran",
+      "crawling": "Pregledovanje...",
+      "lastCrawled": "Zadnji pregled: {date}",
+      "cooldownMessage": "Naslednji pregled možen po {date}",
+      "deleteButton": "Izbriši",
+      "messages": {
+        "fetchError": "Napaka pri nalaganju znanja spletne strani",
+        "crawlError": "Napaka pri začetku pregleda spletne strani",
+        "urlRequired": "Vnesite URL spletne strani",
+        "deleteError": "Napaka pri brisanju datoteke pregleda"
+      }
+    },
     "files": {
-      "title": "Vaše datoteke",
+      "title": "Vaše baze znanja",
       "tooltip": "Upravljajte naložene datoteke, ki se uporabljajo za učenje vašega AI klepetalnega robota. Lahko nalagate dokumente, jih brišete in spremljate stanje obdelave.",
       "counters": {
         "uploaded": "{count, plural, =0 {naloženih datotek} one {naložena datoteka} other {naloženih datotek}}",
@@ -218,6 +236,8 @@
       }
     ],
     "errorMessage": "Imam nekaj tehničnih težav. Prosim, poskusite znova pozneje. 🐑",
+    "subscriptionInvalidMessage": "Vaša naročnina ni več aktivna. Za nadaljnjo uporabo klepeta obnovite svoj paket.",
+    "tokenQuotaExceededMessage": "Dosegli ste mesečno omejitev žetonov. Poskusite znova v naslednjem obračunskem obdobju.",
     "dashboard": {
       "assistantName": "Moj asistent",
       "initialMessage": "Dobrodošli v testnem okolju! Pripravljen sem prikazati svoje sposobnosti z vašimi naloženimi dokumenti. Vprašajte me karkoli, da preizkusite, kako dobro pridobivam in predstavljam informacije iz vaše baze znanja. Kaj bi radi raziskali?"

@@ -12,6 +12,7 @@ import ExampleAssistantMessageBubble from '@/components/ChatBot/ExampleAssistant
 import MessageBubble from '@/components/ChatBot/MessageBubble'
 import SuggestionChips from '@/components/ChatBot/SuggestionChips'
 import { useChat } from '@/context/ChatContext'
+import { getChatErrorTranslationKey } from '@/utils/chat-errors'
 import {
   appendConversationTurn,
   clearAssistantId as clearAssistantIdCookie,
@@ -96,6 +97,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         lang,
         conversation,
         useDashboardMode: mode === 'dashboard',
+        // No WordPress site to read a timezone from here, so the tester's own local clock stands in for the site's.
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       })
 
       // Read the stream and progressively update the last assistant message
@@ -115,9 +118,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       ]
       setConversation(updated, cookieNamespace)
     } catch (error) {
-      console.error('Error fetching from API:', error)
-      // Update the placeholder message with error text instead of adding a new one
-      responseEntry.text = t('errorMessage')
+      responseEntry.text = t(getChatErrorTranslationKey(error))
       setResponses((prev) => [...prev])
     } finally {
       setIsBusy(false)
@@ -171,17 +172,17 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           // Get selected assistant info for attaching suggestions
           const selectedAssistant = assistantIdCookie
             ? (t
-                .raw('initialAssistants')
-                .find(
-                  (assistant: { id: string }) =>
-                    assistant.id === assistantIdCookie
-                ) as
-                | {
-                    initialMessage?: string
-                    suggestions?: string[]
-                    name?: string
-                  }
-                | undefined)
+              .raw('initialAssistants')
+              .find(
+                (assistant: { id: string }) =>
+                  assistant.id === assistantIdCookie
+              ) as
+              | {
+                initialMessage?: string
+                suggestions?: string[]
+                name?: string
+              }
+              | undefined)
             : undefined
 
           for (const turn of conv) {

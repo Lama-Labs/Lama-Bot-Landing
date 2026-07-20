@@ -3,8 +3,9 @@ import { fileTypeFromBuffer } from 'file-type'
 import { NextRequest } from 'next/server'
 
 import { hasAnyPlan } from '@/utils/clerk/subscription'
+import { PLUS_ONLY_PLAN } from '@/utils/plans'
 import { uploadFileToR2 } from '@/utils/r2-helpers'
-import { getUserData } from '@/utils/turso'
+import { getUserData, getWebsiteKnowledge } from '@/utils/turso'
 import {
   deleteFileFromVectorStore,
   getUserVectorStoreDocuments,
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Ensure user has an eligible paid plan or matching trial tier (e.g., basic)
-    const isEligible = await hasAnyPlan(has, 'basic', userId)
+    const isEligible = await hasAnyPlan(has, PLUS_ONLY_PLAN, userId)
     if (!isEligible) {
       return Response.json(
         { error: 'Requires an active paid plan' },
@@ -28,10 +29,22 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Get user data from database
-    const userData = await getUserData(userId)
+    // Get user data, documents, and crawl record in parallel
+    const [userData, rawDocuments, wk] = await Promise.all([
+      getUserData(userId),
+      getUserVectorStoreDocuments(userId),
+      getWebsiteKnowledge(userId),
+    ])
 
-    const documents = await getUserVectorStoreDocuments(userId)
+    // Exclude crawl file from quota calculations
+    const crawlFileId = wk?.vectorStoreFileId ?? null
+    if (!rawDocuments) {
+      return Response.json(
+        { error: 'No vector store found for user' },
+        { status: 404 }
+      )
+    }
+    const documents = rawDocuments.filter((doc) => doc.id !== crawlFileId)
 
     // Enforce file upload limit from database
     const filesLimit = userData?.documentCount ?? 0

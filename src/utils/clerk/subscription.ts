@@ -4,6 +4,45 @@ import { getUserData } from '../turso'
 
 type HasFunction = (query: { plan: string }) => boolean
 
+export type ActivePlanPeriod = {
+  planSlug: string
+  planPeriod: 'month' | 'annual'
+  periodStart: string
+  periodEnd: string
+  source: 'clerk'
+}
+
+const getActiveSubscriptionItemByUserId = async (
+  clerkUserId: string,
+  plans: string | string[]
+) => {
+  const planList = Array.isArray(plans) ? plans : [plans]
+
+  try {
+    const client = await clerkClient()
+    const subscription =
+      await client.billing.getUserBillingSubscription(clerkUserId)
+
+    if (subscription.status !== 'active') return null
+
+    return (
+      subscription.subscriptionItems.find(
+        (item) =>
+          item.status === 'active' &&
+          item.periodEnd != null &&
+          item.plan != null &&
+          planList.includes(item.plan.slug)
+      ) ?? null
+    )
+  } catch (error) {
+    console.error(
+      '[subscription] Failed to check subscription via backend API',
+      { clerkUserId, error: (error as Error).message }
+    )
+    return null
+  }
+}
+
 /**
  * Returns true if the user has ANY of the provided plans, using Clerk's `has` API from `auth()`.
  * Pass the `has` function from `auth()` to avoid multiple auth lookups in a single request.
@@ -56,25 +95,27 @@ export async function hasAnyPlanByUserId(
     return true
   }
 
-  // Check subscription via Clerk's backend API
-  try {
-    const client = await clerkClient()
-    const subscription =
-      await client.billing.getUserBillingSubscription(clerkUserId)
+  return (await getActiveSubscriptionItemByUserId(clerkUserId, plans)) !== null
+}
 
-    if (subscription.status !== 'active') return false
+/**
+ * Returns the active billing period metadata used by token quota creation when
+ * Turso needs to open a new TokenUsage row.
+ */
+export async function getActivePlanPeriodByUserId(
+  clerkUserId: string,
+  plans: string | string[]
+): Promise<ActivePlanPeriod | null> {
+  const activeItem = await getActiveSubscriptionItemByUserId(clerkUserId, plans)
+  if (!activeItem || activeItem.periodEnd == null || !activeItem.plan) {
+    return null
+  }
 
-    return subscription.subscriptionItems.some(
-      (item) =>
-        item.status === 'active' &&
-        item.plan != null &&
-        planList.includes(item.plan.slug)
-    )
-  } catch (error) {
-    console.error(
-      '[subscription] Failed to check subscription via backend API',
-      { clerkUserId, error: (error as Error).message }
-    )
-    return false
+  return {
+    planSlug: activeItem.plan.slug,
+    planPeriod: activeItem.planPeriod,
+    periodStart: new Date(activeItem.periodStart).toISOString(),
+    periodEnd: new Date(activeItem.periodEnd).toISOString(),
+    source: 'clerk',
   }
 }

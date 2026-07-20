@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
 import { hasAnyPlan } from '@/utils/clerk/subscription'
+import { ANY_PAID_PLAN } from '@/utils/plans'
 import { getUserData } from '@/utils/turso'
 
 export async function GET() {
@@ -18,7 +19,7 @@ export async function GET() {
     }
 
     // Check if the user is eligible via trial tier or paid plan
-    const hasSubscription = await hasAnyPlan(has, 'basic', userId)
+    const hasSubscription = await hasAnyPlan(has, ANY_PAID_PLAN, userId)
     if (!hasSubscription) {
       console.log('User is not a paid user')
       return new NextResponse('User is not a paid user', { status: 403 })

@@ -3,56 +3,25 @@
 import { createStreamableValue } from '@ai-sdk/rsc'
 import { auth } from '@clerk/nextjs/server'
 
-import { getCustomInstructionsAction } from '@/app/actions/custom-instructions'
 import type { ChatRequestBody } from '@/app/api/chat/types'
+import { CHAT_ERROR_CODE, getChatErrorCodeByStatus } from '@/utils/chat-errors'
 import { hasAnyPlan } from '@/utils/clerk/subscription'
-import { getCustomInstructions, getUserData } from '@/utils/turso'
+import { ANY_PAID_PLAN } from '@/utils/plans'
+import { getUserData } from '@/utils/turso'
 
-const getDashboardInstructions = (
-  adminCustomInstructions: string
-) => `You are in TESTING MODE in the admin dashboard. The administrator is evaluating how you will perform with real customers.
+/**
+ * Sent as `websiteContent` for dashboard/demo requests.
+ * Only contains testing-specific context — all behavioral rules, custom instructions,
+ * and date/time are already handled by the API route's system instructions.
+ */
+const dashboardContext = `You are in TESTING MODE. The administrator is evaluating how you will perform with real customers.
 
 TESTING CONTEXT:
 - This is a testing/preview environment where the admin tests the complete customer experience
 - You have NO website context available - your ONLY knowledge source is the vector store with uploaded documents
 - The admin is role-playing as a customer to see how you'll actually behave in production
 - Treat every interaction as if it were a real customer conversation
-
-YOUR PRIMARY GOALS:
-1. Act exactly as you would with a real customer - apply all custom instructions naturally
-2. Retrieve and use information from the uploaded documents seamlessly
-3. Demonstrate your full capabilities: tone, personality, helpfulness, and accuracy
-4. Show how effectively the knowledge base supports customer interactions
-
-HOW TO RESPOND:
-- Respond AS IF speaking to a real customer (not as if reporting to the admin)
-- Use the tone, personality, and style defined in your custom instructions
-- ALWAYS search the vector store for relevant information before responding
-- Integrate document information naturally into customer-friendly responses
-- If information exists in documents, provide detailed, helpful answers
-- If information is NOT in documents, respond as you would to a real customer: acknowledge the limitation and offer alternatives or suggest they contact support
-- NEVER make up information - only use what's in the vector store
-- Ask clarifying questions when needed, just as you would with a customer
-
-TRANSPARENCY (for testing purposes):
-- If you can't find information in the documents, briefly mention this limitation: "I don't have that information in my current knowledge base" (customer-friendly, not "uploaded documents")
-- If you find partial information, use it and naturally indicate what else might be helpful
-
-DATE AND TIME:
-- The current date and time is ${new Date().toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}	
-
-Remember: The admin wants to see the REAL customer experience. Show off your personality, helpfulness, and how well you use the knowledge base in natural conversation!
-${
-  adminCustomInstructions
-    ? `
----
-
-ADMIN'S CUSTOM INSTRUCTIONS:
-${adminCustomInstructions}
-
-Apply these instructions fully - act as the assistant described above. The admin is testing you by simulating real customer scenarios, so embody this role completely.`
-    : ''
-}`
+- Respond AS IF speaking to a real customer (not as if reporting to the admin)`
 
 type SubmitChatArgs = {
   threadId: string
@@ -61,6 +30,7 @@ type SubmitChatArgs = {
   lang: string
   conversation?: { role: 'user' | 'assistant'; content: string }[]
   useDashboardMode?: boolean
+  timeZone?: string
 }
 
 export async function submitChatMessage(args: SubmitChatArgs): Promise<{
@@ -74,6 +44,7 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
     lang,
     conversation,
     useDashboardMode = false,
+    timeZone,
   } = args
 
   if (!threadId || !message) {
@@ -81,8 +52,6 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
   }
 
   let apiKey: string
-
-  let customInstructions = ''
 
   // Dashboard mode: use authenticated user's API key
   if (useDashboardMode) {
@@ -95,9 +64,9 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
     }
 
     // Check if user has an active subscription
-    const hasActiveSubscription = await hasAnyPlan(has, 'basic', userId)
+    const hasActiveSubscription = await hasAnyPlan(has, ANY_PAID_PLAN, userId)
     if (!hasActiveSubscription) {
-      throw new Error('Unauthorized: Active subscription required')
+      throw new Error(CHAT_ERROR_CODE.SUBSCRIPTION_INVALID)
     }
 
     // Get user's API key from database
@@ -106,9 +75,6 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
     if (!userApiKey) {
       throw new Error('No API key found. Please contact support.')
     }
-
-    // Fetch custom instructions for the user (centralized via server action)
-    customInstructions = (await getCustomInstructionsAction()) || ''
 
     apiKey = userApiKey
     console.log(`[Dashboard Chat] User: ${userId}`)
@@ -123,72 +89,85 @@ export async function submitChatMessage(args: SubmitChatArgs): Promise<{
     }
 
     apiKey = userData.apiKey
-    customInstructions = (await getCustomInstructions(demoUserId)) || ''
     console.log(`[Demo Chat] Assistant: ${demoUserId}`)
   }
 
   // Build request body matching the /api/chat endpoint
+  // Custom instructions are fetched and applied by the API route itself
   const requestBody: ChatRequestBody = {
     sessionId: threadId,
-    websiteContent: getDashboardInstructions(customInstructions),
-    userMessage: message, // No [lang] prefix - handled by language field
+    websiteContent: dashboardContext,
+    userMessage: message,
     conversation: conversation || [],
     language: lang,
+    timeZone,
   }
 
   // Create streamable value for text
   const stream = createStreamableValue<string>('')
 
-  ;(async () => {
-    try {
-      // Determine the base URL for the API call
-      const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
-        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-        : 'http://localhost:3000'
-      const apiUrl = `${baseUrl}/api/chat`
+    ; (async () => {
+      try {
+        // Determine the base URL for the API call
+        const baseUrl = process.env.VERCEL_URL
+          ? `https://${process.env.VERCEL_URL}`
+          : 'http://localhost:3000'
+        const apiUrl = `${baseUrl}/api/chat`
 
-      // Call the /api/chat endpoint
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
+        // Call the /api/chat endpoint
+        const headers: Record<string, string> = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify(requestBody),
-      })
+        }
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(
-          errorData.error || `API request failed with status ${response.status}`
-        )
+        // Bypass Vercel deployment protection on preview deployments
+        const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET
+        if (bypassSecret) {
+          headers['x-vercel-protection-bypass'] = bypassSecret
+        }
+
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(requestBody),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          const chatErrorCode = getChatErrorCodeByStatus(response.status)
+          if (chatErrorCode) {
+            throw new Error(chatErrorCode)
+          }
+          throw new Error(
+            errorData.error || `API request failed with status ${response.status}`
+          )
+        }
+
+        if (!response.body) {
+          throw new Error('Response body is null')
+        }
+
+        // Stream the plain text response
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let acc = ''
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value, { stream: true })
+          acc += chunk
+          stream.update(acc)
+        }
+
+        stream.done()
+      } catch (error) {
+        console.error('Error calling /api/chat:', error)
+        // Signal error so frontend catch block displays translated error message
+        stream.error(error instanceof Error ? error.message : 'Unknown error')
       }
-
-      if (!response.body) {
-        throw new Error('Response body is null')
-      }
-
-      // Stream the plain text response
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-      let acc = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        const chunk = decoder.decode(value, { stream: true })
-        acc += chunk
-        stream.update(acc)
-      }
-
-      stream.done()
-    } catch (error) {
-      console.error('Error calling /api/chat:', error)
-      // Signal error so frontend catch block displays translated error message
-      stream.error(error instanceof Error ? error.message : 'Unknown error')
-    }
-  })()
+    })()
 
   // Return the text stream handle; the client will read it progressively
   return { text: stream.value }

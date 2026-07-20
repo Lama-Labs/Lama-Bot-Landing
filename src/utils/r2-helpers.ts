@@ -70,6 +70,106 @@ export async function uploadFileToR2(
 }
 
 /**
+ * Delete all crawl backups for a user from R2.
+ * Removes everything under users/{userId}/crawl/.
+ */
+export async function deleteCrawlFromR2(userId: string): Promise<boolean> {
+  try {
+    const prefix = `users/${userId}/crawl/`
+
+    const listed = await r2Client.send(
+      new ListObjectsV2Command({
+        Bucket: R2_BUCKET_NAME,
+        Prefix: prefix,
+        MaxKeys: 10,
+      })
+    )
+
+    const keys = listed.Contents?.map((obj) => obj.Key).filter(Boolean) ?? []
+
+    if (keys.length === 0) {
+      return true
+    }
+
+    await Promise.all(
+      keys.map((key) =>
+        r2Client.send(
+          new DeleteObjectCommand({
+            Bucket: R2_BUCKET_NAME,
+            Key: key,
+          })
+        )
+      )
+    )
+
+    console.log(`[r2] Deleted ${keys.length} crawl backup(s) for user ${userId}`)
+    return true
+  } catch (error) {
+    console.error(`[r2] Failed to delete crawl backups for user ${userId}:`, error)
+    return false
+  }
+}
+
+/**
+ * Upload crawl content to R2 as a backup.
+ * Pattern: users/{userId}/crawl/{sanitizedFilename}
+ * Returns the R2 key on success, null on failure.
+ */
+export async function uploadCrawlToR2(
+  userId: string,
+  fileName: string,
+  content: string
+): Promise<string | null> {
+  try {
+    const prefix = `users/${userId}/crawl/`
+
+    // Delete any existing crawl backups before uploading the new one
+    const listed = await r2Client.send(
+      new ListObjectsV2Command({
+        Bucket: R2_BUCKET_NAME,
+        Prefix: prefix,
+        MaxKeys: 10,
+      })
+    )
+
+    const oldKeys =
+      listed.Contents?.map((obj) => obj.Key).filter(Boolean) ?? []
+    if (oldKeys.length > 0) {
+      await Promise.all(
+        oldKeys.map((key) =>
+          r2Client.send(
+            new DeleteObjectCommand({
+              Bucket: R2_BUCKET_NAME,
+              Key: key,
+            })
+          )
+        )
+      )
+      console.log(
+        `[r2] Deleted ${oldKeys.length} old crawl backup(s) under ${prefix}`
+      )
+    }
+
+    const key = `${prefix}${sanitizeFileName(fileName)}`
+
+    await r2Client.send(
+      new PutObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: key,
+        Body: Buffer.from(content, 'utf-8'),
+        ContentType: 'text/markdown',
+      })
+    )
+
+    console.log(`[r2] Uploaded crawl backup ${key}`)
+    return key
+  } catch (error) {
+    console.error(`[r2] Failed to upload crawl for user ${userId}:`, error)
+    return null
+  }
+}
+
+/**
  * Delete a single file from R2.
  * Requires the OpenAI file ID to locate the object.
  * Because we don't store the original filename separately, we list objects

@@ -189,3 +189,27 @@ export async function deleteFileFromVectorStore(
     return false
   }
 }
+
+/**
+ * Delete an entire vector store by ID
+ */
+export async function deleteVectorStore(
+  vectorStoreId: string
+): Promise<boolean> {
+  try {
+    // Delete all files attached to the vector store first
+    const vsFiles = await openaiClient.vectorStores.files.list(vectorStoreId)
+    await Promise.allSettled(
+      vsFiles.data.map((vsf) => openaiClient.files.delete(vsf.id))
+    )
+
+    await openaiClient.vectorStores.delete(vectorStoreId)
+    console.log(
+      `Vector store ${vectorStoreId} deleted (${vsFiles.data.length} file(s) cleaned up)`
+    )
+    return true
+  } catch (error) {
+    console.error(`Error deleting vector store ${vectorStoreId}:`, error)
+    return false
+  }
+}

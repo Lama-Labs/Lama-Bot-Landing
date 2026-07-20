@@ -60,7 +60,7 @@ const MessageBubble: React.FC<InputProps> = ({
             label={assistant.name}
             key={assistant.id}
             sx={{ m: 1, color: 'white' }}
-            color='secondary'
+            color='info'
             clickable
             onClick={() => {
               // set assistantId to the selected assistant

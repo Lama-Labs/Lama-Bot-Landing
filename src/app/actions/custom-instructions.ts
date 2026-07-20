@@ -4,11 +4,11 @@ import { auth } from '@clerk/nextjs/server'
 import { unstable_cache, updateTag } from 'next/cache'
 
 import { hasAnyPlan } from '@/utils/clerk/subscription'
+import { ANY_PAID_PLAN } from '@/utils/plans'
 import { getCustomInstructions, saveCustomInstructions } from '@/utils/turso'
 
 const tagForUser = (userId: string) => `custom-instructions:${userId}`
 
-// Raw cached getter for internal use (no HTML escaping)
 async function getCustomInstructionsCached(
   userId: string
 ): Promise<string | null> {
@@ -26,21 +26,11 @@ async function getCustomInstructionsCached(
 }
 
 /**
- * Escapes HTML entities to prevent XSS attacks
- */
-function escapeHtml(text: string): string {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
-  }
-  return text.replace(/[&<>"']/g, (m) => map[m])
-}
-
-/**
- * Fetches custom instructions for the authenticated user
+ * Fetches custom instructions for the authenticated user.
+ *
+ * Returned verbatim: these are consumed by a React text field (which escapes on
+ * render) and spliced into the assistant's system prompt, where HTML entities
+ * would corrupt the owner's wording.
  */
 export async function getCustomInstructionsAction(): Promise<string> {
   const { userId } = await auth()
@@ -49,14 +39,7 @@ export async function getCustomInstructionsAction(): Promise<string> {
     throw new Error('Unauthorized: User must be signed in')
   }
 
-  const instructions = await getCustomInstructionsCached(userId)
-
-  // Escape HTML entities when returning to prevent XSS
-  if (instructions) {
-    return escapeHtml(instructions)
-  }
-
-  return ''
+  return (await getCustomInstructionsCached(userId)) ?? ''
 }
 
 /**
@@ -72,7 +55,7 @@ export async function saveCustomInstructionsAction(
   }
 
   // Ensure user has an eligible paid plan or matching trial tier (e.g., basic)
-  const isEligible = await hasAnyPlan(has, 'basic', userId)
+  const isEligible = await hasAnyPlan(has, ANY_PAID_PLAN, userId)
   if (!isEligible) {
     throw new Error('Requires an active paid plan')
   }
@@ -85,11 +68,9 @@ export async function saveCustomInstructionsAction(
     throw new Error('Instructions cannot exceed 5000 characters')
   }
 
-  // Escape HTML entities to prevent HTML injection
-  const sanitizedInstructions = escapeHtml(trimmedInstructions)
-
-  // Save to database (injection already prevented by Turso's parameterized queries)
-  await saveCustomInstructions(userId, sanitizedInstructions)
+  // Stored verbatim: SQL injection is prevented by Turso's parameterized queries,
+  // and every consumer either escapes on render or needs the owner's exact wording.
+  await saveCustomInstructions(userId, trimmedInstructions)
   // Invalidate cache so subsequent reads get fresh value
   updateTag(tagForUser(userId))
 

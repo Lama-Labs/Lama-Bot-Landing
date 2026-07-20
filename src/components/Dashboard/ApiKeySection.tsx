@@ -1,6 +1,6 @@
 'use client'
 
-import type { UserResource } from '@clerk/types'
+import type { UserResource } from "@clerk/shared/types"
 import {
   Alert,
   Box,
@@ -89,6 +89,9 @@ const ApiKeySection = ({ user, isLoaded }: ApiKeySectionProps) => {
           </IconButton>
         </Tooltip>
       </Box>
+      <Typography variant='body1' color='text.secondary' sx={{ mb: 1 }}>
+        {t('subtitle')}
+      </Typography>
 
       {loading ? (
         <Skeleton variant='rectangular' height={60} />

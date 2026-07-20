@@ -48,7 +48,7 @@ export async function DELETE(req: NextRequest) {
       )
     }
 
-    // Also remove the backup from R2 (fire & forget)
+    // Clean up R2 backup
     deleteFileFromR2(userId, fileId).catch((err) =>
       console.error('[r2] Background delete failed:', err)
     )
