@@ -2,6 +2,23 @@ interface TextParserProps {
   text: string
 }
 
+function sanitizeMarkdownUrl(rawUrl: string): string {
+  const compactUrl = rawUrl.replace(/[\u0000-\u001F\u007F\s]+/g, '')
+  const baseUrl =
+    typeof window === 'undefined'
+      ? 'https://example.invalid'
+      : window.location.href
+
+  try {
+    const url = new URL(compactUrl, baseUrl)
+    return ['http:', 'https:', 'mailto:', 'tel:'].includes(url.protocol)
+      ? url.href
+      : '#'
+  } catch {
+    return '#'
+  }
+}
+
 const TextParser: React.FC<TextParserProps> = ({ text }) => {
   const parseText = (input: string) => {
     const parts = input.split(/(\*\*.*?\*\*|\*.*?\*|\[.*?]\(.*?\))/g) // Matches **bold**, *italic*, [link](url)
@@ -22,7 +39,12 @@ const TextParser: React.FC<TextParserProps> = ({ text }) => {
         if (match) {
           const [_, text, url] = match
           parsed.push(
-            <a key={index} href={url} target='_blank' rel='noopener noreferrer'>
+            <a
+              key={index}
+              href={sanitizeMarkdownUrl(url)}
+              target='_blank'
+              rel='noopener noreferrer'
+            >
               {text}
             </a>
           )
