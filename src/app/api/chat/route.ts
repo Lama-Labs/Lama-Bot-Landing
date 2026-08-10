@@ -25,10 +25,11 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
 
-// TODO decide on length
-const MAX_REQUEST_BODY_BYTES = 256 * 1024
+// Coarse outer DoS guard (bytes). Sized above the summed per-field char caps so
+// it only rejects absurd payloads; the char caps below are the precise limit.
+const MAX_REQUEST_BODY_BYTES = 512 * 1024
 const MAX_USER_MESSAGE_CHARS = 4 * 1024
-const MAX_WEBSITE_CONTENT_CHARS = 128 * 1024
+const MAX_WEBSITE_CONTENT_CHARS = 64 * 1024
 const MAX_CONVERSATION_TURNS = 20
 const MAX_CONVERSATION_CONTENT_CHARS = 4 * 1024
 const MAX_LANGUAGE_CHARS = 32
